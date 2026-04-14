@@ -1,4 +1,4 @@
-/*"use client";
+"use client";
 import { useState } from "react";
 import { useChatSystem } from "@/features/dashboard/hooks/useChatSystem";
 import { sendMessage } from "@/services/api";
@@ -26,7 +26,7 @@ export default function MessagingSection() {
 
   return (
     <div className="glass flex flex-col h-[420px]">
-      <h2 className="section-title">💬 Messages</h2>
+      <h2 className="section-title">Messages</h2>
       <div className="flex-1 overflow-y-auto space-y-2 mb-3">
         {data?.map((msg:any)=> {
           const isMe = msg.sender === user?.id;
@@ -54,4 +54,4 @@ export default function MessagingSection() {
       </div>
     </div>
   );
-}  */
+}

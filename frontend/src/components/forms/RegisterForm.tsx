@@ -16,9 +16,9 @@ const schema = z.object({
   // Tumeweka 8 ili iende sawa na Django default settings
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirm_password: z.string().min(8, "Confirm password required"),
-  role: z.enum(["TOURIST", "LOCAL"], { 
-  errorMap: (issue, ctx) => ({ message: "Select a role" })
-}),
+  role: z.enum(["TOURIST", "LOCAL"]).refine((val) => val !== undefined, {
+    message: "Select a role"
+  }),
 }).refine(data => data.password === data.confirm_password, {
   message: "Passwords do not match",
   path: ["confirm_password"],
