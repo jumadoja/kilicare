@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kilicare AI Test</title>
+</head>
+<body>
+  <h1>Kilicare AI Chat</h1>
+  
+  <form id="aiForm">
+    <label for="message">Message:</label><br>
+    <input type="text" id="message" name="message" required style="width:300px;"><br><br>
+    <button type="submit">Send</button>
+  </form>
+
+  <h2>AI Response:</h2>
+  <pre id="response"></pre>
+
+  <script>
+    const ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MTQ3NjQyLCJpYXQiOjE3NjgxNDQwNDIsImp0aSI6ImFkZWUwODExNWJiYzQ2OWVhMmEyMmM5ZmI4M2Q2YTQ2IiwidXNlcl9pZCI6IjIifQ.h8H86tSqtqYRjrjfH_BdmeZreaTMV8TsfYLkoxyKTPA";
+    const API_URL = "http://127.0.0.1:8000/api/ai/ask/";
+
+    const form = document.getElementById("aiForm");
+    const responseEl = document.getElementById("response");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = document.getElementById("message").value;
+
+      const payload = { message: message, context: [] };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${ACCESS_TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          responseEl.textContent = `Error ${res.status}: ${text}`;
+          return;
+        }
+
+        const data = await res.json();
+        responseEl.textContent = JSON.stringify(data, null, 2);
+
+      } catch (err) {
+        responseEl.textContent = "Request failed: " + err;
+      }
+    });
+  </script>
+</body>
+</html>

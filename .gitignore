@@ -1,0 +1,18 @@
+# Node
+node_modules/
+.next/
+
+# Django
+__pycache__/
+db.sqlite3
+
+# Env
+.env
+
+# Python virtual env
+venv/
+backend/venv/
+
+# media files
+backend/media/
+

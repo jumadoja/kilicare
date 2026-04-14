@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KilicareGO AI Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            max-width: 500px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 700px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>KilicareGO AI Chat Test</h2>
+
+    <input id="message" type="text" placeholder="Type your message here" />
+    <button onclick="sendMessage()">Send Message</button>
+
+    <h3>AI Response:</h3>
+    <pre id="response">Waiting for response...</pre>
+
+    <script>
+        // PUT your access token here
+        const token = "MUeax0fyFYWDsjXMJ7Ibvg0Ykb3t4Qyl7XpRSX_PIck";
+
+        async function sendMessage() {
+            const message = document.getElementById("message").value;
+            if (!message) return alert("Please enter a message");
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/api/ai/ask/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: []
+                    })
+                });
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    document.getElementById("response").innerText = "Error: " + errorText;
+                    return;
+                }
+
+                const data = await res.json();
+                document.getElementById("response").innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById("response").innerText = "Fetch Error: " + err;
+            }
+        }
+    </script>
+</body>
+</html>
