@@ -141,6 +141,16 @@ export const fetchAllUsers = async () => {
   return res.data;
 };
 
+export const fetchUserMoments = async (userId: number) => {
+  const res = await apiClient.get(`/api/admin/user-moments/${userId}/`);
+  return res.data;
+};
+
+export const fetchAILogs = async () => {
+  const res = await apiClient.get("/api/admin/ai-logs/");
+  return res.data;
+};
+
 export const fetchAllTipsAdmin = async () => {
   const res = await apiClient.get("/api/admin/tips/");
   return res.data;

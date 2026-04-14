@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchTrendingMoments, likeMoment } from "@/services/api";
-import { MomentsList } from "@/features/moments/MomentsList";
+import { MomentsList } from "@/features/moments/components/MomentsList";
 import { toast } from "react-hot-toast";
 
 export default function MomentsPage() {

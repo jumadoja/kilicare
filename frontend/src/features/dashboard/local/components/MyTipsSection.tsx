@@ -1,10 +1,10 @@
 "use client";
-import { useFetchTips } from "@/features/dashboard/hooks/useFetchTips";
+import { useTips } from "@/features/dashboard/hooks/useFetchTips";
 import { upvoteTip } from "@/services/api";
 import { toast } from "react-hot-toast";
 
 export default function MyTipsSection() {
-  const { data, refetch } = useFetchTips();
+  const { data, refetch } = useTips();
 
   return (
     <div className="space-y-4">

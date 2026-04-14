@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchLatestTips, upvoteTip } from "@/services/api";
-import { TipsList } from "@/features/tips/TipsList";
+import { TipsList } from "@/features/tips/components/TipsList";
 import { toast } from "react-hot-toast";
 
 export default function TipsPage() {

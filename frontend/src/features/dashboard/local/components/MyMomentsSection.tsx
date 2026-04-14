@@ -1,9 +1,9 @@
 "use client";
-import { useFetchMoments } from "@/features/dashboard/hooks/useFetchMoments";
+import { useMoments } from "@/features/dashboard/hooks/useFetchMoments";
 import { likeMoment } from "@/services/api";
 
 export default function MyMomentsSection() {
-  const { data, refetch } = useFetchMoments();
+  const { data, refetch } = useMoments();
 
   return (
     <div className="space-y-4">

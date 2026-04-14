@@ -9,6 +9,7 @@ export interface Tip {
   title: string;
   content: string;
   upvotes: number;
+  category?: string;
 }
 
 export const useTips = () => {
@@ -17,7 +18,7 @@ export const useTips = () => {
   // 🔥 Fetch tips
   const { data: tips = [], isLoading, isError } = useQuery<Tip[]>({
     queryKey: ["tips"],
-    queryFn: fetchLatestTips,
+    queryFn: () => fetchLatestTips(),
     staleTime: 1000 * 60, // 1 minute cache
   });
 

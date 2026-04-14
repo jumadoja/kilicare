@@ -1,8 +1,8 @@
 "use client";
-import { useFetchTips } from "@/features/dashboard/hooks/useFetchTips";
+import { useTips } from "@/features/dashboard/hooks/useFetchTips";
 
 export default function ContentAuditSection() {
-  const { data } = useFetchTips();
+  const { data } = useTips();
 
   return (
     <div className="glass p-4">

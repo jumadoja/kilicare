@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
-import { useFetchMessages } from "@/features/dashboard/hooks/useFetchMessages";
+import { useFetchChatHistory } from "@/features/dashboard/hooks/useChatQueries";
 import { sendMessage } from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "react-hot-toast";
 
 export default function MessagingSection() {
-  const { data, refetch } = useFetchMessages();
+  const { data, refetch } = useFetchChatHistory(null);
   const user = useAuthStore((s) => s.user);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
