@@ -1,18 +1,42 @@
-# Node
+# ======================
+# NODE / NEXT
+# ======================
 node_modules/
 .next/
+out/
+dist/
+build/
+.pnpm-store/
 
-# Django
+# ======================
+# ENV FILES
+# ======================
+.env
+.env.*
+
+# ======================
+# PYTHON / DJANGO
+# ======================
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.pot
+*.sqlite3-journal
 db.sqlite3
 
-# Env
-.env
-
-# Python virtual env
 venv/
 backend/venv/
 
-# media files
+# ======================
+# DJANGO STATIC
+# ======================
+backend/staticfiles/
 backend/media/
 
+# ======================
+# OS FILES
+# ======================
+.DS_Store
+Thumbs.db
