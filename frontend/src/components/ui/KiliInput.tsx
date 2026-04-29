@@ -1,0 +1,157 @@
+'use client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { forwardRef, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface KiliInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  error?: string;
+  hint?: string;
+  leftIcon?: React.ReactNode;
+  rightElement?: React.ReactNode;
+  showPasswordToggle?: boolean;
+}
+
+export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
+  (
+    {
+      label,
+      error,
+      hint,
+      leftIcon,
+      rightElement,
+      showPasswordToggle = false,
+      type = 'text',
+      className,
+      value,
+      defaultValue,
+      onChange,
+      ...props
+    },
+    ref
+  ) => {
+    const [focused, setFocused] = useState(false);
+    const [showPwd, setShowPwd] = useState(false);
+    const [internalValue, setInternalValue] = useState(defaultValue ?? '');
+
+    const isControlled = value !== undefined;
+    const currentValue = isControlled ? String(value ?? '') : String(internalValue);
+    const hasValue = currentValue.length > 0;
+    const inputType = showPasswordToggle
+      ? showPwd ? 'text' : 'password'
+      : type;
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!isControlled) setInternalValue(e.target.value);
+      onChange?.(e);
+    };
+
+    return (
+      <div className="relative w-full">
+        <motion.div
+          className="relative"
+          animate={{ scale: focused ? 1.005 : 1 }}
+          transition={{ duration: 0.15 }}
+        >
+          {/* Left icon */}
+          {leftIcon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-text-muted">
+              {leftIcon}
+            </div>
+          )}
+
+          {/* Floating label */}
+          <motion.label
+            className="absolute pointer-events-none font-body z-10"
+            animate={{
+              left: leftIcon ? '40px' : '16px',
+              top: focused || hasValue ? '8px' : '50%',
+              translateY: focused || hasValue ? '0%' : '-50%',
+              fontSize: focused || hasValue ? '10px' : '14px',
+              color: focused
+                ? '#F5A623'
+                : error
+                ? '#E84545'
+                : '#8B8BA7',
+            }}
+            transition={{ duration: 0.15 }}
+          >
+            {label}
+          </motion.label>
+
+          <input
+            ref={ref}
+            type={inputType}
+            value={isControlled ? value : internalValue}
+            onChange={handleChange}
+            onFocus={(e) => {
+              setFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setFocused(false);
+              props.onBlur?.(e);
+            }}
+            className={cn(
+              'w-full rounded-xl font-body text-sm text-text-primary',
+              'bg-dark-elevated transition-all duration-200 outline-none',
+              'border',
+              leftIcon ? 'pl-10' : 'pl-4',
+              showPasswordToggle || rightElement ? 'pr-12' : 'pr-4',
+              'pt-6 pb-2',
+              focused
+                ? 'border-kili-gold shadow-glow-gold'
+                : error
+                ? 'border-kili-sunset'
+                : hasValue
+                ? 'border-dark-border-light'
+                : 'border-dark-border hover:border-dark-border-light',
+              className,
+            )}
+            style={{ minHeight: '56px' }}
+            {...props}
+          />
+
+          {/* Right element / password toggle */}
+          {(showPasswordToggle || rightElement) && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
+              {showPasswordToggle ? (
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(!showPwd)}
+                  className="text-text-muted hover:text-text-primary transition-colors"
+                >
+                  {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              ) : (
+                rightElement
+              )}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Error message */}
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              className="text-kili-sunset text-xs mt-1 ml-1 font-body"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {/* Hint */}
+        {hint && !error && (
+          <p className="text-text-muted text-xs mt-1 ml-1 font-body">{hint}</p>
+        )}
+      </div>
+    );
+  }
+);
+
+KiliInput.displayName = 'KiliInput';
