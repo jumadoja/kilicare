@@ -546,9 +546,6 @@ export default function RegisterPage() {
   // ── Micro feedback ──────────────────────────────────
   useEffect(() => {
     const fb: Record<string, string> = {};
-    if (watchFirstName.length >= 2) fb.first_name = 'Jina zuri! 👋';
-    if (watchLastName.length >= 2) fb.last_name = 'Imekamilika ✓';
-    if (watchUsername.length >= 3) fb.username = 'Username inaonekana kuwa ya kipekee 🎯';
     if (watchEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchEmail)) {
       fb.email = 'Email sahihi 📧';
     }
@@ -564,7 +561,7 @@ export default function RegisterPage() {
       fb.confirm_password = 'Nenosiri zinalingana ✓';
     }
     setMicroFeedback(fb);
-  }, [watchFirstName, watchLastName, watchUsername, watchEmail, watchPassword, watchConfirmPassword]);
+  }, [watchEmail, watchPassword, watchConfirmPassword]);
 
   // ── Navigation ──────────────────────────────────────
   const validateStep1 = async () => {
@@ -720,48 +717,23 @@ export default function RegisterPage() {
       >
       {/* Header */}
       <div className="text-center mb-6">
-        <motion.div
-          className="inline-flex items-center justify-center mb-4"
-          initial={{ opacity: 0, y: -20, scale: 0.8 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, type: 'spring', stiffness: 200 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <div
-            className="relative p-4 rounded-3xl"
-            style={{
-              background: 'linear-gradient(145deg, rgba(245,166,35,0.15), rgba(0,229,160,0.1))',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(245,166,35,0.3)',
-              boxShadow: '0 8px 32px rgba(245,166,35,0.2), 0 0 0 1px rgba(245,166,35,0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
-            }}
-          >
-            {/* Inner glow effect */}
-            <div
-              className="absolute inset-0 rounded-3xl pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle at 30% 30%, rgba(245,166,35,0.2), transparent 60%)',
-              }}
-            />
-            <img
-              src="/kilicare-logo.png"
-              alt="Kilicare Logo"
-              className="relative h-20 w-auto"
-              style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}
-            />
-          </div>
-        </motion.div>
-
         <motion.h1
           className="text-3xl font-black font-display text-text-primary tracking-tight mb-2"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.1 }}
         >
           Kilicare<span className="text-gradient-gold">+</span>
         </motion.h1>
+        <motion.p
+          className="text-sm font-body"
+          style={{ color: '#F5A623' }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          Jiunge na Kilicare+ kugundua Tanzania
+        </motion.p>
       </div>
 
 
@@ -793,23 +765,6 @@ export default function RegisterPage() {
         />
 
         <div className="p-6">
-          {/* Page Identity inside card */}
-          {!showSuccess && (
-            <motion.div
-              className="mb-6"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <h2 className="text-xl font-bold font-display text-text-primary mb-2">
-                Jisajili akaunti mpya
-              </h2>
-              <p className="text-text-muted text-sm font-body">
-                Jiunge na Kilicare+ kugundua Tanzania
-              </p>
-            </motion.div>
-          )}
-
           <AnimatePresence mode="wait">
 
             {/* ══ SUCCESS ══ */}
