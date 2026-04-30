@@ -80,7 +80,7 @@ export function TravelVisualLayer() {
                 key={img.alt}
                 className="absolute inset-0"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: isMobile ? 1.5 : 2.0 }}
+                animate={{ opacity: isMobile ? 1.3 : 1.8 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 2.5, ease: [0.4, 0, 0.2, 1] }}
               >
@@ -94,14 +94,14 @@ export function TravelVisualLayer() {
                     alt={img.alt}
                     fill
                     className="object-cover"
-                    style={{ filter: isMobile ? 'blur(2px) brightness(1.0)' : 'blur(3px) brightness(1.0)' }}
+                    style={{ filter: isMobile ? 'blur(2px) brightness(1.05)' : 'blur(3px) brightness(1.05)' }}
                     onError={handleError}
                     priority={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
                     sizes="100vw"
                     quality={75}
                   />
-                  <div className="absolute inset-0 bg-black/15 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
                 </motion.div>
               </motion.div>
             )
@@ -184,7 +184,7 @@ export function TravelVisualLayer() {
         <motion.div
           className="absolute inset-0"
           initial={{ opacity: 0 }}
-          animate={{ opacity: isMobile ? 1.5 : 2.0 }}
+          animate={{ opacity: isMobile ? 1.3 : 1.8 }}
           transition={{ duration: 2.5, ease: [0.4, 0, 0.2, 1] }}
         >
           <motion.div
@@ -197,13 +197,13 @@ export function TravelVisualLayer() {
               alt="Tanzania travel background"
               fill
               className="object-cover"
-              style={{ filter: isMobile ? 'blur(2px) brightness(1.0)' : 'blur(3px) brightness(1.0)' }}
+              style={{ filter: isMobile ? 'blur(2px) brightness(1.05)' : 'blur(3px) brightness(1.05)' }}
               priority
               loading="eager"
               sizes="100vw"
               quality={75}
             />
-            <div className="absolute inset-0 bg-black/15 mix-blend-multiply" />
+            <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
           </motion.div>
         </motion.div>
       )}

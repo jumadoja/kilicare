@@ -1109,15 +1109,15 @@ export default function RegisterPage() {
 
                 {/* Bio & Location */}
                 <div className="space-y-4">
-                  <FloatingInput
+                  <KiliInput
+                    {...register('bio' as keyof RegisterInput)}
                     label="Bio yako (si lazima)"
                     value={watchBio}
-                    {...register('bio' as keyof RegisterInput)}
                   />
-                  <FloatingInput
+                  <KiliInput
+                    {...register('location' as keyof RegisterInput)}
                     label="Uko wapi? (Mji/Maeneo)"
                     value={watchLocation}
-                    {...register('location' as keyof RegisterInput)}
                   />
                 </div>
 
