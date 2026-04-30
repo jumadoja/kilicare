@@ -26,7 +26,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden flex items-center justify-center">
+    <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
       {/* Background Visual Layer */}
 
       {/* ── Main content wrapper ── */}
@@ -119,7 +119,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Username field */}
               <KiliInput
                 {...register('username')}

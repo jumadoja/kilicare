@@ -706,11 +706,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden flex items-center justify-center">
+    <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
       {/* Background Visual Layer */}
       
       <motion.div
-        className="relative z-10 w-full max-w-md md:max-w-lg xl:max-w-2xl mx-4"
+        className="relative z-10 w-full max-w-md md:max-w-lg mx-4"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, type: 'spring' }}
@@ -784,7 +784,7 @@ export default function RegisterPage() {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                className="space-y-5"
+                className="space-y-4"
                 style={{ perspective: 1000 }}
               >
                 <OnboardingAssistant step={1} />

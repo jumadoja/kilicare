@@ -6,7 +6,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div data-auth-page className="relative min-h-screen">
+    <div data-auth-page className="relative min-h-[var(--app-height)]">
       <TravelVisualLayer />
       {children}
     </div>

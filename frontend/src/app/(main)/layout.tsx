@@ -9,7 +9,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh bg-dark-bg">
+    <div className="flex min-h-[var(--app-height)] bg-dark-bg">
       {/* Desktop sidebar */}
       <Sidebar />
 

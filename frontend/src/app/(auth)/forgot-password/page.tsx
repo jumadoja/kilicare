@@ -246,7 +246,7 @@ export default function ForgotPasswordPage() {
   const currentConfig = stepConfig[step];
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden flex items-center justify-center">
+    <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
       <motion.div
         className="relative z-10 w-full max-w-md md:max-w-lg mx-4"
         initial={{ opacity: 0, y: 30 }}

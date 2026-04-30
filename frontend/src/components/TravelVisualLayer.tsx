@@ -39,7 +39,7 @@ export function TravelVisualLayer() {
   }, []);
 
   useEffect(() => {
-    const particleCount = isMobile ? 16 : 30;
+    const particleCount = isMobile ? 6 : 12;
     const newParticles = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
       background: `rgba(245,166,35,${0.15 + Math.random() * 0.2})`,
@@ -98,8 +98,8 @@ export function TravelVisualLayer() {
                     onError={handleError}
                     priority={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
-                    sizes="100vw"
-                    quality={75}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
+                    quality={60}
                   />
                   <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
                 </motion.div>
@@ -200,8 +200,8 @@ export function TravelVisualLayer() {
               style={{ filter: isMobile ? 'blur(2px) brightness(1.05)' : 'blur(3px) brightness(1.05)' }}
               priority
               loading="eager"
-              sizes="100vw"
-              quality={75}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
+              quality={60}
             />
             <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
           </motion.div>

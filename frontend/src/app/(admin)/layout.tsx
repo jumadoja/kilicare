@@ -6,7 +6,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-dvh bg-dark-bg">
+    <div className="min-h-[var(--app-height)] bg-dark-bg">
       {children}
     </div>
   );

@@ -51,8 +51,6 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
       <div className="relative w-full">
         <motion.div
           className="relative"
-          animate={{ scale: focused ? 1.005 : 1 }}
-          transition={{ duration: 0.15 }}
         >
           {/* Left icon */}
           {leftIcon && (
@@ -66,8 +64,10 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
             className="absolute pointer-events-none font-body z-10"
             animate={{
               left: leftIcon ? '40px' : '16px',
-              top: focused || hasValue ? '8px' : '50%',
-              translateY: focused || hasValue ? '0%' : '-50%',
+              top: '50%',
+              transform: focused || hasValue
+                ? 'translateY(-1.5rem) scale(0.85)'
+                : 'translateY(-50%)',
               fontSize: focused || hasValue ? '10px' : '14px',
               color: focused
                 ? '#F5A623'
@@ -109,7 +109,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
                 : 'border-dark-border hover:border-dark-border-light',
               className,
             )}
-            style={{ minHeight: '56px' }}
+            style={{ minHeight: 'clamp(48px, 6vh, 56px)' }}
             {...props}
           />
 

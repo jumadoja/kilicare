@@ -3,6 +3,28 @@ import { Toaster } from 'sonner';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import './globals.css';
+import { useEffect } from 'react';
+
+// Dynamic viewport height for mobile keyboard handling
+function ViewportHeightManager() {
+  useEffect(() => {
+    const updateAppHeight = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--app-height', `${vh * 100}px`);
+    };
+
+    updateAppHeight();
+    window.addEventListener('resize', updateAppHeight);
+    window.addEventListener('orientationchange', updateAppHeight);
+
+    return () => {
+      window.removeEventListener('resize', updateAppHeight);
+      window.removeEventListener('orientationchange', updateAppHeight);
+    };
+  }, []);
+
+  return null;
+}
 
 export const metadata: Metadata = {
   title: 'Kilicare+ | Tanzania Tourism Super-App',
@@ -27,7 +49,8 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body className="bg-dark-bg text-text-primary font-body antialiased min-h-dvh">
+      <body className="bg-dark-bg text-text-primary font-body antialiased min-h-[var(--app-height)]">
+        <ViewportHeightManager />
         <ReactQueryProvider>
           <AuthProvider>
             {children}
