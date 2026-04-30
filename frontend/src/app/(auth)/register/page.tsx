@@ -719,75 +719,35 @@ export default function RegisterPage() {
         transition={{ duration: 0.6, type: 'spring' }}
       >
       {/* Header */}
-      <div className="text-center mb-4">
+      <div className="text-center mb-6">
         <motion.div
-          className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-2 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, #F5A623, #D4891A)',
-            boxShadow: '0 0 40px rgba(245,166,35,0.4)',
-          }}
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
+          className="inline-flex items-center justify-center mb-3"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <span className="text-2xl font-black text-dark-bg font-display">K</span>
+          <img
+            src="/kilicare-logo.png"
+            alt="Kilicare Logo"
+            className="h-16 w-auto"
+          />
         </motion.div>
 
-        <h1 className="text-2xl font-black font-display text-text-primary tracking-tight">
+        <motion.h1
+          className="text-3xl font-black font-display text-text-primary tracking-tight mb-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
           Kilicare<span className="text-gradient-gold">+</span>
-        </h1>
-        <p className="text-text-muted text-xs mt-1 font-body">
-          Discover Tanzania, Reimagined
-        </p>
-
-        <motion.div
-          className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full"
-          style={{
-            background: 'rgba(245,166,35,0.08)',
-            border: '1px solid rgba(245,166,35,0.2)',
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <MapPin size={11} className="text-kili-gold" />
-          <span className="text-kili-gold text-xs font-medium">Tanzania 🇹🇿</span>
-        </motion.div>
+        </motion.h1>
       </div>
 
-      {/* Page Identity */}
-      {!showSuccess && (
-        <div className="mb-4">
-          <h2 className="text-lg font-bold font-display text-text-primary">
-            Jisajili akaunti mpya
-          </h2>
-          <p className="text-text-muted text-xs mt-1">
-            Jiunge na Kilicare+ kugundua Tanzania
-          </p>
-        </div>
-      )}
 
       {/* Progress */}
       {!showSuccess && (
         <div className="mb-4">
           <ProgressIntelligence current={step} total={3} />
-          {/* Step indicators */}
-          <div className="flex justify-center gap-3 mt-4">
-            {[1, 2, 3].map((i) => (
-              <motion.div
-                key={i}
-                className={cn(
-                  'w-3 h-3 rounded-full',
-                  step >= i ? 'bg-kili-gold' : 'bg-dark-border'
-                )}
-                initial={{ scale: 0.8 }}
-                animate={{ scale: step === i ? 1.2 : 1 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-                style={{
-                  boxShadow: step === i ? '0 0 12px rgba(245,166,35,0.6)' : 'none',
-                }}
-              />
-            ))}
-          </div>
         </div>
       )}
 
@@ -795,23 +755,40 @@ export default function RegisterPage() {
       <motion.div
         className="relative rounded-3xl overflow-hidden"
         style={{
-          background: 'rgba(19,19,26,0.85)',
+          background: 'linear-gradient(145deg, rgba(19,19,26,0.95), rgba(28,28,39,0.9))',
           backdropFilter: 'blur(40px)',
           WebkitBackdropFilter: 'blur(40px)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+          border: '1px solid rgba(245,166,35,0.15)',
+          boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
         }}
       >
         {/* Top gradient line */}
         <div
-          className="absolute top-0 left-0 right-0 h-px"
+          className="absolute top-0 left-0 right-0 h-1"
           style={{
             background:
-              'linear-gradient(90deg, transparent, rgba(245,166,35,0.6), transparent)',
+              'linear-gradient(90deg, transparent, rgba(245,166,35,0.8), rgba(0,229,160,0.6), transparent)',
           }}
         />
 
         <div className="p-6">
+          {/* Page Identity inside card */}
+          {!showSuccess && (
+            <motion.div
+              className="mb-6"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <h2 className="text-xl font-bold font-display text-text-primary mb-2">
+                Jisajili akaunti mpya
+              </h2>
+              <p className="text-text-muted text-sm font-body">
+                Jiunge na Kilicare+ kugundua Tanzania
+              </p>
+            </motion.div>
+          )}
+
           <AnimatePresence mode="wait">
 
             {/* ══ SUCCESS ══ */}
@@ -836,9 +813,9 @@ export default function RegisterPage() {
               >
                 <OnboardingAssistant step={1} />
 
-                <div className="flex items-center gap-2 mb-3">
-                  <User size={18} className="text-kili-gold" />
-                  <h2 className="text-xl font-bold font-display text-text-primary">
+                <div className="flex items-center gap-2 mb-4">
+                  <User size={20} className="text-kili-gold" />
+                  <h2 className="text-2xl font-bold font-display text-text-primary">
                     Habari yako
                   </h2>
                 </div>
@@ -950,9 +927,9 @@ export default function RegisterPage() {
               >
                 <OnboardingAssistant step={2} />
 
-                <div className="flex items-center gap-2 mb-4">
-                  <Shield size={18} className="text-kili-gold" />
-                  <h2 className="text-xl font-bold font-display text-text-primary">
+                <div className="flex items-center gap-2 mb-5">
+                  <Shield size={20} className="text-kili-gold" />
+                  <h2 className="text-2xl font-bold font-display text-text-primary">
                     Wewe ni nani Tanzania?
                   </h2>
                 </div>
@@ -1015,9 +992,9 @@ export default function RegisterPage() {
               >
                 <OnboardingAssistant step={3} />
 
-                <div className="flex items-center gap-2 mb-4">
-                  <Map size={18} className="text-kili-gold" />
-                  <h2 className="text-xl font-bold font-display text-text-primary">
+                <div className="flex items-center gap-2 mb-5">
+                  <Map size={20} className="text-kili-gold" />
+                  <h2 className="text-2xl font-bold font-display text-text-primary">
                     Maliza wasifu wako
                   </h2>
                 </div>
