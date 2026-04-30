@@ -26,9 +26,9 @@ const config: Config = {
         },
         text: {
           primary: '#F8F8FF',
-          secondary: '#C8C8D8',
-          muted: '#8B8BA7',
-          disabled: '#4A4A5A',
+          secondary: '#D8D8E8',
+          muted: '#A8A8C0',
+          disabled: '#5A5A6A',
         },
       },
       fontFamily: {
