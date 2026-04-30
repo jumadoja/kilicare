@@ -45,32 +45,32 @@ export default function LoginPage() {
       >
         {/* Logo section */}
         <motion.div
-          className="text-center mb-8"
+          className="text-center mb-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 cursor-pointer"
+            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-2 cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, #F5A623, #D4891A)',
               boxShadow: '0 0 40px rgba(245,166,35,0.4)',
             }}
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <span className="text-3xl font-black text-dark-bg font-display">K</span>
+            <span className="text-2xl font-black text-dark-bg font-display">K</span>
           </motion.div>
 
-          <h1 className="text-3xl font-black font-display text-text-primary tracking-tight">
+          <h1 className="text-2xl font-black font-display text-text-primary tracking-tight">
             Kilicare<span className="text-gradient-gold">+</span>
           </h1>
-          <p className="text-text-muted text-sm mt-1 font-body">
+          <p className="text-text-muted text-xs mt-1 font-body">
             Discover Tanzania, Reimagined
           </p>
 
           <motion.div
-            className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full"
+            className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full"
             style={{
               background: 'rgba(245,166,35,0.08)',
               border: '1px solid rgba(245,166,35,0.2)',
@@ -84,7 +84,7 @@ export default function LoginPage() {
           </motion.div>
         </motion.div>
 
-        {/* ── Glass card with Floating Hover ── */}
+        {/* ── Glass card ── */}
         <motion.div
           className="relative rounded-3xl overflow-hidden"
           style={{
@@ -97,45 +97,38 @@ export default function LoginPage() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
         >
           {/* Top gradient line */}
           <div
             className="absolute top-0 left-0 right-0 h-px"
             style={{
-              background: 'linear-gradient(90deg, transparent, rgba(245,166,35,0.5), rgba(232,69,69,0.3), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(245,166,35,0.6), transparent)',
             }}
           />
 
-          <div className="p-8">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold font-display text-text-primary">
+          <div className="p-6">
+            <div className="mb-4">
+              <h2 className="text-lg font-bold font-display text-text-primary">
                 Karibu tena 👋
               </h2>
-              <p className="text-text-muted text-sm mt-1">
+              <p className="text-text-muted text-xs mt-1">
                 Ingia kwenye akaunti yako
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               {/* Username field */}
               <div className="relative">
-                <motion.div
-                  className="relative"
-                  animate={{
-                    scale: focusedField === 'username' ? 1.01 : 1,
-                  }}
-                  transition={{ duration: 0.15 }}
-                >
+                <div className="relative">
                   <motion.label
-                    className="absolute left-4 pointer-events-none font-body z-10"
+                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-1"
                     animate={{
                       top: focusedField === 'username' || watchUsername ? '6px' : '50%',
-                      translateY: focusedField === 'username' || watchUsername ? '0%' : '-50%',
+                      transform: focusedField === 'username' || watchUsername ? 'translateY(0)' : 'translateY(-50%)',
                       fontSize: focusedField === 'username' || watchUsername ? '11px' : '15px',
                       color: focusedField === 'username' ? '#F5A623' : '#8B8BA7',
+                      backgroundColor: focusedField === 'username' || watchUsername ? '#1A1A24' : 'rgba(0, 0, 0, 0)',
                     }}
-                    transition={{ duration: 0.15 }}
                   >
                     Username
                   </motion.label>
@@ -148,17 +141,17 @@ export default function LoginPage() {
                     onBlur={() => setFocusedField(null)}
                     className={cn(
                       'w-full py-3 px-4 rounded-xl font-body text-base',
-                      focusedField === 'username' ? 'text-text-primary' : 'text-text-primary',
+                      'text-text-primary',
                       'bg-dark-elevated transition-all duration-200 outline-none border',
                       focusedField === 'username'
-                        ? 'border-kili-blue shadow-glow-blue bg-[#0A2A3A] scale-[1.01]'
+                        ? 'border-kili-gold shadow-glow-gold'
                         : errors.username
                         ? 'border-kili-sunset'
                         : 'border-dark-border hover:border-dark-border-light',
                     )}
-                    style={{ minHeight: '52px' }}
+                    style={{ height: '48px' }}
                   />
-                </motion.div>
+                </div>
 
                 <AnimatePresence>
                   {errors.username && (
@@ -176,20 +169,16 @@ export default function LoginPage() {
 
               {/* Password field */}
               <div className="relative">
-                <motion.div
-                  className="relative"
-                  animate={{ scale: focusedField === 'password' ? 1.01 : 1 }}
-                  transition={{ duration: 0.15 }}
-                >
+                <div className="relative">
                   <motion.label
-                    className="absolute left-4 pointer-events-none font-body z-10"
+                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-1"
                     animate={{
                       top: focusedField === 'password' || watchPassword ? '6px' : '50%',
-                      translateY: focusedField === 'password' || watchPassword ? '0%' : '-50%',
+                      transform: focusedField === 'password' || watchPassword ? 'translateY(0)' : 'translateY(-50%)',
                       fontSize: focusedField === 'password' || watchPassword ? '11px' : '15px',
                       color: focusedField === 'password' ? '#F5A623' : '#8B8BA7',
+                      backgroundColor: focusedField === 'password' || watchPassword ? '#1A1A24' : 'rgba(0, 0, 0, 0)',
                     }}
-                    transition={{ duration: 0.15 }}
                   >
                     Password
                   </motion.label>
@@ -197,32 +186,29 @@ export default function LoginPage() {
                   <input
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
                     onFocus={() => setFocusedField('password')}
                     onBlur={() => setFocusedField(null)}
                     className={cn(
                       'w-full py-3 px-4 pr-12 rounded-xl font-body text-base',
-                      focusedField === 'password' ? 'text-text-primary' : 'text-text-primary',
+                      'text-text-primary',
                       'bg-dark-elevated transition-all duration-200 outline-none border',
                       focusedField === 'password'
-                        ? 'border-kili-blue shadow-glow-blue bg-[#0A2A3A] scale-[1.01]'
+                        ? 'border-kili-gold shadow-glow-gold'
                         : errors.password
                         ? 'border-kili-sunset'
                         : 'border-dark-border hover:border-dark-border-light',
                     )}
-                    style={{ minHeight: '52px' }}
+                    style={{ height: '48px' }}
                   />
 
-                  <motion.button
+                  <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-                    whileHover={{ scale: 1.1, color: '#F5A623' }}
-                    whileTap={{ scale: 0.9 }}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </motion.button>
-                </motion.div>
+                  </button>
+                </div>
 
                 <AnimatePresence>
                   {errors.password && (
@@ -254,7 +240,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={isLoggingIn}
                 className={cn(
-                  'w-full h-14 rounded-xl font-display font-bold text-dark-bg text-base',
+                  'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                   'relative overflow-hidden transition-all duration-200',
                   isLoggingIn ? 'opacity-80 cursor-not-allowed' : 'hover:brightness-110',
                 )}
@@ -292,7 +278,7 @@ export default function LoginPage() {
             </form>
 
             {/* Divider */}
-            <div className="flex items-center gap-3 my-6">
+            <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-dark-border" />
               <span className="text-text-disabled text-xs font-body">au endelea na</span>
               <div className="flex-1 h-px bg-dark-border" />
@@ -305,7 +291,7 @@ export default function LoginPage() {
                   key={provider}
                   type="button"
                   disabled
-                  className="h-11 rounded-xl border border-dark-border bg-dark-elevated text-text-disabled text-sm font-body cursor-not-allowed opacity-50 flex items-center justify-center gap-2"
+                  className="h-10 rounded-xl border border-dark-border bg-dark-elevated text-text-disabled text-xs font-body cursor-not-allowed opacity-50 flex items-center justify-center gap-2"
                   whileHover={{ opacity: 0.6 }}
                 >
                   <span>{provider === 'Google' ? '🌐' : '🍎'}</span>
@@ -315,7 +301,7 @@ export default function LoginPage() {
             </div>
 
             {/* Register link with animated underline */}
-            <p className="text-center text-text-muted text-sm mt-6 font-body">
+            <p className="text-center text-text-muted text-xs mt-4 font-body">
               Huna akaunti?{' '}
               <Link
                 href="/register"
@@ -330,7 +316,7 @@ export default function LoginPage() {
 
         {/* Bottom text */}
         <motion.p
-          className="text-center text-text-disabled text-xs mt-6 font-body"
+          className="text-center text-text-disabled text-[10px] mt-4 font-body"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}

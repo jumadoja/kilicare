@@ -78,7 +78,7 @@ function OTPInput({
           onKeyDown={(e) => handleKey(i, e)}
           onPaste={handlePaste}
           className={cn(
-            'w-12 h-14 text-center text-xl font-bold font-mono rounded-xl',
+            'w-10 h-12 text-center text-lg font-bold font-mono rounded-xl',
             'text-text-primary outline-none transition-all duration-200',
             'border bg-dark-elevated',
             digit
@@ -258,22 +258,6 @@ export default function ForgotPasswordPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Back button */}
-        <motion.div
-          className="mb-6"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 text-text-muted hover:text-text-primary transition-colors font-body text-sm"
-          >
-            <ArrowLeft size={16} />
-            Rudi Login
-          </Link>
-        </motion.div>
-
         {/* Card */}
         <motion.div
           className="relative rounded-3xl overflow-hidden"
@@ -291,16 +275,35 @@ export default function ForgotPasswordPage() {
             style={{
               background: step === 'success'
                 ? 'linear-gradient(90deg, transparent, rgba(0,229,160,0.6), transparent)'
-                : 'linear-gradient(90deg, transparent, rgba(74,158,255,0.5), rgba(245,166,35,0.3), transparent)',
+                : 'linear-gradient(90deg, transparent, rgba(245,166,35,0.6), transparent)',
             }}
           />
 
-          <div className="p-8">
+          <div className="p-6">
+            {/* Back button inside card */}
+            <motion.div
+              className="mb-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-dark-elevated transition-all duration-200 font-body text-sm"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.05)',
+                }}
+              >
+                <ArrowLeft size={14} />
+                Rudi Login
+              </Link>
+            </motion.div>
+
             {/* Header */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={step + '-header'}
-                className="mb-8"
+                className="mb-6"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
@@ -308,7 +311,7 @@ export default function ForgotPasswordPage() {
               >
                 {/* Icon */}
                 <motion.div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
                   style={{
                     background: step === 'success'
                       ? 'rgba(0,229,160,0.12)'
@@ -318,18 +321,17 @@ export default function ForgotPasswordPage() {
                       : '1px solid rgba(245,166,35,0.2)',
                   }}
                   animate={step === 'success' ? {
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.05, 1],
                   } : {}}
                   transition={{ duration: 0.5 }}
                 >
                   {currentConfig.icon}
                 </motion.div>
 
-                <h2 className="text-2xl font-black font-display text-text-primary tracking-tight">
+                <h2 className="text-lg font-black font-display text-text-primary tracking-tight">
                   {currentConfig.title}
                 </h2>
-                <p className="text-text-muted text-sm mt-1 font-body">
+                <p className="text-text-muted text-xs mt-1 font-body">
                   {currentConfig.subtitle}
                 </p>
 
@@ -352,7 +354,7 @@ export default function ForgotPasswordPage() {
                                 : '#2A2A3A',
                           }}
                           animate={{
-                            width: isActive ? 32 : 8,
+                            width: isActive ? 24 : 8,
                           }}
                           transition={{ duration: 0.3 }}
                         />
@@ -378,20 +380,15 @@ export default function ForgotPasswordPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="relative">
-                    <motion.div
-                      className="relative"
-                      animate={{ scale: focused === 'email_or_phone' ? 1.01 : 1 }}
-                      transition={{ duration: 0.15 }}
-                    >
+                    <div className="relative">
                       <motion.label
-                        className="absolute left-4 pointer-events-none font-body z-10"
+                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out"
                         animate={{
                           top: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '6px' : '50%',
-                          translateY: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '0%' : '-50%',
+                          transform: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? 'translateY(0)' : 'translateY(-50%)',
                           fontSize: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '11px' : '15px',
                           color: focused === 'email_or_phone' ? '#F5A623' : '#8B8BA7',
                         }}
-                        transition={{ duration: 0.15 }}
                       >
                         Barua pepe au namba ya simu
                       </motion.label>
@@ -403,17 +400,17 @@ export default function ForgotPasswordPage() {
                         onBlur={() => setFocused(null)}
                         className={cn(
                           'w-full py-3 px-4 rounded-xl font-body text-base',
-                          focused === 'email_or_phone' ? 'text-gray-900' : 'text-text-primary',
+                          'text-text-primary',
                           'bg-dark-elevated transition-all duration-200 outline-none border',
                           focused === 'email_or_phone'
-                            ? 'border-kili-gold shadow-glow-gold bg-white scale-[1.01]'
+                            ? 'border-kili-gold shadow-glow-gold'
                             : emailForm.formState.errors.email_or_phone
                               ? 'border-kili-sunset'
                               : 'border-dark-border hover:border-dark-border-light',
                         )}
-                        style={{ minHeight: '52px' }}
+                        style={{ height: '48px' }}
                       />
-                    </motion.div>
+                    </div>
                     <AnimatePresence>
                       {emailForm.formState.errors.email_or_phone && (
                         <motion.p
@@ -429,20 +426,15 @@ export default function ForgotPasswordPage() {
                   </div>
 
                   <div className="relative">
-                    <motion.div
-                      className="relative"
-                      animate={{ scale: focused === 'username' ? 1.01 : 1 }}
-                      transition={{ duration: 0.15 }}
-                    >
+                    <div className="relative">
                       <motion.label
-                        className="absolute left-4 pointer-events-none font-body z-10"
+                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out"
                         animate={{
                           top: focused === 'username' || emailForm.watch('username') ? '6px' : '50%',
-                          translateY: focused === 'username' || emailForm.watch('username') ? '0%' : '-50%',
+                          transform: focused === 'username' || emailForm.watch('username') ? 'translateY(0)' : 'translateY(-50%)',
                           fontSize: focused === 'username' || emailForm.watch('username') ? '11px' : '15px',
                           color: focused === 'username' ? '#F5A623' : '#8B8BA7',
                         }}
-                        transition={{ duration: 0.15 }}
                       >
                         Username wako
                       </motion.label>
@@ -454,17 +446,17 @@ export default function ForgotPasswordPage() {
                         onBlur={() => setFocused(null)}
                         className={cn(
                           'w-full py-3 px-4 rounded-xl font-body text-base',
-                          focused === 'username' ? 'text-gray-900' : 'text-text-primary',
+                          'text-text-primary',
                           'bg-dark-elevated transition-all duration-200 outline-none border',
                           focused === 'username'
-                            ? 'border-kili-gold shadow-glow-gold bg-white scale-[1.01]'
+                            ? 'border-kili-gold shadow-glow-gold'
                             : emailForm.formState.errors.username
                               ? 'border-kili-sunset'
                               : 'border-dark-border hover:border-dark-border-light',
                         )}
-                        style={{ minHeight: '52px' }}
+                        style={{ height: '48px' }}
                       />
-                    </motion.div>
+                    </div>
                     <AnimatePresence>
                       {emailForm.formState.errors.username && (
                         <motion.p
@@ -481,14 +473,14 @@ export default function ForgotPasswordPage() {
 
                   {/* Info box */}
                   <div
-                    className="p-3 rounded-xl flex items-start gap-3"
+                    className="p-2.5 rounded-xl flex items-start gap-2"
                     style={{
-                      background: 'rgba(74,158,255,0.06)',
-                      border: '1px solid rgba(74,158,255,0.15)',
+                      background: 'rgba(245,166,35,0.06)',
+                      border: '1px solid rgba(245,166,35,0.15)',
                     }}
                   >
-                    <Mail size={14} className="text-kili-blue mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-text-muted font-body leading-relaxed">
+                    <Mail size={12} className="text-kili-gold mt-0.5 flex-shrink-0" />
+                    <p className="text-[11px] text-text-muted font-body leading-relaxed">
                       Tutakutumia namba ya tarakimu 6 kwenye barua pepe yako. Angalia pia folda ya spam.
                     </p>
                   </div>
@@ -497,7 +489,7 @@ export default function ForgotPasswordPage() {
                     type="submit"
                     disabled={forgotMutation.isPending}
                     className={cn(
-                      'w-full h-14 rounded-xl font-display font-bold text-dark-bg text-base',
+                      'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                       'flex items-center justify-center gap-2',
                       forgotMutation.isPending && 'opacity-80 cursor-not-allowed',
                     )}
@@ -530,7 +522,7 @@ export default function ForgotPasswordPage() {
               {step === 'otp' && (
                 <motion.div
                   key="otp-form"
-                  className="space-y-6"
+                  className="space-y-4"
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -30 }}
@@ -538,7 +530,7 @@ export default function ForgotPasswordPage() {
                 >
                   {/* Email sent confirmation */}
                   <motion.div
-                    className="flex items-center gap-3 p-3 rounded-xl"
+                    className="flex items-center gap-2 p-2.5 rounded-xl"
                     style={{
                       background: 'rgba(0,229,160,0.06)',
                       border: '1px solid rgba(0,229,160,0.2)',
@@ -546,15 +538,15 @@ export default function ForgotPasswordPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                   >
-                    <CheckCircle2 size={16} className="text-kili-green flex-shrink-0" />
-                    <p className="text-xs text-text-secondary font-body">
+                    <CheckCircle2 size={14} className="text-kili-green flex-shrink-0" />
+                    <p className="text-[11px] text-text-secondary font-body">
                       Namba imetumwa kwa <span className="text-kili-green font-semibold">{emailOrPhone}</span>
                     </p>
                   </motion.div>
 
                   {/* OTP inputs */}
                   <div>
-                    <p className="text-center text-sm text-text-muted font-body mb-4">
+                    <p className="text-center text-xs text-text-muted font-body mb-3">
                       Ingiza namba 6 uliyopokea
                     </p>
                     <OTPInput
@@ -606,7 +598,7 @@ export default function ForgotPasswordPage() {
                     onClick={verifyOtp}
                     disabled={otp.length < 6}
                     className={cn(
-                      'w-full h-14 rounded-xl font-display font-bold text-dark-bg text-base',
+                      'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                       'flex items-center justify-center gap-2 transition-all',
                       otp.length < 6 && 'opacity-50 cursor-not-allowed',
                     )}
@@ -644,20 +636,15 @@ export default function ForgotPasswordPage() {
                   {/* New password */}
                   <div>
                     <div className="relative">
-                      <motion.div
-                        className="relative"
-                        animate={{ scale: focused === 'new_pwd' ? 1.01 : 1 }}
-                        transition={{ duration: 0.15 }}
-                      >
+                      <div className="relative">
                         <motion.label
-                          className="absolute left-4 pointer-events-none font-body z-10"
+                          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out"
                           animate={{
                             top: focused === 'new_pwd' || watchPwd ? '6px' : '50%',
-                            translateY: focused === 'new_pwd' || watchPwd ? '0%' : '-50%',
+                            transform: focused === 'new_pwd' || watchPwd ? 'translateY(0)' : 'translateY(-50%)',
                             fontSize: focused === 'new_pwd' || watchPwd ? '11px' : '15px',
                             color: focused === 'new_pwd' ? '#F5A623' : '#8B8BA7',
                           }}
-                          transition={{ duration: 0.15 }}
                         >
                           Password mpya
                         </motion.label>
@@ -668,15 +655,15 @@ export default function ForgotPasswordPage() {
                           onBlur={() => setFocused(null)}
                           className={cn(
                             'w-full py-3 px-4 pr-12 rounded-xl font-body text-base',
-                            focused === 'new_pwd' ? 'text-gray-900' : 'text-text-primary',
+                            'text-text-primary',
                             'bg-dark-elevated transition-all duration-200 outline-none border',
                             focused === 'new_pwd'
-                              ? 'border-kili-gold shadow-glow-gold bg-white scale-[1.01]'
+                              ? 'border-kili-gold shadow-glow-gold'
                               : pwdForm.formState.errors.new_password
                               ? 'border-kili-sunset'
                               : 'border-dark-border hover:border-dark-border-light',
                           )}
-                          style={{ minHeight: '52px' }}
+                          style={{ height: '48px' }}
                         />
                         <button
                           type="button"
@@ -688,7 +675,7 @@ export default function ForgotPasswordPage() {
                             : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                           }
                         </button>
-                      </motion.div>
+                      </div>
                       <AnimatePresence>
                         {pwdForm.formState.errors.new_password && (
                           <motion.p
@@ -740,7 +727,7 @@ export default function ForgotPasswordPage() {
                     type="submit"
                     disabled={resetMutation.isPending}
                     className={cn(
-                      'w-full h-14 rounded-xl font-display font-bold text-dark-bg text-base',
+                      'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                       'flex items-center justify-center gap-2',
                       resetMutation.isPending && 'opacity-80 cursor-not-allowed',
                     )}
@@ -823,7 +810,7 @@ export default function ForgotPasswordPage() {
 
                   <Link href="/login" className="block">
                     <motion.div
-                      className="w-full h-14 rounded-xl font-display font-bold text-dark-bg text-base flex items-center justify-center gap-2"
+                      className="w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2"
                       style={{
                         background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                         boxShadow: '0 4px 20px rgba(245,166,35,0.35)',

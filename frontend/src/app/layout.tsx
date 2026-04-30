@@ -5,13 +5,13 @@ import { AuthProvider } from '@/providers/AuthProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'KilicareGO+ | Tanzania Tourism Super-App',
+  title: 'Kilicare+ | Tanzania Tourism Super-App',
   description: 'Discover Tanzania like never before. AI-powered travel companion for East Africa.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'KilicareGO+',
+    title: 'Kilicare+',
   },
 };
 
@@ -19,8 +19,9 @@ export const viewport: Viewport = {
   themeColor: '#0A0A0F',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

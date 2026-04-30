@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -20,7 +20,7 @@ import { TravelVisualLayer } from '@/components/TravelVisualLayer';
 // ── AI Onboarding Assistant ────────────────────────────
 function OnboardingAssistant({ step }: { step: number }) {
   const messages = {
-    1: 'Karibu KilicareGO+ 👋 Nitakusaidia kujaza taarifa zako',
+    1: 'Habari mimi ni AsKkiliCare,👋 Nitakusaidia kukupa maelezo mafupi kujaza taarifa zako',
     2: 'Chagua jukumu lako - utapata experiences zinakufaa',
     3: 'Weka picha yako ili watu wakutambue kwa urahisi',
   };
@@ -147,20 +147,16 @@ function FloatingInput({
 
   return (
     <div className="relative">
-      <motion.div
-        className="relative"
-        animate={{ scale: focused ? 1.01 : 1 }}
-        transition={{ duration: 0.15 }}
-      >
+      <div className="relative">
         <motion.label
-          className="absolute left-4 pointer-events-none font-body z-10"
+          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-1"
           animate={{
             top: focused || hasValue ? '6px' : '50%',
-            translateY: focused || hasValue ? '0%' : '-50%',
+            transform: focused || hasValue ? 'translateY(0)' : 'translateY(-50%)',
             fontSize: focused || hasValue ? '11px' : '15px',
             color: focused ? '#F5A623' : '#8B8BA7',
+            backgroundColor: focused || hasValue ? '#1A1A24' : 'rgba(0, 0, 0, 0)',
           }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           {label}
         </motion.label>
@@ -179,17 +175,17 @@ function FloatingInput({
           }}
           className={cn(
             'w-full py-3 px-4 pt-6 rounded-xl font-body text-base',
-            focused ? 'text-text-primary' : 'text-text-primary',
+            'text-text-primary',
             'bg-dark-elevated transition-all duration-200 outline-none border',
             rightElement ? 'pr-12' : '',
             focused
-              ? 'border-kili-blue shadow-glow-blue bg-[#0A2A3A] scale-[1.01]'
+              ? 'border-kili-gold shadow-glow-gold'
               : error
               ? 'border-kili-sunset'
               : 'border-dark-border hover:border-dark-border-light',
           )}
           style={{
-            minHeight: '52px',
+            height: '48px',
           }}
           aria-label={label}
           aria-invalid={!!error}
@@ -201,7 +197,7 @@ function FloatingInput({
             {rightElement}
           </div>
         )}
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {microFeedback && !error && (
@@ -342,10 +338,10 @@ function RoleCard({
           'Fuata local guides',
           'Angalia moments za Tanzania',
         ],
-        color: '#4A9EFF',
-        gradient: 'linear-gradient(135deg, rgba(74,158,255,0.15), rgba(74,158,255,0.05))',
-        border: 'rgba(74,158,255,0.3)',
-        glow: '0 0 30px rgba(74,158,255,0.2)',
+        color: '#F5A623',
+        gradient: 'linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05))',
+        border: 'rgba(245,166,35,0.3)',
+        glow: '0 0 30px rgba(245,166,35,0.2)',
         badge: '🧳 Karibu Tanzania!',
         feedback: 'Vizuri! Hii itakusaidia kupata experiences sahihi',
       }
@@ -372,14 +368,14 @@ function RoleCard({
   return (
     <motion.div
       onClick={onSelect}
-      className="relative cursor-pointer rounded-2xl p-6 md:p-6 w-full min-h-[140px] md:min-h-[160px]"
+      className="relative cursor-pointer rounded-2xl p-4 md:p-5 w-full min-h-[120px] md:min-h-[140px]"
       style={{
         background: selected ? config.gradient : 'rgba(28,28,39,0.5)',
         border: `1px solid ${selected ? config.border : 'rgba(42,42,58,0.8)'}`,
         boxShadow: selected ? config.glow : 'none',
       }}
-      whileHover={{ scale: 1.02, y: -2 }}
-      whileTap={{ scale: 0.97, y: 1 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       animate={{ scale: selected ? 1.01 : 1 }}
     >
       {/* Sparkle particles when selected */}
@@ -551,81 +547,17 @@ function RoleCard({
   );
 }
 
-// ── Confetti Component ──────────────────────────────────
-function Confetti() {
-  const colors = ['#F5A623', '#00E5A0', '#4A9EFF', '#E84545', '#FF7700'];
-  
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {[...Array(50)].map((_, i) => {
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const left = Math.random() * 100;
-        const delay = Math.random() * 2;
-        const duration = 2 + Math.random() * 2;
-        const size = 6 + Math.random() * 8;
-        
-        return (
-          <motion.div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              background: color,
-              width: size,
-              height: size,
-              left: `${left}%`,
-              boxShadow: `0 0 10px ${color}`,
-            }}
-            initial={{ 
-              y: -20, 
-              opacity: 0,
-              rotate: 0,
-            }}
-            animate={{
-              y: [null, '100vh'],
-              opacity: [0, 1, 1, 0],
-              rotate: [0, 360, 720],
-              x: [0, (Math.random() - 0.5) * 200],
-            }}
-            transition={{
-              duration,
-              delay,
-              ease: 'easeOut',
-              repeat: Infinity,
-              repeatDelay: 1,
-            }}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
 // ── Success Screen ────────────────────────────────────
 function SuccessScreen({ onRedirect }: { onRedirect: () => void }) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playMusic = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio("/audio/success-music.mp3");
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.3;
-    }
-    audioRef.current.play().catch(() => console.log("Music waiting for interaction"));
-  };
-
   useEffect(() => {
-    playMusic();
-    const t = setTimeout(onRedirect, 6000);
+    const t = setTimeout(onRedirect, 2000);
     return () => {
       clearTimeout(t);
-      audioRef.current?.pause();
-      audioRef.current = null;
     };
   }, [onRedirect]);
 
   return (
     <div className="relative">
-      <Confetti />
       <motion.div
         className="text-center py-12 relative z-10"
         initial={{ opacity: 0, scale: 0.9 }}
@@ -701,20 +633,17 @@ const slideVariants = {
   enter: (dir: number) => ({ 
     x: dir > 0 ? 100 : -100, 
     opacity: 0,
-    rotateY: dir > 0 ? 15 : -15,
-    scale: 0.9,
+    scale: 0.95,
   }),
   center: { 
     x: 0, 
     opacity: 1,
-    rotateY: 0,
     scale: 1,
   },
   exit: (dir: number) => ({ 
     x: dir < 0 ? 100 : -100, 
     opacity: 0,
-    rotateY: dir < 0 ? -15 : 15,
-    scale: 0.9,
+    scale: 0.95,
   }),
 };
 
@@ -734,12 +663,6 @@ export default function RegisterPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [microFeedback, setMicroFeedback] = useState<Record<string, string>>({});
 
-  // Mouse parallax effect
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  const rotateX = useTransform(mouseY, [-100, 100], [5, -5]);
-  const rotateY = useTransform(mouseX, [-100, 100], [-5, 5]);
 
   const {
     register,
@@ -989,9 +912,9 @@ export default function RegisterPage() {
         transition={{ duration: 0.6, type: 'spring' }}
       >
       {/* Header */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-3">
         <motion.div
-          className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-3"
+          className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
           style={{
             background: 'linear-gradient(135deg, #F5A623, #D4891A)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
@@ -1001,7 +924,7 @@ export default function RegisterPage() {
           <span className="text-xl font-black text-dark-bg font-display">K</span>
         </motion.div>
 
-        <h1 className="text-3xl md:text-4xl font-black font-display text-text-primary tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-black font-display text-text-primary tracking-tight">
           Jisajili{' '}
           <span className="text-gradient-gold">KilicareGO+</span>
         </h1>
@@ -1024,7 +947,7 @@ export default function RegisterPage() {
 
       {/* Progress */}
       {!showSuccess && (
-        <div className="mb-8">
+        <div className="mb-4">
           <ProgressIntelligence current={step} total={3} />
           {/* Step indicators */}
           <div className="flex justify-center gap-3 mt-4">
@@ -1056,19 +979,6 @@ export default function RegisterPage() {
           WebkitBackdropFilter: 'blur(40px)',
           border: '1px solid rgba(255,255,255,0.07)',
           boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-          rotateX,
-          rotateY,
-        }}
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          mouseX.set(e.clientX - centerX);
-          mouseY.set(e.clientY - centerY);
-        }}
-        onMouseLeave={() => {
-          mouseX.set(0);
-          mouseY.set(0);
         }}
       >
         {/* Top gradient line */}
@@ -1108,12 +1018,12 @@ export default function RegisterPage() {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                className="space-y-6"
+                className="space-y-5"
                 style={{ perspective: 1000 }}
               >
                 <OnboardingAssistant step={1} />
 
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-3">
                   <User size={18} className="text-kili-gold" />
                   <h2 className="text-xl font-bold font-display text-text-primary">
                     Habari yako
@@ -1164,7 +1074,7 @@ export default function RegisterPage() {
                   />
                 </motion.div>
 
-                <div className="pt-2">
+                <div className="pt-1">
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
                   <FloatingInput
                     label="Nenosiri"
@@ -1186,7 +1096,9 @@ export default function RegisterPage() {
                   />
                   <AnimatePresence>
                     {watchPassword && (
-                      <PasswordStrength password={watchPassword} />
+                      <div className="mt-3">
+                        <PasswordStrength password={watchPassword} />
+                      </div>
                     )}
                   </AnimatePresence>
                 </motion.div>
@@ -1213,20 +1125,17 @@ export default function RegisterPage() {
                   />
                 </motion.div>
 
-                <div className="pt-4">
+                <div className="pt-2">
                   <motion.button
                     type="button"
                     onClick={validateStep1}
-                    className="w-full h-14 rounded-xl font-display font-bold text-dark-bg text-base flex items-center justify-center gap-2"
+                    className="w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2"
                     style={{
                       background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                       boxShadow: '0 4px 20px rgba(245,166,35,0.35)',
                     }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      boxShadow: '0 8px 30px rgba(245,166,35,0.5)',
-                    }}
-                    whileTap={{ scale: 0.97, y: 1 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Endelea <ArrowRight size={18} />
                   </motion.button>
@@ -1248,14 +1157,14 @@ export default function RegisterPage() {
               >
                 <OnboardingAssistant step={2} />
 
-                <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-2 mb-4">
                   <Shield size={18} className="text-kili-gold" />
                   <h2 className="text-xl font-bold font-display text-text-primary">
                     Wewe ni nani Tanzania?
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 md:max-w-2xl md:mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:max-w-2xl md:mx-auto">
                   <RoleCard
                     role="TOURIST"
                     selected={selectedRole === 'TOURIST'}
@@ -1275,12 +1184,8 @@ export default function RegisterPage() {
                     type="button"
                     onClick={() => setStep(1)}
                     className="min-w-[100px] h-14 px-6 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
-                    whileHover={{ 
-                      scale: 1.03,
-                      borderColor: 'rgba(245,166,35,0.6)',
-                      backgroundColor: 'rgba(42,42,58,0.8)',
-                    }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <ArrowLeft size={16} />
                     Rudi
@@ -1289,15 +1194,12 @@ export default function RegisterPage() {
                   <motion.button
                     type="button"
                     onClick={goStep3}
-                    className="flex-1 h-14 rounded-xl font-display font-bold text-dark-bg text-base flex items-center justify-center gap-2"
+                    className="flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2"
                     style={{
                       background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                       boxShadow: '0 4px 20px rgba(245,166,35,0.35)',
                     }}
-                    whileHover={{ 
-                      scale: 1.02,
-                      boxShadow: '0 8px 30px rgba(245,166,35,0.5)',
-                    }}
+                    whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     Endelea <ArrowRight size={18} />
@@ -1320,7 +1222,7 @@ export default function RegisterPage() {
               >
                 <OnboardingAssistant step={3} />
 
-                <div className="flex items-center gap-2 mb-8">
+                <div className="flex items-center gap-2 mb-4">
                   <Map size={18} className="text-kili-gold" />
                   <h2 className="text-xl font-bold font-display text-text-primary">
                     Maliza wasifu wako
@@ -1329,7 +1231,7 @@ export default function RegisterPage() {
 
 
                 {/* Avatar upload */}
-                <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center mb-5">
                   <label className="cursor-pointer group">
                     <input
                       type="file"
@@ -1339,7 +1241,7 @@ export default function RegisterPage() {
                       disabled={avatarUploading}
                     />
                     <motion.div
-                      className="relative w-32 h-32 rounded-full overflow-hidden"
+                      className="relative w-24 h-24 rounded-full overflow-hidden"
                       style={{
                         background: avatarPreview
                           ? 'transparent'
@@ -1347,8 +1249,8 @@ export default function RegisterPage() {
                         border: '2px solid rgba(245,166,35,0.4)',
                         boxShadow: '0 0 20px rgba(245,166,35,0.2)',
                       }}
-                      whileHover={{ scale: !avatarUploading ? 1.05 : 1 }}
-                      whileTap={{ scale: !avatarUploading ? 0.95 : 1 }}
+                      whileHover={{ scale: !avatarUploading ? 1.01 : 1 }}
+                      whileTap={{ scale: !avatarUploading ? 0.98 : 1 }}
                     >
                       {avatarUploading ? (
                         <div className="relative w-full h-full flex flex-col items-center justify-center gap-1">
@@ -1413,7 +1315,7 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Bio & Location */}
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <FloatingInput
                     label="Bio yako (si lazima)"
                     value={watchBio}
@@ -1462,17 +1364,13 @@ export default function RegisterPage() {
                 </motion.div>
 
                 {/* Buttons */}
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-3 mt-4">
                   <motion.button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="min-w-[100px] h-14 px-6 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
-                    whileHover={{ 
-                      scale: 1.03,
-                      borderColor: 'rgba(245,166,35,0.6)',
-                      backgroundColor: 'rgba(42,42,58,0.8)',
-                    }}
-                    whileTap={{ scale: 0.97 }}
+                    className="min-w-[90px] h-12 px-5 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <ArrowLeft size={16} />
                     Rudi
@@ -1493,11 +1391,8 @@ export default function RegisterPage() {
                         ? 'none'
                         : '0 4px 20px rgba(245,166,35,0.35)',
                     }}
-                    whileHover={!isRegistering ? { 
-                      scale: 1.02,
-                      boxShadow: '0 8px 30px rgba(245,166,35,0.5)',
-                    } : {}}
-                    whileTap={!isRegistering ? { scale: 0.97, y: 1 } : {}}
+                    whileHover={!isRegistering ? { scale: 1.01 } : {}}
+                    whileTap={!isRegistering ? { scale: 0.98 } : {}}
                   >
                     <AnimatePresence mode="wait">
                       {isRegistering ? (
@@ -1533,7 +1428,7 @@ export default function RegisterPage() {
 
       {/* Login link */}
       {!showSuccess && (
-        <p className="text-center text-text-muted text-sm mt-6 font-body">
+        <p className="text-center text-text-muted text-xs mt-4 font-body">
           Una akaunti tayari?{' '}
           <Link
             href="/login"
