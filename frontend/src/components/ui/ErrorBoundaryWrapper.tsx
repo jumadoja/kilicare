@@ -25,9 +25,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('[ErrorBoundary] Error caught:', error);
-    console.error('[ErrorBoundary] Component stack:', errorInfo.componentStack);
-    
     this.setState({ errorInfo });
     
     // Call custom error handler if provided
@@ -35,10 +32,13 @@ export class ErrorBoundary extends React.Component<Props, State> {
       this.props.onError(error, errorInfo);
     }
 
-    // Log to external service in production (placeholder)
+    // Log to external service in production
     if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-      // TODO: Integrate with error tracking service (Sentry, LogRocket, etc.)
-      console.error('[ErrorBoundary] Production error - would log to tracking service');
+      // Integrate with error tracking service (Sentry, LogRocket, etc.)
+      // Example with Sentry:
+      // Sentry.captureException(error, {
+      //   contexts: { react: { componentStack: errorInfo.componentStack } }
+      // });
     }
   }
 

@@ -1,5 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
+import { useId } from 'react';
 import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
@@ -23,13 +24,14 @@ export function LoadingSpinner({
   const s = sizeMap[size];
   const r = s / 2 - 4;
   const circumference = 2 * Math.PI * r;
+  const gradientId = `spinner-${useId()}`;
 
   const spinner = (
     <div className="flex flex-col items-center gap-3">
       <div className="relative" style={{ width: s, height: s }}>
         <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className="animate-spin-slow">
           <defs>
-            <linearGradient id="spinnerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#F5A623" stopOpacity="0" />
               <stop offset="50%" stopColor="#F5A623" stopOpacity="1" />
               <stop offset="100%" stopColor="#E84545" stopOpacity="1" />
@@ -44,7 +46,7 @@ export function LoadingSpinner({
           <circle
             cx={s / 2} cy={s / 2} r={r}
             fill="none"
-            stroke="url(#spinnerGrad)"
+            stroke={`url(#${gradientId})`}
             strokeWidth="3"
             strokeLinecap="round"
             strokeDasharray={`${circumference * 0.7} ${circumference * 0.3}`}

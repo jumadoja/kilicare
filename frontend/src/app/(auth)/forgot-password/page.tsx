@@ -173,6 +173,13 @@ export default function ForgotPasswordPage() {
     initialValues: { emailOrPhone: '', username: '', step: 'email' },
     storageType: 'sessionStorage',
     clearOnSuccess: true,
+    onRestore: (data) => {
+      if (data.emailOrPhone) setEmailOrPhone(data.emailOrPhone);
+      if (data.username) setUsername(data.username);
+      if (data.step && ['email', 'otp', 'password', 'success'].includes(data.step)) {
+        setStep(data.step as Step);
+      }
+    },
   });
 
   const { focusOnError } = useFocusManagement({
@@ -188,27 +195,6 @@ export default function ForgotPasswordPage() {
   const [canResend, setCanResend] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
-  // Restore form state on mount
-  useEffect(() => {
-    if (isRestored) {
-      if (typeof window === 'undefined') return;
-      try {
-        const storage = window.sessionStorage;
-        const saved = storage.getItem('form_forgot-password');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const { _timestamp, ...formData } = parsed;
-          if (formData.emailOrPhone) setEmailOrPhone(formData.emailOrPhone);
-          if (formData.username) setUsername(formData.username);
-          if (formData.step && ['email', 'otp', 'password', 'success'].includes(formData.step)) {
-            setStep(formData.step as Step);
-          }
-        }
-      } catch (error) {
-        console.error('[ForgotPasswordPage] Failed to restore form state:', error);
-      }
-    }
-  }, [isRestored]);
 
   // Save form state on change
   useEffect(() => {

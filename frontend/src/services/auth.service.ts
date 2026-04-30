@@ -29,7 +29,6 @@ export const authService = {
   },
 
   async getMe(): Promise<User> {
-    console.log('[TRACE][getMe] called');
     const { data } = await api.get<User>(API.AUTH.ME);
     return data;
   },

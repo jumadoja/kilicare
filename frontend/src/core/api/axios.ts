@@ -28,18 +28,30 @@ function isRetryableError(error: AxiosError): boolean {
   return RETRY_STATUS_CODES.includes(status);
 }
 
+// Get CSRF token from cookie
+function getCsrfToken(): string | null {
+  if (typeof document === 'undefined') return null;
+  
+  const getCookie = (name: string): string | null => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+    return null;
+  };
+  
+  return getCookie('csrftoken') || getCookie('csrf_token');
+}
+
 // Online/offline detection
 let isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
     isOnline = true;
-    console.log('[Network] Connection restored');
   });
   
   window.addEventListener('offline', () => {
     isOnline = false;
-    console.log('[Network] Connection lost');
   });
 }
 
@@ -47,17 +59,22 @@ const api = axios.create({
   baseURL: env.API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
+  withCredentials: true,
 });
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = tokenManager.getAccess();
-    console.log('[TRACE][REQUEST]');
-    console.log('URL:', config.url);
-    console.log('METHOD:', config.method);
-    console.log('TOKEN:', token);
     if (token) config.headers.Authorization = `Bearer ${token}`;
-    console.log('AUTH HEADER:', config.headers.Authorization);
+    
+    // Add CSRF token to non-GET requests
+    if (config.method !== 'get') {
+      const csrfToken = getCsrfToken();
+      if (csrfToken) {
+        config.headers['X-CSRFToken'] = csrfToken;
+      }
+    }
+    
     return config;
   },
   (err) => Promise.reject(err)
@@ -101,7 +118,6 @@ api.interceptors.response.use(
 
     // Handle 401 unauthorized (token refresh)
     if (error.response?.status === 401 && !orig._retry) {
-      console.log('[TRACE][401 DETECTED]', error.config?.url);
       
       // Use promise-based locking instead of boolean flag
       if (refreshPromise) {
@@ -136,19 +152,15 @@ api.interceptors.response.use(
       
       if (orig._retryCount <= MAX_RETRIES) {
         const delay = getRetryDelay(orig._retryCount - 1);
-        console.log(`[Network] Retry attempt ${orig._retryCount}/${MAX_RETRIES} after ${Math.round(delay)}ms`);
         
         return new Promise((resolve) => {
           setTimeout(() => resolve(api(orig)), delay);
         });
-      } else {
-        console.error('[Network] Max retries reached for:', error.config?.url);
       }
     }
     
     // Check offline status
     if (!isOnline) {
-      console.error('[Network] Request failed - offline mode');
       // You could queue requests here for later
     }
     
@@ -171,14 +183,12 @@ const unsubscribeAuthRefresh = authEvents.on('AUTH_REFRESH', async () => {
   const refresh = tokenManager.getRefresh();
   if (!refresh || refreshPromise) return;
 
-  console.log('[AXIOS] Handling AUTH_REFRESH event');
   refreshPromise = performRefresh();
 
   try {
     await refreshPromise;
-    console.log('[AXIOS] Proactive refresh successful');
   } catch (e) {
-    console.error('[AXIOS] Proactive refresh failed', e);
+    // Silent fail - token refresh will be handled by 401 interceptor
   } finally {
     refreshPromise = null;
   }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const travelImages = [
   {
@@ -27,6 +28,7 @@ export function TravelVisualLayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [particles, setParticles] = useState<Array<{id: number; background: string; left: string; top: string; duration: number; delay: number; yMove: number; xMove: number}>>([]);
 
   useEffect(() => {
@@ -80,9 +82,9 @@ export function TravelVisualLayer() {
             currentIndex === index && (
               <motion.div
                 key={img.alt}
-                className="absolute inset-0"
+                className={cn("absolute inset-0 transition-opacity duration-500", isLoaded ? "opacity-100" : "opacity-0")}
                 initial={{ opacity: 0 }}
-                animate={{ opacity: isMobile ? 1.3 : 1.8 }}
+                animate={{ opacity: isLoaded ? (isMobile ? 1.3 : 1.8) : 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 2.5, ease: [0.4, 0, 0.2, 1] }}
               >
@@ -98,10 +100,13 @@ export function TravelVisualLayer() {
                     className="object-cover"
                     style={{ filter: isMobile ? 'blur(2px) brightness(1.05)' : 'blur(3px) brightness(1.05)' }}
                     onError={handleError}
+                    onLoad={() => setIsLoaded(true)}
                     priority={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
                     quality={60}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwC3AAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA//EABQQAQAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAT8Q//9k="
                   />
                   <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
                 </motion.div>
@@ -200,10 +205,13 @@ export function TravelVisualLayer() {
               fill
               className="object-cover"
               style={{ filter: isMobile ? 'blur(2px) brightness(1.05)' : 'blur(3px) brightness(1.05)' }}
+              onLoad={() => setIsLoaded(true)}
               priority
               loading="eager"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
               quality={60}
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwC3AAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA//EABQQAQAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAT8Q//9k="
             />
             <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
           </motion.div>

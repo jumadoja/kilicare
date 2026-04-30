@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useId } from 'react';
 
 interface TrustScoreRingProps {
   score: number;
@@ -21,7 +21,7 @@ export function TrustScoreRing({
   const radius = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * radius;
   const center = size / 2;
-  const id = `trust-${Math.random().toString(36).slice(2, 7)}`;
+  const id = `trust-${useId()}`;
 
   useEffect(() => {
     if (!shouldAnimate) return;

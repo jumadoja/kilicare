@@ -42,10 +42,10 @@ class AuthEventBus {
           try {
             listener();
           } catch (error) {
-            console.error(`[AuthEventBus] Error in listener for ${event}:`, error);
+            // Silent fail
           }
         } else {
-          console.error(`[AuthEventBus] Invalid listener for ${event}:`, listener);
+          // Invalid listener - skip
         }
       });
     }

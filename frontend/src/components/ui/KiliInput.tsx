@@ -1,6 +1,6 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, useId } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +35,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
     const [focused, setFocused] = useState(false);
     const [showPwd, setShowPwd] = useState(false);
     const [internalValue, setInternalValue] = useState(defaultValue ?? '');
+    const generatedId = useId();
 
     const isControlled = value !== undefined;
     const currentValue = isControlled ? String(value ?? '') : String(internalValue);
@@ -43,8 +44,8 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
       ? showPwd ? 'text' : 'password'
       : type;
 
-    // Generate unique IDs for ARIA relationships
-    const inputId = id || `input-${label.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate unique IDs for ARIA relationships (deterministic across SSR/client)
+    const inputId = id || `input-${label.replace(/\s+/g, '-').toLowerCase()}-${generatedId}`;
     const errorId = `${inputId}-error`;
     const hintId = `${inputId}-hint`;
 

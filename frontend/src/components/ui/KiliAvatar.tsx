@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils';
 
@@ -50,7 +51,8 @@ export function KiliAvatar({
   onClick,
 }: KiliAvatarProps) {
   const s = sizeMap[size];
-  const id = `avatar-${Math.random().toString(36).slice(2, 7)}`;
+  const id = `avatar-${useId()}`;
+  const [imageError, setImageError] = useState(false);
 
   const content = (
     <div
@@ -130,13 +132,14 @@ export function KiliAvatar({
             : 'linear-gradient(135deg, #F5A623, #D4891A)',
         }}
       >
-        {src ? (
+        {src && !imageError ? (
           <Image
             src={src}
             alt={name}
             width={s.image}
             height={s.image}
             className="object-cover w-full h-full"
+            onError={() => setImageError(true)}
           />
         ) : (
           <span

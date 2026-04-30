@@ -462,11 +462,27 @@ export default function RegisterPage() {
   const { registerAsync: registerUser, isRegistering } = useAuth();
   const router = useRouter();
 
-  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<Partial<RegisterInput>>({
+  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<Partial<RegisterInput> & { _step?: number; _role?: 'TOURIST' | 'LOCAL_GUIDE' }>({
     formKey: 'register',
     initialValues: {},
     storageType: 'sessionStorage',
     clearOnSuccess: true,
+    onRestore: (data) => {
+      // Restore form fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (value && key !== '_step' && key !== '_role') {
+          setValue(key as keyof RegisterInput, value as string);
+        }
+      });
+      
+      // Restore step and role if valid
+      if (data._step && data._step >= 1 && data._step <= 3) {
+        setStep(data._step);
+      }
+      if (data._role && (data._role === 'TOURIST' || data._role === 'LOCAL_GUIDE')) {
+        setSelectedRole(data._role);
+      }
+    },
   });
 
   const { focusOnError } = useFocusManagement({
@@ -517,35 +533,6 @@ export default function RegisterPage() {
   // Watch all form values for persistence
   const formValues = watch();
 
-  // Restore form state on mount
-  useEffect(() => {
-    if (isRestored) {
-      if (typeof window === 'undefined') return;
-      try {
-        const storage = window.sessionStorage;
-        const saved = storage.getItem('form_register');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const { _timestamp, step: savedStep, role: savedRole, ...formData } = parsed;
-          
-          // Restore form fields
-          Object.entries(formData).forEach(([key, value]) => {
-            if (value) setValue(key as keyof RegisterInput, value as string);
-          });
-          
-          // Restore step and role if valid
-          if (savedStep && savedStep >= 1 && savedStep <= 3) {
-            setStep(savedStep);
-          }
-          if (savedRole && (savedRole === 'TOURIST' || savedRole === 'LOCAL_GUIDE')) {
-            setSelectedRole(savedRole);
-          }
-        }
-      } catch (error) {
-        console.error('[RegisterPage] Failed to restore form state:', error);
-      }
-    }
-  }, [isRestored, setValue]);
 
   // Save form state on change
   useEffect(() => {
@@ -668,39 +655,6 @@ export default function RegisterPage() {
       // ❌ DO NOT show success on error
       // show error feedback instead
 
-      // Detailed console logging for debugging
-      console.log('## Error Type');
-      console.log('Console Registration Error');
-
-      console.log('## Error Message');
-      if (error instanceof Error) {
-        console.log(error.message);
-
-        // Check if it's an Axios/network error
-        if ('code' in error) {
-          console.log('## Error Code');
-          console.log((error as any).code);
-        }
-
-        if ('response' in error) {
-          console.log('## Status Code');
-          console.log((error as any).response?.status);
-          console.log('## Response Data');
-          console.log((error as any).response?.data);
-        }
-
-        if ('config' in error) {
-          console.log('## Request URL');
-          console.log((error as any).config?.url);
-        }
-      } else {
-        console.log('Unknown error occurred');
-        console.log(error);
-      }
-
-      console.log('## Next.js version');
-      console.log('16.2.4 (Turbopack)');
-
       // User-friendly error message - parse backend response
       let errorMessage = 'Imeshindikana kujisajili. Tafadhali jaribu tena.';
 
@@ -713,9 +667,6 @@ export default function RegisterPage() {
         else if ('response' in error) {
           const response = (error as any).response;
           const responseData = response?.data;
-
-          console.log('## Parsing Backend Error');
-          console.log(responseData);
 
           // Check for specific field errors
           if (responseData) {

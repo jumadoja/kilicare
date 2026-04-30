@@ -20,6 +20,10 @@ export default function LoginPage() {
     initialValues: { username: '', password: '' },
     storageType: 'sessionStorage',
     clearOnSuccess: true,
+    onRestore: (data) => {
+      if (data.username) setValue('username', data.username);
+      if (data.password) setValue('password', data.password);
+    },
   });
 
   const { focusOnError } = useFocusManagement({
@@ -48,24 +52,6 @@ export default function LoginPage() {
   // Watch form values for persistence
   const formValues = watch();
 
-  // Restore form state on mount
-  useEffect(() => {
-    if (isRestored) {
-      if (typeof window === 'undefined') return;
-      try {
-        const storage = window.sessionStorage;
-        const saved = storage.getItem('form_login');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const { _timestamp, ...formData } = parsed;
-          if (formData.username) setValue('username', formData.username);
-          if (formData.password) setValue('password', formData.password);
-        }
-      } catch (error) {
-        console.error('[LoginPage] Failed to restore form state:', error);
-      }
-    }
-  }, [isRestored, setValue]);
 
   // Save form state on change
   useEffect(() => {

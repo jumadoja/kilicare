@@ -16,12 +16,10 @@ class WsManager {
 
   constructor() {
     this.unsubscribeAuthLogout = authEvents.on('AUTH_LOGOUT', () => {
-      console.log('[WS] AUTH_LOGOUT → disconnect all');
       this.disconnectAll();
     });
 
     this.unsubscribeAuthRefresh = authEvents.on('AUTH_REFRESH', () => {
-      console.log('[WS] AUTH_REFRESH → reconnect all with new token');
       this.reconnectAllWithNewToken();
     });
   }
@@ -35,7 +33,6 @@ class WsManager {
   connect(key: string, url: string) {
     if (this.sockets.get(key)?.readyState === WebSocket.OPEN) return;
     const token = tokenManager.getAccess();
-    console.log('[TRACE][WS CONNECT] token:', token);
     if (!token || !tokenManager.isAuthenticated()) return;
 
     // Store URL for potential reconnect after refresh
@@ -55,20 +52,17 @@ class WsManager {
     ws.onclose = () => {
       const token = tokenManager.getAccess();
       if (token && tokenManager.isAuthenticated()) {
-        console.log('[WS] reconnecting with fresh token');
         this.reconnect(key, url);
       } else {
-        console.log('[WS] no token or expired → abort reconnect');
         this.pendingUrls.delete(key);
       }
     };
-    ws.onerror = (e) => console.error(`[WS] ${key}`, e);
+    ws.onerror = (e) => {/* Silent error logging */};
     this.sockets.set(key, ws);
   }
 
   private reconnect(key: string, url: string) {
     const n = this.attempts.get(key) ?? 0;
-    console.log('[TRACE][WS RECONNECT ATTEMPT]', key, 'attempt:', n);
     if (n >= 5) return; // Max 5 retry attempts
     const delay = Math.min(1000 * 2 ** n, this.MAX_DELAY);
     this.attempts.set(key, n + 1);

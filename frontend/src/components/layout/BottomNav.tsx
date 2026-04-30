@@ -6,7 +6,7 @@ import { Home, Compass, Shield, MessageCircle, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChatStore } from '@/store/chat.store';
 import { useAuth } from '@/hooks/useAuth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 
 const NAV_ITEMS = [
   { href: '/feed', icon: Home, label: 'Feed' },
@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { href: '/passport', icon: Award, label: 'Pasipoti' },
 ];
 
-export function BottomNav() {
+function BottomNavInternal() {
   const pathname = usePathname();
   const { unreadTotal } = useChatStore();
   const { token } = useAuth();
@@ -140,3 +140,5 @@ export function BottomNav() {
     </motion.nav>
   );
 }
+
+export const BottomNav = memo(BottomNavInternal);

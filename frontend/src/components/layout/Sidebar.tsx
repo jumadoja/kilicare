@@ -13,7 +13,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
 import { useAuth } from '@/hooks/useAuth';
 import { getInitials } from '@/lib/utils';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 
 const NAV_ITEMS = [
   { href: '/feed', icon: Home, label: 'Feed', color: '#F5A623' },
@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   { href: '/profile', icon: User, label: 'Wasifu', color: '#8B8BA7' },
 ];
 
-export function Sidebar() {
+function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar } = useAppStore();
   const { user } = useAuthStore();
@@ -299,3 +299,5 @@ export function Sidebar() {
     </motion.aside>
   );
 }
+
+export const Sidebar = memo(Sidebar);

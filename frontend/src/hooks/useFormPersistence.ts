@@ -24,7 +24,6 @@ export function useFormPersistence<T extends Record<string, any>>({
     try {
       return storageType === 'localStorage' ? window.localStorage : window.sessionStorage;
     } catch (e) {
-      console.error('[useFormPersistence] Failed to access storage:', e);
       return null;
     }
   };
@@ -48,7 +47,7 @@ export function useFormPersistence<T extends Record<string, any>>({
           try {
             storage.removeItem(`form_${formKey}`);
           } catch (e) {
-            console.error('[useFormPersistence] Failed to remove expired form state:', e);
+            // Silent fail
           }
           setIsRestored(true);
           return;
@@ -57,7 +56,7 @@ export function useFormPersistence<T extends Record<string, any>>({
         onRestore?.(formData);
       }
     } catch (error) {
-      console.error(`[useFormPersistence] Failed to restore form state for ${formKey}:`, error);
+      // Silent fail
     } finally {
       setIsRestored(true);
     }
@@ -71,7 +70,7 @@ export function useFormPersistence<T extends Record<string, any>>({
       const toSave = { ...data, _timestamp: Date.now() };
       storage.setItem(`form_${formKey}`, JSON.stringify(toSave));
     } catch (error) {
-      console.error(`[useFormPersistence] Failed to save form state for ${formKey}:`, error);
+      // Silent fail
     }
   };
 
@@ -82,7 +81,7 @@ export function useFormPersistence<T extends Record<string, any>>({
     try {
       storage.removeItem(`form_${formKey}`);
     } catch (error) {
-      console.error(`[useFormPersistence] Failed to clear form state for ${formKey}:`, error);
+      // Silent fail
     }
   };
 

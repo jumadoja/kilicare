@@ -42,7 +42,6 @@ const safeGetItem = (key: string): string | null => {
   try {
     return window.localStorage.getItem(key);
   } catch (e) {
-    console.error('[Storage] Failed to get item:', key, e);
     return null;
   }
 };
@@ -52,7 +51,7 @@ const safeSetItem = (key: string, value: string): void => {
   try {
     window.localStorage.setItem(key, value);
   } catch (e) {
-    console.error('[Storage] Failed to set item:', key, e);
+    // Silent fail - storage may be disabled
   }
 };
 
@@ -61,7 +60,7 @@ const safeRemoveItem = (key: string): void => {
   try {
     window.localStorage.removeItem(key);
   } catch (e) {
-    console.error('[Storage] Failed to remove item:', key, e);
+    // Silent fail - storage may be disabled
   }
 };
 
@@ -71,8 +70,6 @@ let isClearing = false; // Guard to prevent repeated clearing
 export const tokenManager = {
   setTokens(access: string, refresh: string) {
     if (!isBrowser) return;
-    console.log('[TOKEN SET][ACCESS]', access);
-    console.log('[TOKEN SET][REFRESH]', refresh);
     safeSetItem(K.ACCESS, access);
     safeSetItem(K.REFRESH, refresh);
     isClearing = false; // Reset guard when new tokens are set
@@ -86,7 +83,6 @@ export const tokenManager = {
     const token = safeGetItem(K.ACCESS);
     if (!isValidJWT(token) || isTokenExpired(token)) {
       if (!isClearing) {
-        console.log('[TOKEN] invalid/expired → clearing');
         tokenManager.clearTokens();
       }
       return null;
@@ -103,7 +99,6 @@ export const tokenManager = {
     if (!isBrowser) return;
     if (isClearing) return; // Prevent repeated clearing
     isClearing = true;
-    console.log('[TOKEN CLEARED]');
     Object.values(K).forEach((k) => safeRemoveItem(k));
     authEvents.emit('AUTH_LOGOUT');
     if (refreshTimer) {
@@ -137,14 +132,11 @@ export const tokenManager = {
 
     if (timeUntilExpiry <= refreshBuffer) {
       // Token expires soon, trigger refresh immediately
-      console.log('[TOKEN] expires soon → triggering refresh');
       authEvents.emit('AUTH_REFRESH');
     } else {
       // Schedule refresh before expiry
       const delay = timeUntilExpiry - refreshBuffer;
-      console.log(`[TOKEN] scheduling proactive refresh in ${Math.round(delay / 1000)}s`);
       refreshTimer = setTimeout(() => {
-        console.log('[TOKEN] proactive refresh triggered');
         authEvents.emit('AUTH_REFRESH');
         refreshTimer = null;
       }, delay);
