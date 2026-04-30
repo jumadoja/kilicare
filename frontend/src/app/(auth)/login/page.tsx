@@ -51,8 +51,9 @@ export default function LoginPage() {
   // Restore form state on mount
   useEffect(() => {
     if (isRestored) {
+      if (typeof window === 'undefined') return;
       try {
-        const saved = sessionStorage.getItem('form_login');
+        const saved = window.sessionStorage.getItem('form_login');
         if (saved) {
           const parsed = JSON.parse(saved);
           const { _timestamp, ...formData } = parsed;

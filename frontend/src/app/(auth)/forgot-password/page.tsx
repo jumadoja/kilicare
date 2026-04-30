@@ -191,8 +191,9 @@ export default function ForgotPasswordPage() {
   // Restore form state on mount
   useEffect(() => {
     if (isRestored) {
+      if (typeof window === 'undefined') return;
       try {
-        const saved = sessionStorage.getItem('form_forgot-password');
+        const saved = window.sessionStorage.getItem('form_forgot-password');
         if (saved) {
           const parsed = JSON.parse(saved);
           const { _timestamp, ...formData } = parsed;

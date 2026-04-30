@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 
 export default function ViewportHeightManager() {
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
     const updateAppHeight = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--app-height', `${vh * 100}px`);

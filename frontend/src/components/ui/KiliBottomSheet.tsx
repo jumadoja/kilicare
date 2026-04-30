@@ -32,6 +32,8 @@ export function KiliBottomSheet({
 }: KiliBottomSheetProps) {
   // Lock body scroll when open
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -42,6 +44,8 @@ export function KiliBottomSheet({
 
   // Close on escape
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };

@@ -14,6 +14,7 @@ import { useChatStore } from '@/store/chat.store';
 import { useAuth } from '@/hooks/useAuth';
 import { getInitials } from '@/lib/utils';
 import { tokenManager } from '@/core/auth/tokenManager';
+import { useState, useEffect } from 'react';
 
 const NAV_ITEMS = [
   { href: '/feed', icon: Home, label: 'Feed', color: '#F5A623' },
@@ -33,8 +34,16 @@ export function Sidebar() {
   const { user } = useAuthStore();
   const { unreadTotal } = useChatStore();
   const { logout } = useAuth();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  if (!tokenManager.isAuthenticated()) return null;
+  useEffect(() => {
+    setIsHydrated(true);
+    setIsAuthenticated(tokenManager.isAuthenticated());
+  }, []);
+
+  if (!isHydrated) return null;
+  if (!isAuthenticated) return null;
 
   const W = sidebarOpen ? 260 : 72;
 

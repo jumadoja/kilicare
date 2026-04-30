@@ -36,6 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isHydrated]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const on = () => setOnline(true);
     const off = () => setOnline(false);
     window.addEventListener('online', on);
@@ -47,6 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [setOnline]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'kili_access_token' || e.key === 'kili_refresh_token') {
         const token = tokenManager.getAccess();

@@ -520,8 +520,9 @@ export default function RegisterPage() {
   // Restore form state on mount
   useEffect(() => {
     if (isRestored) {
+      if (typeof window === 'undefined') return;
       try {
-        const saved = sessionStorage.getItem('form_register');
+        const saved = window.sessionStorage.getItem('form_register');
         if (saved) {
           const parsed = JSON.parse(saved);
           const { _timestamp, step: savedStep, role: savedRole, ...formData } = parsed;

@@ -25,7 +25,7 @@ export function formatDistance(km: number): string {
 
 export async function getCurrentPosition(): Promise<GeolocationCoordinates> {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
       reject(new Error('Geolocation haipo'));
       return;
     }

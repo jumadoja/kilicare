@@ -16,10 +16,20 @@ export function useFormPersistence<T extends Record<string, any>>({
   clearOnSuccess = true,
 }: FormPersistenceOptions<T>) {
   const [isRestored, setIsRestored] = useState(false);
-  const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
+  
+  const getStorage = () => {
+    if (typeof window === 'undefined') return null;
+    return storageType === 'localStorage' ? window.localStorage : window.sessionStorage;
+  };
 
   // Load saved form state on mount
   useEffect(() => {
+    const storage = getStorage();
+    if (!storage) {
+      setIsRestored(true);
+      return;
+    }
+    
     try {
       const saved = storage.getItem(`form_${formKey}`);
       if (saved) {
@@ -44,10 +54,13 @@ export function useFormPersistence<T extends Record<string, any>>({
       setIsRestored(true);
     }
     return initialValues;
-  }, [formKey, initialValues, storage]);
+  }, [formKey, initialValues]);
 
   // Save form state on change
   const saveFormState = (data: T) => {
+    const storage = getStorage();
+    if (!storage) return;
+    
     try {
       const toSave = {
         ...data,
@@ -61,6 +74,9 @@ export function useFormPersistence<T extends Record<string, any>>({
 
   // Clear form state (call on successful submission)
   const clearFormState = () => {
+    const storage = getStorage();
+    if (!storage) return;
+    
     try {
       storage.removeItem(`form_${formKey}`);
     } catch (error) {

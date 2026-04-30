@@ -43,6 +43,8 @@ export function useConfetti() {
   }, []);
 
   const burst = useCallback((x: number, y: number) => {
+    if (typeof window === 'undefined') return;
+    
     confetti({
       particleCount: 30,
       spread: 40,

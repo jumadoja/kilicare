@@ -30,8 +30,10 @@ export function TravelVisualLayer() {
   const [particles, setParticles] = useState<Array<{id: number; background: string; left: string; top: string; duration: number; delay: number; yMove: number; xMove: number}>>([]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const checkMobile = () => {
-      setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 768);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);

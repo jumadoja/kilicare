@@ -3,14 +3,23 @@ import { motion } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import { Shield } from 'lucide-react';
 import { tokenManager } from '@/core/auth/tokenManager';
+import { useState, useEffect } from 'react';
 
 export function FloatingSOSButton() {
   const router = useRouter();
   const pathname = usePathname();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+    setIsAuthenticated(tokenManager.isAuthenticated());
+  }, []);
 
   // Hide on SOS page and auth pages
   const shouldHide =
-    !tokenManager.isAuthenticated() ||
+    !isHydrated ||
+    !isAuthenticated ||
     pathname.startsWith('/sos') ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/register') ||

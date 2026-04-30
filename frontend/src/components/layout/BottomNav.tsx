@@ -6,6 +6,7 @@ import { Home, Compass, Shield, MessageCircle, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChatStore } from '@/store/chat.store';
 import { tokenManager } from '@/core/auth/tokenManager';
+import { useState, useEffect } from 'react';
 
 const NAV_ITEMS = [
   { href: '/feed', icon: Home, label: 'Feed' },
@@ -18,8 +19,16 @@ const NAV_ITEMS = [
 export function BottomNav() {
   const pathname = usePathname();
   const { unreadTotal } = useChatStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  if (!tokenManager.isAuthenticated()) return null;
+  useEffect(() => {
+    setIsHydrated(true);
+    setIsAuthenticated(tokenManager.isAuthenticated());
+  }, []);
+
+  if (!isHydrated) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <motion.nav
