@@ -258,8 +258,8 @@ export default function ForgotPasswordPage() {
           className="relative rounded-3xl overflow-hidden"
           style={{
             background: 'rgba(19,19,26,0.85)',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             border: '1px solid rgba(255,255,255,0.07)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}

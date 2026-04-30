@@ -749,8 +749,8 @@ export default function RegisterPage() {
         className="relative rounded-3xl overflow-hidden"
         style={{
           background: 'linear-gradient(145deg, rgba(19,19,26,0.95), rgba(28,28,39,0.9))',
-          backdropFilter: 'blur(40px)',
-          WebkitBackdropFilter: 'blur(40px)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           border: '1px solid rgba(245,166,35,0.15)',
           boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
         }}

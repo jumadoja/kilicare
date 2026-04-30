@@ -1,3 +1,5 @@
+'use client';
+
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'sonner';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
