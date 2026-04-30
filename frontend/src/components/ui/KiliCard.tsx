@@ -54,8 +54,8 @@ export const KiliCard = forwardRef<HTMLDivElement, KiliCardProps>(
       background: gradient
         ? 'linear-gradient(135deg, rgba(28,28,39,0.8) 0%, rgba(19,19,26,0.8) 100%)'
         : 'rgba(19,19,26,0.8)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       border: `1px solid ${glowBorder[glow]}`,
       boxShadow: glowStyles[glow],
       borderRadius: '16px',

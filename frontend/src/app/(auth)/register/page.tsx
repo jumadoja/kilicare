@@ -152,7 +152,7 @@ function PasswordStrength({ password }: { password: string }) {
 
   return (
     <motion.div
-      className="mt-2 space-y-2"
+      className="mt-2 space-y-4"
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
@@ -260,7 +260,7 @@ function RoleCard({
   return (
     <motion.div
       onClick={onSelect}
-      className="relative cursor-pointer rounded-2xl p-4 md:p-5 w-full min-h-[120px] md:min-h-[140px]"
+      className="relative cursor-pointer rounded-xl p-4 md:p-5 w-full min-h-[120px] md:min-h-[140px]"
       style={{
         background: selected ? config.gradient : 'rgba(28,28,39,0.5)',
         border: `1px solid ${selected ? config.border : 'rgba(42,42,58,0.8)'}`,
@@ -286,7 +286,7 @@ function RoleCard({
       </AnimatePresence>
 
       {/* Content container with max-width to prevent text spreading */}
-      <div className="max-w-[280px] md:max-w-[320px]">
+      <div className="w-full">
         {/* Icon box */}
         <motion.div
           className="w-12 h-12 rounded-xl flex items-center justify-center mb-3"
@@ -310,7 +310,7 @@ function RoleCard({
         </p>
 
         {/* Features */}
-        <div className="space-y-1.5 mb-4">
+        <div className="space-y-4 mb-4">
           {config.features.map((f) => (
             <div key={f} className="flex items-center gap-2">
               <div
@@ -390,7 +390,7 @@ function SuccessScreen({ onRedirect }: { onRedirect: () => void }) {
             className="absolute inset-0 rounded-full pointer-events-none"
             style={{
               background: 'rgba(0,229,160,0.3)',
-              filter: 'blur(20px)',
+              filter: 'blur(16px)',
             }}
             animate={{ scale: [1, 1.5, 2], opacity: [0.5, 0.3, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
@@ -746,12 +746,8 @@ export default function RegisterPage() {
 
       {/* ── Card ── */}
       <motion.div
-        className="relative rounded-3xl overflow-hidden"
+        className="relative rounded-3xl overflow-hidden pb-safe glass-auth"
         style={{
-          background: 'linear-gradient(145deg, rgba(19,19,26,0.95), rgba(28,28,39,0.9))',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(245,166,35,0.15)',
           boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
         }}
       >
@@ -910,7 +906,7 @@ export default function RegisterPage() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:max-w-2xl md:mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                   <RoleCard
                     role="TOURIST"
                     selected={selectedRole === 'TOURIST'}
@@ -929,7 +925,7 @@ export default function RegisterPage() {
                   <motion.button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="min-w-[100px] h-14 px-6 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
+                    className="min-w-[100px] h-12 px-6 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -1127,7 +1123,7 @@ export default function RegisterPage() {
                     onClick={handleSubmit(onSubmit)}
                     disabled={isRegistering}
                     className={cn(
-                      'flex-1 h-14 rounded-xl font-display font-bold text-dark-bg text-base',
+                      'flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                       'flex items-center justify-center gap-2',
                       isRegistering && 'opacity-80 cursor-not-allowed',
                     )}

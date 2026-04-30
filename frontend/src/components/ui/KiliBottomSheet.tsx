@@ -72,8 +72,8 @@ export function KiliBottomSheet({
             )}
             style={{
               background: 'rgba(19,19,26,0.97)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
               border: '1px solid rgba(255,255,255,0.07)',
               borderBottom: 'none',
             }}

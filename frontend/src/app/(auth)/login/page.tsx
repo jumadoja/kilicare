@@ -52,11 +52,9 @@ export default function LoginPage() {
             whileTap={{ scale: 0.95 }}
           >
             <div
-              className="relative p-4 rounded-3xl"
+              className="relative p-4 rounded-3xl glass"
               style={{
                 background: 'linear-gradient(145deg, rgba(245,166,35,0.15), rgba(0,229,160,0.1))',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
                 border: '1px solid rgba(245,166,35,0.3)',
                 boxShadow: '0 8px 32px rgba(245,166,35,0.2), 0 0 0 1px rgba(245,166,35,0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
               }}
@@ -89,12 +87,8 @@ export default function LoginPage() {
 
         {/* ── Glass card ── */}
         <motion.div
-          className="relative rounded-3xl overflow-hidden"
+          className="relative rounded-3xl overflow-hidden pb-safe glass-auth"
           style={{
-            background: 'linear-gradient(145deg, rgba(19,19,26,0.95), rgba(28,28,39,0.9))',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(245,166,35,0.15)',
             boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
           }}
           initial={{ opacity: 0, scale: 0.97 }}

@@ -45,7 +45,7 @@ export function Sidebar() {
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       style={{
         background: 'rgba(13,13,20,0.95)',
-        backdropFilter: 'blur(20px)',
+        backdropFilter: 'blur(16px)',
         borderRight: '1px solid rgba(255,255,255,0.05)',
       }}
     >

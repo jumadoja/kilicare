@@ -33,8 +33,8 @@ export function BottomNav() {
         className="absolute inset-0"
         style={{
           background: 'rgba(10,10,15,0.92)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       />

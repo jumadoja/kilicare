@@ -255,12 +255,8 @@ export default function ForgotPasswordPage() {
       >
         {/* Card */}
         <motion.div
-          className="relative rounded-3xl overflow-hidden"
+          className="relative rounded-3xl overflow-hidden pb-safe glass-strong"
           style={{
-            background: 'rgba(19,19,26,0.85)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255,255,255,0.07)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}
         >
@@ -306,7 +302,7 @@ export default function ForgotPasswordPage() {
               >
                 {/* Icon */}
                 <motion.div
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
                   style={{
                     background: step === 'success'
                       ? 'rgba(0,229,160,0.12)'
@@ -633,7 +629,7 @@ export default function ForgotPasswordPage() {
               {step === 'success' && (
                 <motion.div
                   key="success"
-                  className="text-center py-4 space-y-6"
+                  className="text-center py-4 space-y-4"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: 'spring', stiffness: 200 }}
@@ -670,7 +666,7 @@ export default function ForgotPasswordPage() {
                   </div>
 
                   <motion.div
-                    className="p-4 rounded-2xl"
+                    className="p-4 rounded-xl"
                     style={{
                       background: 'rgba(0,229,160,0.06)',
                       border: '1px solid rgba(0,229,160,0.15)',

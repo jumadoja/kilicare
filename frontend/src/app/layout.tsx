@@ -1,32 +1,9 @@
-'use client';
-
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'sonner';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import './globals.css';
-import { useEffect } from 'react';
-
-// Dynamic viewport height for mobile keyboard handling
-function ViewportHeightManager() {
-  useEffect(() => {
-    const updateAppHeight = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--app-height', `${vh * 100}px`);
-    };
-
-    updateAppHeight();
-    window.addEventListener('resize', updateAppHeight);
-    window.addEventListener('orientationchange', updateAppHeight);
-
-    return () => {
-      window.removeEventListener('resize', updateAppHeight);
-      window.removeEventListener('orientationchange', updateAppHeight);
-    };
-  }, []);
-
-  return null;
-}
+import ViewportHeightManager from '@/components/system/ViewportHeightManager';
 
 export const metadata: Metadata = {
   title: 'Kilicare+ | Tanzania Tourism Super-App',

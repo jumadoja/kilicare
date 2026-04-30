@@ -6,19 +6,19 @@ import Image from 'next/image';
 
 const travelImages = [
   {
-    src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+    src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=60&w=400&fm=webp&auto=format&fit=crop",
     alt: "Zanzibar beach",
   },
   {
-    src: "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800&auto=format&fit=crop",
+    src: "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=60&w=400&fm=webp&auto=format&fit=crop",
     alt: "Serengeti safari",
   },
   {
-    src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
+    src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=60&w=400&fm=webp&auto=format&fit=crop",
     alt: "Mount Kilimanjaro",
   },
   {
-    src: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?q=80&w=800&auto=format&fit=crop",
+    src: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?q=60&w=400&fm=webp&auto=format&fit=crop",
     alt: "African culture",
   },
 ];
