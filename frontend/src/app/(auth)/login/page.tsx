@@ -53,7 +53,8 @@ export default function LoginPage() {
     if (isRestored) {
       if (typeof window === 'undefined') return;
       try {
-        const saved = window.sessionStorage.getItem('form_login');
+        const storage = window.sessionStorage;
+        const saved = storage.getItem('form_login');
         if (saved) {
           const parsed = JSON.parse(saved);
           const { _timestamp, ...formData } = parsed;

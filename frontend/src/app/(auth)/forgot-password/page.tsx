@@ -193,7 +193,8 @@ export default function ForgotPasswordPage() {
     if (isRestored) {
       if (typeof window === 'undefined') return;
       try {
-        const saved = window.sessionStorage.getItem('form_forgot-password');
+        const storage = window.sessionStorage;
+        const saved = storage.getItem('form_forgot-password');
         if (saved) {
           const parsed = JSON.parse(saved);
           const { _timestamp, ...formData } = parsed;

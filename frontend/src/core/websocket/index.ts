@@ -11,18 +11,25 @@ class WsManager {
   private attempts = new Map<string, number>();
   private pendingUrls = new Map<string, string>(); // Store URLs for reconnect after refresh
   private MAX_DELAY = 30_000;
+  private unsubscribeAuthLogout: (() => void) | null = null;
+  private unsubscribeAuthRefresh: (() => void) | null = null;
 
   constructor() {
-    // Subscribe to auth events
-    authEvents.on('AUTH_LOGOUT', () => {
+    this.unsubscribeAuthLogout = authEvents.on('AUTH_LOGOUT', () => {
       console.log('[WS] AUTH_LOGOUT → disconnect all');
       this.disconnectAll();
     });
 
-    authEvents.on('AUTH_REFRESH', () => {
+    this.unsubscribeAuthRefresh = authEvents.on('AUTH_REFRESH', () => {
       console.log('[WS] AUTH_REFRESH → reconnect all with new token');
       this.reconnectAllWithNewToken();
     });
+  }
+
+  destroy() {
+    this.disconnectAll();
+    this.unsubscribeAuthLogout?.();
+    this.unsubscribeAuthRefresh?.();
   }
 
   connect(key: string, url: string) {

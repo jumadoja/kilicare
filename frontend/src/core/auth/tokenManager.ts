@@ -31,6 +31,40 @@ const getTokenExpiry = (token: string | null): number | null => {
   }
 };
 
+const isValidJWT = (token: string | null): boolean => {
+  if (!token) return false;
+  const parts = token.split('.');
+  return parts.length === 3;
+};
+
+const safeGetItem = (key: string): string | null => {
+  if (!isBrowser) return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch (e) {
+    console.error('[Storage] Failed to get item:', key, e);
+    return null;
+  }
+};
+
+const safeSetItem = (key: string, value: string): void => {
+  if (!isBrowser) return;
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (e) {
+    console.error('[Storage] Failed to set item:', key, e);
+  }
+};
+
+const safeRemoveItem = (key: string): void => {
+  if (!isBrowser) return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch (e) {
+    console.error('[Storage] Failed to remove item:', key, e);
+  }
+};
+
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 let isClearing = false; // Guard to prevent repeated clearing
 
@@ -39,43 +73,49 @@ export const tokenManager = {
     if (!isBrowser) return;
     console.log('[TOKEN SET][ACCESS]', access);
     console.log('[TOKEN SET][REFRESH]', refresh);
-    window.localStorage.setItem(K.ACCESS, access);
-    window.localStorage.setItem(K.REFRESH, refresh);
+    safeSetItem(K.ACCESS, access);
+    safeSetItem(K.REFRESH, refresh);
     isClearing = false; // Reset guard when new tokens are set
     authEvents.emit('AUTH_TOKEN_UPDATED');
+    authEvents.emit('AUTH_LOGIN');
     tokenManager.scheduleProactiveRefresh();
   },
+
   getAccess: (): string | null => {
     if (!isBrowser) return null;
-    const token = window.localStorage.getItem(K.ACCESS);
-    if (isTokenExpired(token)) {
-      // Only clear if not already clearing (prevent infinite loop)
+    const token = safeGetItem(K.ACCESS);
+    if (!isValidJWT(token) || isTokenExpired(token)) {
       if (!isClearing) {
-        console.log('[TOKEN] expired → clearing');
+        console.log('[TOKEN] invalid/expired → clearing');
         tokenManager.clearTokens();
       }
       return null;
     }
     return token;
   },
-  getRefresh: (): string | null =>
-    isBrowser ? window.localStorage.getItem(K.REFRESH) : null,
+
+  getRefresh: (): string | null => {
+    if (!isBrowser) return null;
+    return safeGetItem(K.REFRESH);
+  },
+
   clearTokens() {
     if (!isBrowser) return;
     if (isClearing) return; // Prevent repeated clearing
     isClearing = true;
     console.log('[TOKEN CLEARED]');
-    Object.values(K).forEach((k) => window.localStorage.removeItem(k));
+    Object.values(K).forEach((k) => safeRemoveItem(k));
     authEvents.emit('AUTH_LOGOUT');
     if (refreshTimer) {
       clearTimeout(refreshTimer);
       refreshTimer = null;
     }
   },
+
   isAuthenticated: (): boolean => {
     if (!isBrowser) return false;
-    const token = window.localStorage.getItem(K.ACCESS);
-    return !!token && !isTokenExpired(token);
+    const token = safeGetItem(K.ACCESS);
+    return !!token && isValidJWT(token) && !isTokenExpired(token);
   },
   /**
    * Schedule proactive token refresh 30 seconds before expiry
@@ -87,7 +127,7 @@ export const tokenManager = {
       refreshTimer = null;
     }
 
-    const token = window.localStorage.getItem(K.ACCESS);
+    const token = safeGetItem(K.ACCESS);
     const expiry = getTokenExpiry(token);
     if (!expiry) return;
 

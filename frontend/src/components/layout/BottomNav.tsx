@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Home, Compass, Shield, MessageCircle, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChatStore } from '@/store/chat.store';
-import { tokenManager } from '@/core/auth/tokenManager';
+import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
 
 const NAV_ITEMS = [
@@ -19,13 +19,14 @@ const NAV_ITEMS = [
 export function BottomNav() {
   const pathname = usePathname();
   const { unreadTotal } = useChatStore();
+  const { token } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
-    setIsAuthenticated(tokenManager.isAuthenticated());
   }, []);
+
+  const isAuthenticated = !!token;
 
   if (!isHydrated) return null;
   if (!isAuthenticated) return null;

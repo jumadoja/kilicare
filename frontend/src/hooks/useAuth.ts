@@ -8,39 +8,58 @@ import { tokenManager } from '@/core/auth/tokenManager';
 import { parseApiError } from '@/core/errors';
 import { LoginPayload, RegisterPayload } from '@/types';
 import { useState, useEffect } from 'react';
+import { authEvents } from '@/core/auth/authEvents';
 
 export function useAuth() {
   const { setAuth, logout: storeLogout, user } = useAuthStore();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [token, setToken] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
-    if (typeof window !== 'undefined') {
-      setToken(tokenManager.getAccess());
-    }
   }, []);
 
+  // Listen to token updates to keep state in sync
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const handleTokenUpdate = () => {
+      // Token state is now derived from tokenManager, no local state needed
+    };
+
+    const unsubscribe1 = authEvents.on('AUTH_TOKEN_UPDATED', handleTokenUpdate);
+    const unsubscribe2 = authEvents.on('AUTH_REFRESH', handleTokenUpdate);
+
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
+  }, [isHydrated]);
+
   const loginMutation = useMutation({
-    mutationFn: (p: LoginPayload) => authService.login(p),
+    mutationFn: authService.login,
     onSuccess: (data) => {
       setAuth(data.user, data.access_token, data.refresh_token);
-      setToken(data.access_token);
-      toast.success(`Karibu, ${data.user.username}! 🌍`);
-      router.push('/feed');
+      toast.success('Karibu! �');
     },
-    onError: (e) => toast.error(parseApiError(e)),
+    onError: (e) => {
+      toast.error(parseApiError(e));
+    },
   });
 
   const registerMutation = useMutation({
-    mutationFn: (p: RegisterPayload) => authService.register(p),
+    mutationFn: authService.register,
     onSuccess: () => {
-      toast.success('Akaunti imeundwa! Tafadhali ingia. 🎉');
+      toast.success('Akaunti imewekwa! Tafadhali ingia.');
     },
-    onError: (e) => toast.error(parseApiError(e)),
+    onError: (e) => {
+      toast.error(parseApiError(e));
+    },
   });
+
+  // Token is now derived from tokenManager directly
+  const token = isHydrated ? tokenManager.getAccess() : null;
 
   const { data: freshUser } = useQuery({
     queryKey: ['me'],
@@ -55,15 +74,16 @@ export function useAuth() {
       const refresh = tokenManager.getRefresh();
       if (refresh) await authService.logout(refresh);
     } catch { /* ignore */ }
-    wsManager.disconnectAll();
+    // wsManager.disconnectAll() is called via AUTH_LOGOUT event listener in websocket manager
+    // Removing direct call here to prevent duplicate disconnection
     queryClient.clear();
     storeLogout();
-    setToken(null);
     router.push('/login');
   };
 
   return {
     user: freshUser ?? user,
+    token,
     isAuthenticated: isHydrated ? tokenManager.isAuthenticated() : false,
     login: loginMutation.mutate,
     isLoggingIn: loginMutation.isPending,

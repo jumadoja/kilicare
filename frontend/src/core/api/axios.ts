@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { env } from '@/config/env';
 import { tokenManager } from '@/core/auth/tokenManager';
 import { authEvents } from '@/core/auth/authEvents';
+import { API } from '@/lib/constants';
 import Router from 'next/router';
 
 // Network resilience configuration
@@ -62,7 +63,7 @@ api.interceptors.request.use(
   (err) => Promise.reject(err)
 );
 
-let refreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
 let queue: Array<{ resolve: (t: string) => void; reject: (e: unknown) => void }> = [];
 
 const flush = (err: unknown, token: string | null) => {
@@ -70,18 +71,40 @@ const flush = (err: unknown, token: string | null) => {
   queue = [];
 };
 
+const performRefresh = async (): Promise<string> => {
+  const refresh = tokenManager.getRefresh();
+  if (!refresh) {
+    tokenManager.clearTokens();
+    Router.replace('/login');
+    throw new Error('No refresh token');
+  }
+
+  try {
+    const { data } = await api.post(API.AUTH.REFRESH, { refresh: refresh });
+    tokenManager.setTokens(data.access, data.refresh);
+    authEvents.emit('AUTH_REFRESH');
+    return data.access;
+  } catch (e) {
+    tokenManager.clearTokens();
+    Router.replace('/login');
+    throw e;
+  }
+};
+
 api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
-    const orig = error.config as InternalAxiosRequestConfig & { 
-      _retry?: boolean; 
+    const orig = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
       _retryCount?: number;
     };
-    
+
     // Handle 401 unauthorized (token refresh)
     if (error.response?.status === 401 && !orig._retry) {
       console.log('[TRACE][401 DETECTED]', error.config?.url);
-      if (refreshing) {
+      
+      // Use promise-based locking instead of boolean flag
+      if (refreshPromise) {
         return new Promise((resolve, reject) => {
           queue.push({ resolve, reject });
         }).then((t) => {
@@ -89,28 +112,20 @@ api.interceptors.response.use(
           return api(orig);
         });
       }
+
       orig._retry = true;
-      refreshing = true;
-      const refresh = tokenManager.getRefresh();
-      if (!refresh) {
-        tokenManager.clearTokens();
-        Router.replace('/login');
-        return Promise.reject(error);
-      }
+      refreshPromise = performRefresh();
+
       try {
-        const { data } = await api.post('/auth/token/refresh/', { refresh: refresh });
-        tokenManager.setTokens(data.access, data.refresh);
-        authEvents.emit('AUTH_REFRESH');
-        flush(null, data.access);
-        orig.headers.Authorization = `Bearer ${data.access}`;
+        const newToken = await refreshPromise;
+        flush(null, newToken);
+        orig.headers.Authorization = `Bearer ${newToken}`;
         return api(orig);
       } catch (e) {
         flush(e, null);
-        tokenManager.clearTokens();
-        Router.replace('/login');
         return Promise.reject(e);
       } finally {
-        refreshing = false;
+        refreshPromise = null;
       }
     }
     
@@ -142,7 +157,7 @@ api.interceptors.response.use(
 );
 
 // Subscribe to token updates to update default Authorization header
-authEvents.on('AUTH_TOKEN_UPDATED', () => {
+const unsubscribeTokenUpdated = authEvents.on('AUTH_TOKEN_UPDATED', () => {
   const token = tokenManager.getAccess();
   if (token) {
     api.defaults.headers.common.Authorization = `Bearer ${token}`;
@@ -152,24 +167,27 @@ authEvents.on('AUTH_TOKEN_UPDATED', () => {
 });
 
 // Handle proactive refresh events
-authEvents.on('AUTH_REFRESH', async () => {
+const unsubscribeAuthRefresh = authEvents.on('AUTH_REFRESH', async () => {
   const refresh = tokenManager.getRefresh();
-  if (!refresh || refreshing) return;
+  if (!refresh || refreshPromise) return;
 
   console.log('[AXIOS] Handling AUTH_REFRESH event');
-  refreshing = true;
+  refreshPromise = performRefresh();
 
   try {
-    const { data } = await api.post('/auth/token/refresh/', { refresh });
-    tokenManager.setTokens(data.access, data.refresh);
+    await refreshPromise;
     console.log('[AXIOS] Proactive refresh successful');
   } catch (e) {
     console.error('[AXIOS] Proactive refresh failed', e);
-    tokenManager.clearTokens();
-    Router.replace('/login');
   } finally {
-    refreshing = false;
+    refreshPromise = null;
   }
 });
+
+// Export cleanup function for module unload (if needed)
+export const cleanupAxiosAuthListeners = () => {
+  unsubscribeTokenUpdated();
+  unsubscribeAuthRefresh();
+};
 
 export default api;

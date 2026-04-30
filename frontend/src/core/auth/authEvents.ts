@@ -34,11 +34,18 @@ class AuthEventBus {
   emit(event: AuthEvent): void {
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
-      eventListeners.forEach((listener) => {
-        try {
-          listener();
-        } catch (error) {
-          console.error(`[AuthEventBus] Error in listener for ${event}:`, error);
+      // Convert to array to prevent iteration issues if Set is modified during emission
+      const listenersArray = Array.from(eventListeners);
+      listenersArray.forEach((listener) => {
+        // Validate that listener is a function before calling
+        if (typeof listener === 'function') {
+          try {
+            listener();
+          } catch (error) {
+            console.error(`[AuthEventBus] Error in listener for ${event}:`, error);
+          }
+        } else {
+          console.error(`[AuthEventBus] Invalid listener for ${event}:`, listener);
         }
       });
     }

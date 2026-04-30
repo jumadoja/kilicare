@@ -13,7 +13,6 @@ import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
 import { useAuth } from '@/hooks/useAuth';
 import { getInitials } from '@/lib/utils';
-import { tokenManager } from '@/core/auth/tokenManager';
 import { useState, useEffect } from 'react';
 
 const NAV_ITEMS = [
@@ -33,14 +32,14 @@ export function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useAppStore();
   const { user } = useAuthStore();
   const { unreadTotal } = useChatStore();
-  const { logout } = useAuth();
+  const { logout, token } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
-    setIsAuthenticated(tokenManager.isAuthenticated());
   }, []);
+
+  const isAuthenticated = !!token;
 
   if (!isHydrated) return null;
   if (!isAuthenticated) return null;

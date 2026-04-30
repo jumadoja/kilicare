@@ -522,7 +522,8 @@ export default function RegisterPage() {
     if (isRestored) {
       if (typeof window === 'undefined') return;
       try {
-        const saved = window.sessionStorage.getItem('form_register');
+        const storage = window.sessionStorage;
+        const saved = storage.getItem('form_register');
         if (saved) {
           const parsed = JSON.parse(saved);
           const { _timestamp, step: savedStep, role: savedRole, ...formData } = parsed;
