@@ -1193,21 +1193,35 @@ export default function RegisterPage() {
             )}
 
           </AnimatePresence>
+
+          {/* Login link inside card */}
+          {!showSuccess && (
+            <motion.div
+              className="mt-6 pt-4 border-t border-dark-border text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <p className="text-text-muted text-sm font-body">
+                Una akaunti tayari?{' '}
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1 text-kili-gold hover:text-kili-gold-light font-semibold transition-all duration-200 hover:underline hover:underline-offset-4"
+                >
+                  Ingia hapa
+                  <motion.span
+                    initial={{ x: 0 }}
+                    whileHover={{ x: 3 }}
+                    transition={{ type: 'spring', stiffness: 400 }}
+                  >
+                    →
+                  </motion.span>
+                </Link>
+              </p>
+            </motion.div>
+          )}
         </div>
       </motion.div>
-
-      {/* Login link */}
-      {!showSuccess && (
-        <p className="text-center text-text-muted text-xs mt-4 font-body">
-          Una akaunti tayari?{' '}
-          <Link
-            href="/login"
-            className="text-kili-gold hover:text-kili-gold-light font-semibold transition-colors"
-          >
-            Ingia hapa
-          </Link>
-        </p>
-      )}
       </motion.div>
     </div>
   );
