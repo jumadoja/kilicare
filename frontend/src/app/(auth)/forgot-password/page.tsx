@@ -16,6 +16,7 @@ import {
 } from '@/lib/validators';
 import { parseApiError } from '@/core/errors';
 import { cn } from '@/lib/utils';
+import { KiliInput } from '@/components/ui/KiliInput';
 
 // ── OTP Input component ──────────────────────────────
 function OTPInput({
@@ -157,7 +158,6 @@ export default function ForgotPasswordPage() {
   const [otpError, setOtpError] = useState(false);
   const [canResend, setCanResend] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
 
   // Email form
   const emailForm = useForm<ForgotPasswordInput>({
@@ -223,7 +223,7 @@ export default function ForgotPasswordPage() {
   const stepConfig: Record<Step, { icon: React.ReactNode; title: string; subtitle: string }> = {
     email: {
       icon: <Mail size={20} className="text-kili-gold" />,
-      title: 'Umesahau Password?',
+      title: 'Rejesha password yako',
       subtitle: 'Tutakutumia namba ya tarakimu 6 kwenye barua pepe yako.',
     },
     otp: {
@@ -374,99 +374,21 @@ export default function ForgotPasswordPage() {
                   exit={{ opacity: 0, x: -30 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="relative">
-                    <div className="relative">
-                      <motion.label
-                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
-                        animate={{
-                          top: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '5px' : '50%',
-                          transform: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? 'translateY(0)' : 'translateY(-50%)',
-                          fontSize: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '11px' : '15px',
-                          color: focused === 'email_or_phone' ? '#F5A623' : '#8B8BA7',
-                          backgroundColor: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
-                        }}
-                      >
-                        Barua pepe au namba ya simu
-                      </motion.label>
-                      <input
-                        {...emailForm.register('email_or_phone')}
-                        type="text"
-                        autoComplete="email"
-                        onFocus={() => setFocused('email_or_phone')}
-                        onBlur={() => setFocused(null)}
-                        className={cn(
-                          'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
-                          'text-text-primary',
-                          'bg-dark-elevated transition-all duration-200 outline-none border',
-                          focused === 'email_or_phone'
-                            ? 'border-kili-gold shadow-glow-gold'
-                            : emailForm.formState.errors.email_or_phone
-                              ? 'border-kili-sunset'
-                              : 'border-dark-border hover:border-dark-border-light',
-                        )}
-                        style={{ height: '48px' }}
-                      />
-                    </div>
-                    <AnimatePresence>
-                      {emailForm.formState.errors.email_or_phone && (
-                        <motion.p
-                          className="text-kili-sunset text-xs mt-1 ml-1 font-body"
-                          initial={{ opacity: 0, y: -4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          {emailForm.formState.errors.email_or_phone.message}
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <KiliInput
+                    {...emailForm.register('email_or_phone')}
+                    label="Barua pepe au namba ya simu"
+                    error={emailForm.formState.errors.email_or_phone?.message}
+                    type="text"
+                    autoComplete="email"
+                  />
 
-                  <div className="relative">
-                    <div className="relative">
-                      <motion.label
-                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
-                        animate={{
-                          top: focused === 'username' || emailForm.watch('username') ? '5px' : '50%',
-                          transform: focused === 'username' || emailForm.watch('username') ? 'translateY(0)' : 'translateY(-50%)',
-                          fontSize: focused === 'username' || emailForm.watch('username') ? '11px' : '15px',
-                          color: focused === 'username' ? '#F5A623' : '#8B8BA7',
-                          backgroundColor: focused === 'username' || emailForm.watch('username') ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
-                        }}
-                      >
-                        Username wako
-                      </motion.label>
-                      <input
-                        {...emailForm.register('username')}
-                        type="text"
-                        autoComplete="username"
-                        onFocus={() => setFocused('username')}
-                        onBlur={() => setFocused(null)}
-                        className={cn(
-                          'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
-                          'text-text-primary',
-                          'bg-dark-elevated transition-all duration-200 outline-none border',
-                          focused === 'username'
-                            ? 'border-kili-gold shadow-glow-gold'
-                            : emailForm.formState.errors.username
-                              ? 'border-kili-sunset'
-                              : 'border-dark-border hover:border-dark-border-light',
-                        )}
-                        style={{ height: '48px' }}
-                      />
-                    </div>
-                    <AnimatePresence>
-                      {emailForm.formState.errors.username && (
-                        <motion.p
-                          className="text-kili-sunset text-xs mt-1 ml-1 font-body"
-                          initial={{ opacity: 0, y: -4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          {emailForm.formState.errors.username.message}
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <KiliInput
+                    {...emailForm.register('username')}
+                    label="Username wako"
+                    error={emailForm.formState.errors.username?.message}
+                    type="text"
+                    autoComplete="username"
+                  />
 
                   {/* Info box */}
                   <div
@@ -632,61 +554,14 @@ export default function ForgotPasswordPage() {
                 >
                   {/* New password */}
                   <div>
-                    <div className="relative">
-                      <div className="relative">
-                        <motion.label
-                          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
-                          animate={{
-                            top: focused === 'new_pwd' || watchPwd ? '5px' : '50%',
-                            transform: focused === 'new_pwd' || watchPwd ? 'translateY(0)' : 'translateY(-50%)',
-                            fontSize: focused === 'new_pwd' || watchPwd ? '11px' : '15px',
-                            color: focused === 'new_pwd' ? '#F5A623' : '#8B8BA7',
-                            backgroundColor: focused === 'new_pwd' || watchPwd ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
-                          }}
-                        >
-                          Password mpya
-                        </motion.label>
-                        <input
-                          {...pwdForm.register('new_password')}
-                          type={showPwd ? 'text' : 'password'}
-                          onFocus={() => setFocused('new_pwd')}
-                          onBlur={() => setFocused(null)}
-                          className={cn(
-                            'w-full py-3 px-4 pt-5 pr-12 rounded-xl font-body text-base',
-                            'text-text-primary',
-                            'bg-dark-elevated transition-all duration-200 outline-none border',
-                            focused === 'new_pwd'
-                              ? 'border-kili-gold shadow-glow-gold'
-                              : pwdForm.formState.errors.new_password
-                              ? 'border-kili-sunset'
-                              : 'border-dark-border hover:border-dark-border-light',
-                          )}
-                          style={{ height: '48px' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPwd(!showPwd)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-                        >
-                          {showPwd
-                            ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                            : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                          }
-                        </button>
-                      </div>
-                      <AnimatePresence>
-                        {pwdForm.formState.errors.new_password && (
-                          <motion.p
-                            className="text-kili-sunset text-xs mt-1 ml-1 font-body"
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
-                          >
-                            {pwdForm.formState.errors.new_password.message}
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                    <KiliInput
+                      {...pwdForm.register('new_password')}
+                      label="Password mpya"
+                      error={pwdForm.formState.errors.new_password?.message}
+                      type="password"
+                      showPasswordToggle
+                      autoComplete="new-password"
+                    />
 
                     {/* Password strength */}
                     <AnimatePresence>

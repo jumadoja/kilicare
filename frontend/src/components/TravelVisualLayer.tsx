@@ -69,7 +69,7 @@ export function TravelVisualLayer() {
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
 
       {/* BASE BACKGROUND - Cinematic dark gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0F]/85 via-[#0C0C12]/80 to-[#0A0A0F]/85" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0F]/90 via-[#0C0C12]/85 to-[#0A0A0F]/90" />
 
       {/* TRAVEL IMAGES ROTATION - Cinematic blurred background */}
       {!imageError && (

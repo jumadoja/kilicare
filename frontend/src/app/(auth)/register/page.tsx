@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
-  Eye, EyeOff, Loader2, ArrowLeft,
+  Loader2, ArrowLeft,
   ArrowRight, User, Map, Camera,
   CheckCircle2, Shield, Star, Compass,
   Sparkles, Heart, Zap, Trophy, Lock, MapPin,
@@ -15,6 +15,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { registerSchema, RegisterInput } from '@/lib/validators';
 import { cn } from '@/lib/utils';
+import { KiliInput } from '@/components/ui/KiliInput';
 
 // ── AI Onboarding Assistant ────────────────────────────
 function OnboardingAssistant({ step }: { step: number }) {
@@ -123,115 +124,7 @@ function ProgressIntelligence({
   );
 }
 
-// ── Floating Input ────────────────────────────────────
-function FloatingInput({
-  label,
-  error,
-  type = 'text',
-  rightElement,
-  microFeedback,
-  value,
-  onFocus,
-  onBlur,
-  ...props
-}: {
-  label: string;
-  error?: string;
-  type?: string;
-  rightElement?: React.ReactNode;
-  microFeedback?: string;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
-  const [focused, setFocused] = useState(false);
-  const hasValue = !!(value as string);
-
-  return (
-    <div className="relative">
-      <div className="relative">
-        <motion.label
-          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
-          animate={{
-            top: focused || hasValue ? '5px' : '50%',
-            transform: focused || hasValue ? 'translateY(0)' : 'translateY(-50%)',
-            fontSize: focused || hasValue ? '11px' : '15px',
-            color: focused ? '#F5A623' : '#8B8BA7',
-            backgroundColor: focused || hasValue ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
-          }}
-        >
-          {label}
-        </motion.label>
-
-        <input
-          {...props}
-          value={value}
-          type={type}
-          onFocus={(e) => {
-            setFocused(true);
-            onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setFocused(false);
-            onBlur?.(e);
-          }}
-          className={cn(
-            'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
-            'text-text-primary',
-            'bg-dark-elevated transition-all duration-200 outline-none border',
-            rightElement ? 'pr-12' : '',
-            focused
-              ? 'border-kili-gold shadow-glow-gold'
-              : error
-              ? 'border-kili-sunset'
-              : 'border-dark-border hover:border-dark-border-light',
-          )}
-          style={{
-            height: '48px',
-          }}
-          aria-label={label}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${label}-error` : microFeedback ? `${label}-feedback` : undefined}
-        />
-
-        {rightElement && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
-            {rightElement}
-          </div>
-        )}
-      </div>
-
-      <AnimatePresence>
-        {microFeedback && !error && (
-          <motion.p
-            id={`${label}-feedback`}
-            key="feedback"
-            className="text-kili-green text-xs mt-1 ml-1 font-body flex items-center gap-1"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            role="status"
-            aria-live="polite"
-          >
-            <Zap size={10} />
-            {microFeedback}
-          </motion.p>
-        )}
-        {error && (
-          <motion.p
-            id={`${label}-error`}
-            key="error"
-            className="text-kili-sunset text-xs mt-1 ml-1 font-body"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            role="alert"
-            aria-live="assertive"
-          >
-            {error}
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+// ── Floating Input - DEPRECATED: Use KiliInput instead ──
 
 // ── Password Strength ─────────────────────────────────
 function PasswordStrength({ password }: { password: string }) {
@@ -377,68 +270,6 @@ function RoleCard({
       whileTap={{ scale: 0.98 }}
       animate={{ scale: selected ? 1.01 : 1 }}
     >
-      {/* Subtle ambient particles when selected - one-time burst */}
-      <AnimatePresence>
-        {selected && (
-          <>
-            {[...Array(6)].map((_, i) => {
-              const angle = (i / 6) * Math.PI * 2;
-              const radiusX = 50 + Math.cos(angle) * 50;
-              const radiusY = 50 + Math.sin(angle) * 50;
-              
-              return (
-                <motion.div
-                  key={i}
-                  className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
-                  style={{
-                    background: config.color,
-                    boxShadow: `0 0 6px ${config.color}, 0 0 12px ${config.color}`,
-                  }}
-                  initial={{ 
-                    opacity: 0, 
-                    scale: 0,
-                    x: '50%',
-                    y: '50%'
-                  }}
-                  animate={{
-                    opacity: [0, 0.6, 0.3, 0],
-                    scale: [0, 1, 0.8, 0],
-                    x: [50, radiusX + (Math.random() - 0.5) * 10, radiusX],
-                    y: [50, radiusY + (Math.random() - 0.5) * 10, radiusY],
-                  }}
-                  transition={{
-                    duration: 2,
-                    delay: i * 0.1,
-                    ease: 'easeOut'
-                  }}
-                />
-              );
-            })}
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Soft ambient breathing glow when selected */}
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at center, ${config.color}15, transparent 70%)`,
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: [0.2, 0.35, 0.2], 
-            }}
-            transition={{ 
-              duration: 3, 
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }}
-          />
-        )}
-      </AnimatePresence>
-
       {/* Check icon - subtle fade-in */}
       <AnimatePresence>
         {selected && (
@@ -464,8 +295,6 @@ function RoleCard({
             border: `1px solid ${selected ? config.border : 'transparent'}`,
             color: config.color,
           }}
-          animate={{ rotate: selected ? [0, -5, 5, 0] : 0 }}
-          transition={{ duration: 0.4 }}
         >
           {config.icon}
         </motion.div>
@@ -512,9 +341,9 @@ function RoleCard({
           {selected && (
             <motion.p
               className="mt-3 text-xs text-kili-green font-body text-center flex items-center justify-center gap-1"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
               <Heart size={10} />
               {config.feedback}
@@ -925,6 +754,18 @@ export default function RegisterPage() {
         </motion.div>
       </div>
 
+      {/* Page Identity */}
+      {!showSuccess && (
+        <div className="mb-4">
+          <h2 className="text-lg font-bold font-display text-text-primary">
+            Jisajili akaunti mpya
+          </h2>
+          <p className="text-text-muted text-xs mt-1">
+            Jiunge na Kilicare+ kugundua Tanzania
+          </p>
+        </div>
+      )}
+
       {/* Progress */}
       {!showSuccess && (
         <div className="mb-4">
@@ -1004,67 +845,56 @@ export default function RegisterPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-                    <FloatingInput
+                    <KiliInput
+                      {...register('first_name')}
                       label="Jina la kwanza"
                       error={errors.first_name?.message}
-                      microFeedback={microFeedback.first_name}
-                      value={watchFirstName}
-                      {...register('first_name')}
+                      hint={microFeedback.first_name}
+                      autoComplete="given-name"
                     />
                   </motion.div>
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    <FloatingInput
+                    <KiliInput
+                      {...register('last_name')}
                       label="Jina la mwisho"
                       error={errors.last_name?.message}
-                      microFeedback={microFeedback.last_name}
-                      value={watchLastName}
-                      {...register('last_name')}
+                      hint={microFeedback.last_name}
+                      autoComplete="family-name"
                     />
                   </motion.div>
                 </div>
 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                  <FloatingInput
+                  <KiliInput
+                    {...register('username')}
                     label="Username"
                     error={errors.username?.message || usernameError}
-                    microFeedback={usernameError ? undefined : microFeedback.username}
-                    value={watchUsername}
+                    hint={usernameError ? undefined : microFeedback.username}
                     autoComplete="username"
-                    {...register('username')}
                   />
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                  <FloatingInput
+                  <KiliInput
+                    {...register('email')}
                     label="Barua pepe (Email)"
                     type="email"
                     error={errors.email?.message || emailError}
-                    microFeedback={emailError ? undefined : microFeedback.email}
-                    value={watchEmail}
+                    hint={emailError ? undefined : microFeedback.email}
                     autoComplete="email"
-                    {...register('email')}
                   />
                 </motion.div>
 
                 <div className="pt-1">
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                  <FloatingInput
-                    label="Nenosiri"
-                    type={showPassword ? 'text' : 'password'}
-                    error={errors.password?.message}
-                    microFeedback={microFeedback.password}
-                    value={watchPassword}
-                    autoComplete="new-password"
-                    rightElement={
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((p) => !p)}
-                        className="text-text-muted hover:text-text-primary transition-colors"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    }
+                  <KiliInput
                     {...register('password')}
+                    label="Nenosiri"
+                    type="password"
+                    error={errors.password?.message}
+                    hint={microFeedback.password}
+                    showPasswordToggle
+                    autoComplete="new-password"
                   />
                   <AnimatePresence>
                     {watchPassword && (
@@ -1077,23 +907,14 @@ export default function RegisterPage() {
                 </div>
 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                  <FloatingInput
-                    label="Thibitisha Nenosiri"
-                    type={showConfirm ? 'text' : 'password'}
-                    error={errors.confirm_password?.message}
-                    microFeedback={microFeedback.confirm_password}
-                    value={watchConfirmPassword}
-                    autoComplete="new-password"
-                    rightElement={
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirm((p) => !p)}
-                        className="text-text-muted hover:text-text-primary transition-colors"
-                      >
-                        {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    }
+                  <KiliInput
                     {...register('confirm_password')}
+                    label="Thibitisha Nenosiri"
+                    type="password"
+                    error={errors.confirm_password?.message}
+                    hint={microFeedback.confirm_password}
+                    showPasswordToggle
+                    autoComplete="new-password"
                   />
                 </motion.div>
 

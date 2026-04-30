@@ -156,22 +156,43 @@ textarea {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+input:-webkit-autofill::selection,
 textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
 textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active,
+textarea:-webkit-autofill::selection,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
-select:-webkit-autofill:focus {
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active,
+select:-webkit-autofill::selection {
   -webkit-text-fill-color: #F8F8FF !important;
   -webkit-box-shadow: 0 0 0px 1000px #1C1C27 inset !important;
+  -webkit-background-clip: text !important;
+  background-color: #1C1C27 !important;
+  background-image: none !important;
+  color: #F8F8FF !important;
   transition: background-color 5000s ease-in-out 0s;
-  caret-color: #F8F8FF;
+  caret-color: #F8F8FF !important;
 }
 
 /* Force dark background for autofilled inputs in all states */
 input:-webkit-autofill::first-line,
 textarea:-webkit-autofill::first-line {
   color: #F8F8FF !important;
+}
+
+/* Prevent white background injection on autofill */
+input:-webkit-autofill::before,
+textarea:-webkit-autofill::before {
+  content: none !important;
+}
+
+input:-webkit-autofill::after,
+textarea:-webkit-autofill::after {
+  content: none !important;
 }
 
 @layer utilities {

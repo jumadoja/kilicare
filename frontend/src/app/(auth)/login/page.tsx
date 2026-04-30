@@ -4,27 +4,22 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2, MapPin } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { loginSchema, LoginInput } from '@/lib/validators';
 import { cn } from '@/lib/utils';
+import { KiliInput } from '@/components/ui/KiliInput';
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
-
-  const watchUsername = watch('username', '');
-  const watchPassword = watch('password', '');
 
   const onSubmit = (data: LoginInput) => {
     login(data);
@@ -116,111 +111,23 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               {/* Username field */}
-              <div className="relative">
-                <div className="relative">
-                  <motion.label
-                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
-                    animate={{
-                      top: focusedField === 'username' || watchUsername ? '5px' : '50%',
-                      transform: focusedField === 'username' || watchUsername ? 'translateY(0)' : 'translateY(-50%)',
-                      fontSize: focusedField === 'username' || watchUsername ? '11px' : '15px',
-                      color: focusedField === 'username' ? '#F5A623' : '#8B8BA7',
-                      backgroundColor: focusedField === 'username' || watchUsername ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
-                    }}
-                  >
-                    Username
-                  </motion.label>
-
-                  <input
-                    {...register('username')}
-                    type="text"
-                    autoComplete="username"
-                    onFocus={() => setFocusedField('username')}
-                    onBlur={() => setFocusedField(null)}
-                    className={cn(
-                      'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
-                      'text-text-primary',
-                      'bg-dark-elevated transition-all duration-200 outline-none border',
-                      focusedField === 'username'
-                        ? 'border-kili-gold shadow-glow-gold'
-                        : errors.username
-                        ? 'border-kili-sunset'
-                        : 'border-dark-border hover:border-dark-border-light',
-                    )}
-                    style={{ height: '48px' }}
-                  />
-                </div>
-
-                <AnimatePresence>
-                  {errors.username && (
-                    <motion.p
-                      className="text-kili-sunset text-xs mt-1 ml-1 font-body"
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      {errors.username.message}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
+              <KiliInput
+                {...register('username')}
+                label="Username"
+                error={errors.username?.message}
+                type="text"
+                autoComplete="username"
+              />
 
               {/* Password field */}
-              <div className="relative">
-                <div className="relative">
-                  <motion.label
-                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
-                    animate={{
-                      top: focusedField === 'password' || watchPassword ? '5px' : '50%',
-                      transform: focusedField === 'password' || watchPassword ? 'translateY(0)' : 'translateY(-50%)',
-                      fontSize: focusedField === 'password' || watchPassword ? '11px' : '15px',
-                      color: focusedField === 'password' ? '#F5A623' : '#8B8BA7',
-                      backgroundColor: focusedField === 'password' || watchPassword ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
-                    }}
-                  >
-                    Password
-                  </motion.label>
-
-                  <input
-                    {...register('password')}
-                    type={showPassword ? 'text' : 'password'}
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField(null)}
-                    className={cn(
-                      'w-full py-3 px-4 pt-5 pr-12 rounded-xl font-body text-base',
-                      'text-text-primary',
-                      'bg-dark-elevated transition-all duration-200 outline-none border',
-                      focusedField === 'password'
-                        ? 'border-kili-gold shadow-glow-gold'
-                        : errors.password
-                        ? 'border-kili-sunset'
-                        : 'border-dark-border hover:border-dark-border-light',
-                    )}
-                    style={{ height: '48px' }}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-
-                <AnimatePresence>
-                  {errors.password && (
-                    <motion.p
-                      className="text-kili-sunset text-xs mt-1 ml-1 font-body"
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      {errors.password.message}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
+              <KiliInput
+                {...register('password')}
+                label="Password"
+                error={errors.password?.message}
+                type="password"
+                showPasswordToggle
+                autoComplete="current-password"
+              />
 
               {/* Forgot password link with animated underline */}
               <div className="flex justify-end">
