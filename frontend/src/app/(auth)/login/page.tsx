@@ -1,11 +1,13 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Loader2, MapPin } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useFormPersistence } from '@/hooks/useFormPersistence';
+import { useFocusManagement } from '@/hooks/useFocusManagement';
 import { loginSchema, LoginInput } from '@/lib/validators';
 import { cn } from '@/lib/utils';
 import { KiliInput } from '@/components/ui/KiliInput';
@@ -13,17 +15,77 @@ import { KiliInput } from '@/components/ui/KiliInput';
 export default function LoginPage() {
   const { login, isLoggingIn } = useAuth();
 
+  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<LoginInput>({
+    formKey: 'login',
+    initialValues: { username: '', password: '' },
+    storageType: 'sessionStorage',
+    clearOnSuccess: true,
+  });
+
+  const { focusOnError } = useFocusManagement({
+    autoFocusSelector: 'input[name="username"]',
+    enableFocusOnError: true,
+  }) as { focusOnError: () => void };
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
+    watch,
+    setValue,
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
 
+  // Focus on first error when validation fails
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      focusOnError();
+    }
+  }, [errors, focusOnError]);
+
+
+  // Watch form values for persistence
+  const formValues = watch();
+
+  // Restore form state on mount
+  useEffect(() => {
+    if (isRestored) {
+      try {
+        const saved = sessionStorage.getItem('form_login');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const { _timestamp, ...formData } = parsed;
+          if (formData.username) setValue('username', formData.username);
+          if (formData.password) setValue('password', formData.password);
+        }
+      } catch (error) {
+        console.error('[LoginPage] Failed to restore form state:', error);
+      }
+    }
+  }, [isRestored, setValue]);
+
+  // Save form state on change
+  useEffect(() => {
+    if (isRestored && (formValues.username || formValues.password)) {
+      saveFormState(formValues);
+    }
+  }, [formValues, isRestored, saveFormState]);
+
   const onSubmit = (data: LoginInput) => {
     login(data);
+    // Clear form state on successful submission (handled by useAuth onSuccess)
+    // We'll clear it in a useEffect when we detect successful navigation
   };
+
+  // Clear form state when user navigates away (success indicator)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Don't clear on refresh, only on successful navigation
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   return (
     <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
@@ -31,10 +93,11 @@ export default function LoginPage() {
 
       {/* ── Main content wrapper ── */}
       <motion.div
-        className="relative z-10 w-full max-w-md md:max-w-lg mx-4"
+        className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        style={{ willChange: 'transform, opacity' }}
       >
         {/* Logo section */}
         <motion.div
@@ -113,7 +176,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
               {/* Username field */}
               <KiliInput
                 {...register('username')}

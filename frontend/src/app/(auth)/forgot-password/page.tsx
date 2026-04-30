@@ -8,6 +8,8 @@ import { ArrowLeft, Loader2, Mail, KeyRound, CheckCircle2, RefreshCw } from 'luc
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { authService } from '@/services/auth.service';
+import { useFormPersistence } from '@/hooks/useFormPersistence';
+import { useFocusManagement } from '@/hooks/useFocusManagement';
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -30,6 +32,7 @@ function OTPInput({
 }) {
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const digits = value.split('').concat(Array(6).fill('')).slice(0, 6);
+  const otpId = 'otp-input-group';
 
   const handleKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
@@ -65,11 +68,17 @@ function OTPInput({
   };
 
   return (
-    <div className="flex gap-3 justify-center">
+    <div 
+      role="group"
+      aria-label="One-time password input"
+      aria-describedby={hasError ? 'otp-error' : undefined}
+      className="flex gap-3 justify-center"
+    >
       {digits.map((digit, i) => (
         <motion.input
           key={i}
           ref={(el) => { inputs.current[i] = el; }}
+          id={`${otpId}-${i}`}
           type="text"
           inputMode="numeric"
           maxLength={1}
@@ -77,10 +86,14 @@ function OTPInput({
           onChange={(e) => handleChange(i, e)}
           onKeyDown={(e) => handleKey(i, e)}
           onPaste={handlePaste}
+          aria-label={`OTP digit ${i + 1} of 6`}
+          aria-invalid={hasError}
+          autoComplete={i === 0 ? 'one-time-code' : 'off'}
           className={cn(
             'w-10 h-12 text-center text-lg font-bold font-mono rounded-xl',
             'text-text-primary outline-none transition-all duration-200',
             'border bg-dark-elevated',
+            'focus-visible:ring-2 focus-visible:ring-kili-gold focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
             digit
               ? hasError
                 ? 'border-kili-sunset shadow-glow-red'
@@ -151,6 +164,22 @@ function Countdown({
 type Step = 'email' | 'otp' | 'password' | 'success';
 
 export default function ForgotPasswordPage() {
+  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<{
+    emailOrPhone: string;
+    username: string;
+    step: Step;
+  }>({
+    formKey: 'forgot-password',
+    initialValues: { emailOrPhone: '', username: '', step: 'email' },
+    storageType: 'sessionStorage',
+    clearOnSuccess: true,
+  });
+
+  const { focusOnError } = useFocusManagement({
+    autoFocusSelector: 'input[name="email_or_phone"]',
+    enableFocusOnError: true,
+  }) as { focusOnError: () => void };
+
   const [step, setStep] = useState<Step>('email');
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [username, setUsername] = useState('');
@@ -158,6 +187,33 @@ export default function ForgotPasswordPage() {
   const [otpError, setOtpError] = useState(false);
   const [canResend, setCanResend] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+
+  // Restore form state on mount
+  useEffect(() => {
+    if (isRestored) {
+      try {
+        const saved = sessionStorage.getItem('form_forgot-password');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const { _timestamp, ...formData } = parsed;
+          if (formData.emailOrPhone) setEmailOrPhone(formData.emailOrPhone);
+          if (formData.username) setUsername(formData.username);
+          if (formData.step && ['email', 'otp', 'password', 'success'].includes(formData.step)) {
+            setStep(formData.step as Step);
+          }
+        }
+      } catch (error) {
+        console.error('[ForgotPasswordPage] Failed to restore form state:', error);
+      }
+    }
+  }, [isRestored]);
+
+  // Save form state on change
+  useEffect(() => {
+    if (isRestored) {
+      saveFormState({ emailOrPhone, username, step });
+    }
+  }, [emailOrPhone, username, step, isRestored, saveFormState]);
 
   // Email form
   const emailForm = useForm<ForgotPasswordInput>({
@@ -168,6 +224,15 @@ export default function ForgotPasswordPage() {
   const pwdForm = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
   });
+
+  // Focus on first error when validation fails
+  useEffect(() => {
+    const hasEmailErrors = Object.keys(emailForm.formState.errors).length > 0;
+    const hasPwdErrors = Object.keys(pwdForm.formState.errors).length > 0;
+    if (hasEmailErrors || hasPwdErrors) {
+      focusOnError();
+    }
+  }, [emailForm.formState.errors, pwdForm.formState.errors, focusOnError]);
 
   const watchPwd = pwdForm.watch('new_password', '');
 
@@ -187,6 +252,7 @@ export default function ForgotPasswordPage() {
       authService.resetPassword(data),
     onSuccess: () => {
       setStep('success');
+      handleSuccess(); // Clear form state on success
       toast.success('Password imebadilishwa! 🎉');
     },
     onError: (e) => {
@@ -248,10 +314,11 @@ export default function ForgotPasswordPage() {
   return (
     <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
       <motion.div
-        className="relative z-10 w-full max-w-md md:max-w-lg mx-4"
+        className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        style={{ willChange: 'transform, opacity' }}
       >
         {/* Card */}
         <motion.div
@@ -365,6 +432,7 @@ export default function ForgotPasswordPage() {
                   key="email-form"
                   onSubmit={emailForm.handleSubmit(onEmailSubmit)}
                   className="space-y-4"
+                  noValidate
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -30 }}
@@ -472,6 +540,8 @@ export default function ForgotPasswordPage() {
                     <AnimatePresence>
                       {otpError && (
                         <motion.p
+                          id="otp-error"
+                          role="alert"
                           className="text-center text-kili-sunset text-xs mt-3 font-body"
                           initial={{ opacity: 0, y: -4 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -543,6 +613,7 @@ export default function ForgotPasswordPage() {
                   key="password-form"
                   onSubmit={pwdForm.handleSubmit(onPasswordSubmit)}
                   className="space-y-4"
+                  noValidate
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -30 }}

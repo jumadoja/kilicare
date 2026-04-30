@@ -4,6 +4,44 @@ import { tokenManager } from '@/core/auth/tokenManager';
 import { authEvents } from '@/core/auth/authEvents';
 import Router from 'next/router';
 
+// Network resilience configuration
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+const RETRY_STATUS_CODES = [408, 429, 500, 502, 503, 504];
+
+// Exponential backoff with jitter
+function getRetryDelay(attempt: number): number {
+  const baseDelay = INITIAL_RETRY_DELAY * Math.pow(2, attempt);
+  const jitter = Math.random() * 0.3 * baseDelay; // Add 30% jitter
+  return baseDelay + jitter;
+}
+
+// Check if error is retryable
+function isRetryableError(error: AxiosError): boolean {
+  if (!error.response) {
+    // Network errors (no response) are retryable
+    return true;
+  }
+  
+  const status = error.response.status;
+  return RETRY_STATUS_CODES.includes(status);
+}
+
+// Online/offline detection
+let isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    isOnline = true;
+    console.log('[Network] Connection restored');
+  });
+  
+  window.addEventListener('offline', () => {
+    isOnline = false;
+    console.log('[Network] Connection lost');
+  });
+}
+
 const api = axios.create({
   baseURL: env.API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
@@ -35,7 +73,12 @@ const flush = (err: unknown, token: string | null) => {
 api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
-    const orig = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const orig = error.config as InternalAxiosRequestConfig & { 
+      _retry?: boolean; 
+      _retryCount?: number;
+    };
+    
+    // Handle 401 unauthorized (token refresh)
     if (error.response?.status === 401 && !orig._retry) {
       console.log('[TRACE][401 DETECTED]', error.config?.url);
       if (refreshing) {
@@ -70,6 +113,30 @@ api.interceptors.response.use(
         refreshing = false;
       }
     }
+    
+    // Network resilience: retry logic for retryable errors
+    if (isRetryableError(error) && !orig._retry) {
+      orig._retry = true;
+      orig._retryCount = (orig._retryCount || 0) + 1;
+      
+      if (orig._retryCount <= MAX_RETRIES) {
+        const delay = getRetryDelay(orig._retryCount - 1);
+        console.log(`[Network] Retry attempt ${orig._retryCount}/${MAX_RETRIES} after ${Math.round(delay)}ms`);
+        
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(api(orig)), delay);
+        });
+      } else {
+        console.error('[Network] Max retries reached for:', error.config?.url);
+      }
+    }
+    
+    // Check offline status
+    if (!isOnline) {
+      console.error('[Network] Request failed - offline mode');
+      // You could queue requests here for later
+    }
+    
     return Promise.reject(error);
   }
 );

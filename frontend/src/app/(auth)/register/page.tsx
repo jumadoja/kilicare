@@ -13,6 +13,8 @@ import {
   Sparkles, Heart, Zap, Trophy, Lock, MapPin,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useFormPersistence } from '@/hooks/useFormPersistence';
+import { useFocusManagement } from '@/hooks/useFocusManagement';
 import { registerSchema, RegisterInput } from '@/lib/validators';
 import { cn } from '@/lib/utils';
 import { KiliInput } from '@/components/ui/KiliInput';
@@ -460,6 +462,18 @@ export default function RegisterPage() {
   const { registerAsync: registerUser, isRegistering } = useAuth();
   const router = useRouter();
 
+  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<Partial<RegisterInput>>({
+    formKey: 'register',
+    initialValues: {},
+    storageType: 'sessionStorage',
+    clearOnSuccess: true,
+  });
+
+  const { focusOnError } = useFocusManagement({
+    autoFocusSelector: 'input[name="first_name"]',
+    enableFocusOnError: true,
+  }) as { focusOnError: () => void };
+
   const [step, setStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState<'TOURIST' | 'LOCAL_GUIDE'>('TOURIST');
   const [showPassword, setShowPassword] = useState(false);
@@ -478,11 +492,18 @@ export default function RegisterPage() {
     trigger,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: { role: 'TOURIST' },
   });
+
+  // Focus on first error when validation fails
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      focusOnError();
+    }
+  }, [errors, focusOnError]);
 
   const watchPassword = watch('password', '');
   const watchFirstName = watch('first_name', '');
@@ -492,6 +513,49 @@ export default function RegisterPage() {
   const watchConfirmPassword = watch('confirm_password', '');
   const watchBio = watch('bio', '');
   const watchLocation = watch('location', '');
+
+  // Watch all form values for persistence
+  const formValues = watch();
+
+  // Restore form state on mount
+  useEffect(() => {
+    if (isRestored) {
+      try {
+        const saved = sessionStorage.getItem('form_register');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const { _timestamp, step: savedStep, role: savedRole, ...formData } = parsed;
+          
+          // Restore form fields
+          Object.entries(formData).forEach(([key, value]) => {
+            if (value) setValue(key as keyof RegisterInput, value as string);
+          });
+          
+          // Restore step and role if valid
+          if (savedStep && savedStep >= 1 && savedStep <= 3) {
+            setStep(savedStep);
+          }
+          if (savedRole && (savedRole === 'TOURIST' || savedRole === 'LOCAL_GUIDE')) {
+            setSelectedRole(savedRole);
+          }
+        }
+      } catch (error) {
+        console.error('[RegisterPage] Failed to restore form state:', error);
+      }
+    }
+  }, [isRestored, setValue]);
+
+  // Save form state on change
+  useEffect(() => {
+    if (isRestored) {
+      const toSave = {
+        ...formValues,
+        _step: step,
+        _role: selectedRole,
+      };
+      saveFormState(toSave);
+    }
+  }, [formValues, step, selectedRole, isRestored, saveFormState]);
 
   // Real-time validation for username/email conflicts
   const [usernameError, setUsernameError] = useState<string | undefined>(undefined);
@@ -590,6 +654,9 @@ export default function RegisterPage() {
 
       // ✅ ONLY HERE show success after confirmed API success
       setShowSuccess(true);
+      
+      // Clear form state on success
+      handleSuccess();
 
       // delay AFTER confirmed success
       setTimeout(() => {
@@ -710,10 +777,11 @@ export default function RegisterPage() {
       {/* Background Visual Layer */}
       
       <motion.div
-        className="relative z-10 w-full max-w-md md:max-w-lg mx-4"
+        className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, type: 'spring' }}
+        style={{ willChange: 'transform, opacity' }}
       >
       {/* Header */}
       <div className="text-center mb-6">
@@ -1106,61 +1174,58 @@ export default function RegisterPage() {
                 </motion.div>
 
                 {/* Buttons */}
-                <div className="flex gap-3 mt-4">
-                  <motion.button
-                    type="button"
-                    onClick={() => setStep(2)}
-                    className="min-w-[90px] h-12 px-5 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <ArrowLeft size={16} />
-                    Rudi
-                  </motion.button>
+                <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                  <div className="flex gap-3 mt-4">
+                    <motion.button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="min-w-[90px] h-12 px-5 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <ArrowLeft size={16} />
+                      Rudi
+                    </motion.button>
 
-                  <motion.button
-                    type="button"
-                    onClick={handleSubmit(onSubmit)}
-                    disabled={isRegistering}
-                    className={cn(
-                      'flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
-                      'flex items-center justify-center gap-2',
-                      isRegistering && 'opacity-80 cursor-not-allowed',
-                    )}
-                    style={{
-                      background: 'linear-gradient(135deg, #F5A623, #D4891A)',
-                      boxShadow: isRegistering
-                        ? 'none'
-                        : '0 4px 20px rgba(245,166,35,0.35)',
-                    }}
-                    whileHover={!isRegistering ? { scale: 1.01 } : {}}
-                    whileTap={!isRegistering ? { scale: 0.98 } : {}}
-                  >
-                    <AnimatePresence mode="wait">
-                      {isRegistering ? (
-                        <motion.div
-                          key="loading"
-                          className="flex items-center gap-2"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          <Loader2 size={18} className="animate-spin" />
-                          <span>Inaunda akaunti...</span>
-                        </motion.div>
-                      ) : (
-                        <motion.span
-                          key="text"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          🎉 Unda Akaunti
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                </div>
+                    <motion.button
+                      type="submit"
+                      disabled={isRegistering}
+                      className="flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm"
+                      style={{
+                        background: 'linear-gradient(135deg, #F5A623, #D4891A)',
+                        boxShadow: isRegistering
+                          ? 'none'
+                          : '0 4px 20px rgba(245,166,35,0.35)',
+                      }}
+                      whileHover={!isRegistering ? { scale: 1.01 } : {}}
+                      whileTap={!isRegistering ? { scale: 0.98 } : {}}
+                    >
+                      <AnimatePresence mode="wait">
+                        {isRegistering ? (
+                          <motion.div
+                            key="loading"
+                            className="flex items-center gap-2"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            <Loader2 size={18} className="animate-spin" />
+                            <span>Inaunda akaunti...</span>
+                          </motion.div>
+                        ) : (
+                          <motion.span
+                            key="text"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            🎉 Unda Akaunti
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  </div>
+                </form>
               </motion.div>
             )}
 

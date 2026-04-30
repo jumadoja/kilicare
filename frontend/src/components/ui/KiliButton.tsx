@@ -93,7 +93,7 @@ export const KiliButton = forwardRef<HTMLButtonElement, KiliButtonProps>(
         className={cn(
           'relative inline-flex items-center justify-center font-body',
           'transition-all duration-200 select-none',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kili-gold',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kili-gold focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
           sizeStyles[size],
           vStyle.base,
           fullWidth && 'w-full',
@@ -102,6 +102,8 @@ export const KiliButton = forwardRef<HTMLButtonElement, KiliButtonProps>(
         )}
         style={vStyle.style}
         disabled={isDisabled}
+        aria-busy={loading}
+        aria-disabled={isDisabled}
         whileHover={!isDisabled ? { scale: 1.01 } : {}}
         whileTap={!isDisabled ? { scale: 0.97 } : {}}
         {...(props as React.ComponentProps<typeof motion.button>)}

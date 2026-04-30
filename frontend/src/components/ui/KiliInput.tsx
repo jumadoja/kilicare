@@ -27,6 +27,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
       value,
       defaultValue,
       onChange,
+      id,
       ...props
     },
     ref
@@ -41,6 +42,11 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
     const inputType = showPasswordToggle
       ? showPwd ? 'text' : 'password'
       : type;
+
+    // Generate unique IDs for ARIA relationships
+    const inputId = id || `input-${label.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substr(2, 9)}`;
+    const errorId = `${inputId}-error`;
+    const hintId = `${inputId}-hint`;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!isControlled) setInternalValue(e.target.value);
@@ -61,6 +67,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
 
           {/* Floating label */}
           <motion.label
+            htmlFor={inputId}
             className="absolute pointer-events-none font-body z-10"
             animate={{
               left: leftIcon ? '40px' : '16px',
@@ -82,6 +89,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
 
           <input
             ref={ref}
+            id={inputId}
             type={inputType}
             value={isControlled ? value : internalValue}
             onChange={handleChange}
@@ -93,6 +101,13 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
               setFocused(false);
               props.onBlur?.(e);
             }}
+            aria-label={label}
+            aria-describedby={cn(
+              error && errorId,
+              hint && !error && hintId
+            ) || undefined}
+            aria-invalid={!!error}
+            aria-required={props.required || false}
             className={cn(
               'w-full rounded-xl font-body text-sm text-text-primary',
               'bg-dark-elevated transition-all duration-200 outline-none',
@@ -100,6 +115,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
               leftIcon ? 'pl-10' : 'pl-4',
               showPasswordToggle || rightElement ? 'pr-12' : 'pr-4',
               'pt-6 pb-2',
+              'focus-visible:ring-2 focus-visible:ring-kili-gold focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
               focused
                 ? 'border-kili-gold shadow-glow-gold'
                 : error
@@ -120,7 +136,9 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="text-text-muted hover:text-text-primary transition-colors"
+                  aria-label={showPwd ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPwd}
+                  className="text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-kili-gold rounded"
                 >
                   {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -135,6 +153,8 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
         <AnimatePresence>
           {error && (
             <motion.p
+              id={errorId}
+              role="alert"
               className="text-kili-sunset text-xs mt-1 ml-1 font-body"
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -147,7 +167,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
 
         {/* Hint */}
         {hint && !error && (
-          <p className="text-text-muted text-xs mt-1 ml-1 font-body">{hint}</p>
+          <p id={hintId} className="text-text-muted text-xs mt-1 ml-1 font-body">{hint}</p>
         )}
       </div>
     );

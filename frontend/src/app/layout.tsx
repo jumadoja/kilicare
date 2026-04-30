@@ -4,6 +4,7 @@ import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import './globals.css';
 import ViewportHeightManager from '@/components/system/ViewportHeightManager';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundaryWrapper';
 
 export const metadata: Metadata = {
   title: 'Kilicare+ | Tanzania Tourism Super-App',
@@ -30,24 +31,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-scroll-behavior="smooth">
       <body className="bg-dark-bg text-text-primary font-body antialiased min-h-[var(--app-height)]">
         <ViewportHeightManager />
-        <ReactQueryProvider>
-          <AuthProvider>
-            {children}
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                style: {
-                  background: '#1C1C27',
-                  color: '#F8F8FF',
-                  border: '1px solid #2A2A3A',
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  fontFamily: 'Inter, system-ui, sans-serif',
-                },
-              }}
-            />
-          </AuthProvider>
-        </ReactQueryProvider>
+        <ErrorBoundary>
+          <ReactQueryProvider>
+            <AuthProvider>
+              {children}
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  style: {
+                    background: '#1C1C27',
+                    color: '#F8F8FF',
+                    border: '1px solid #2A2A3A',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                  },
+                }}
+              />
+            </AuthProvider>
+          </ReactQueryProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
