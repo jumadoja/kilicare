@@ -10,7 +10,7 @@ import {
   Eye, EyeOff, Loader2, ArrowLeft,
   ArrowRight, User, Map, Camera,
   CheckCircle2, Shield, Star, Compass,
-  Sparkles, Heart, Zap, Trophy, Lock,
+  Sparkles, Heart, Zap, Trophy, Lock, MapPin,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { registerSchema, RegisterInput } from '@/lib/validators';
@@ -890,37 +890,39 @@ export default function RegisterPage() {
         transition={{ duration: 0.6, type: 'spring' }}
       >
       {/* Header */}
-      <div className="text-center mb-3">
+      <div className="text-center mb-4">
         <motion.div
-          className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
+          className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-2 cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #F5A623, #D4891A)',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,255,255,0.07)',
+            boxShadow: '0 0 40px rgba(245,166,35,0.4)',
           }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <span className="text-xl font-black text-dark-bg font-display">K</span>
+          <span className="text-2xl font-black text-dark-bg font-display">K</span>
         </motion.div>
 
-        <h1 className="text-2xl md:text-3xl font-black font-display text-text-primary tracking-tight">
-          Jisajili{' '}
-          <span className="text-gradient-gold">KilicareGO+</span>
+        <h1 className="text-2xl font-black font-display text-text-primary tracking-tight">
+          Kilicare<span className="text-gradient-gold">+</span>
         </h1>
+        <p className="text-text-muted text-xs mt-1 font-body">
+          Discover Tanzania, Reimagined
+        </p>
 
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={step}
-            className="text-text-muted text-sm mt-1 font-body"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2 }}
-          >
-            {step === 1 && 'Unda akaunti yako ya utalii'}
-            {step === 2 && 'Chagua jukumu lako Tanzania'}
-            {step === 3 && 'Maliza wasifu wako'}
-          </motion.p>
-        </AnimatePresence>
+        <motion.div
+          className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full"
+          style={{
+            background: 'rgba(245,166,35,0.08)',
+            border: '1px solid rgba(245,166,35,0.2)',
+          }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <MapPin size={11} className="text-kili-gold" />
+          <span className="text-kili-gold text-xs font-medium">Tanzania 🇹🇿</span>
+        </motion.div>
       </div>
 
       {/* Progress */}

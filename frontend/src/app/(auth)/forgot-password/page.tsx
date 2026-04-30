@@ -84,8 +84,7 @@ function OTPInput({
               ? hasError
                 ? 'border-kili-sunset shadow-glow-red'
                 : 'border-kili-gold shadow-glow-gold text-kili-gold'
-              : 'border-dark-border hover:border-dark-border-light',
-            'focus:border-kili-gold focus:shadow-glow-gold',
+              : 'border-dark-border hover:border-dark-border-light focus:border-kili-gold focus:shadow-glow-gold',
           )}
           animate={{
             scale: digit ? [1, 1.1, 1] : 1,
