@@ -42,13 +42,13 @@ export function TravelVisualLayer() {
     const particleCount = isMobile ? 16 : 30;
     const newParticles = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
-      background: `rgba(245,166,35,${0.2 + Math.random() * 0.3})`,
+      background: `rgba(245,166,35,${0.15 + Math.random() * 0.2})`,
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
-      duration: isMobile ? 6 + Math.random() * 3 : 4 + Math.random() * 4,
+      duration: isMobile ? 8 + Math.random() * 4 : 6 + Math.random() * 5,
       delay: Math.random() * 2,
-      yMove: isMobile ? -20 - Math.random() * 30 : -30 - Math.random() * 50,
-      xMove: (Math.random() - 0.5) * (isMobile ? 20 : 40),
+      yMove: isMobile ? -15 - Math.random() * 20 : -25 - Math.random() * 35,
+      xMove: (Math.random() - 0.5) * (isMobile ? 15 : 30),
     }));
     setParticles(newParticles);
   }, [isMobile]);
@@ -69,7 +69,7 @@ export function TravelVisualLayer() {
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
 
       {/* BASE BACKGROUND - Cinematic dark gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0F]/95 via-[#0C0C12]/90 to-[#0A0A0F]/95" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0F]/85 via-[#0C0C12]/80 to-[#0A0A0F]/85" />
 
       {/* TRAVEL IMAGES ROTATION - Cinematic blurred background */}
       {!imageError && (
@@ -101,7 +101,7 @@ export function TravelVisualLayer() {
                     sizes="100vw"
                     quality={75}
                   />
-                  <div className="absolute inset-0 bg-black/30 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-black/15 mix-blend-multiply" />
                 </motion.div>
               </motion.div>
             )
@@ -159,7 +159,7 @@ export function TravelVisualLayer() {
           className={`absolute rounded-full ${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'}`}
           style={{
             background: particle.background,
-            boxShadow: '0 0 8px rgba(245,166,35,0.4)',
+            boxShadow: '0 0 6px rgba(245,166,35,0.3)',
             left: particle.left,
             top: particle.top,
             zIndex: 2,
@@ -167,8 +167,8 @@ export function TravelVisualLayer() {
           animate={{
             y: [0, particle.yMove, 0],
             x: [0, particle.xMove, 0],
-            opacity: [0.3, 0.8, 0.3],
-            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.6, 0.2],
+            scale: [1, 1.1, 1],
           }}
           transition={{
             duration: particle.duration,
@@ -203,7 +203,7 @@ export function TravelVisualLayer() {
               sizes="100vw"
               quality={75}
             />
-            <div className="absolute inset-0 bg-black/30 mix-blend-multiply" />
+            <div className="absolute inset-0 bg-black/15 mix-blend-multiply" />
           </motion.div>
         </motion.div>
       )}

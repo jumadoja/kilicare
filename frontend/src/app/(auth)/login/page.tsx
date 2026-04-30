@@ -8,7 +8,6 @@ import { Eye, EyeOff, Loader2, MapPin } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { loginSchema, LoginInput } from '@/lib/validators';
 import { cn } from '@/lib/utils';
-import { TravelVisualLayer } from '@/components/TravelVisualLayer';
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useAuth();
@@ -34,7 +33,6 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-dvh w-full overflow-hidden flex items-center justify-center">
       {/* Background Visual Layer */}
-      <TravelVisualLayer />
 
       {/* ── Main content wrapper ── */}
       <motion.div
@@ -121,13 +119,13 @@ export default function LoginPage() {
               <div className="relative">
                 <div className="relative">
                   <motion.label
-                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-1"
+                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
                     animate={{
-                      top: focusedField === 'username' || watchUsername ? '6px' : '50%',
+                      top: focusedField === 'username' || watchUsername ? '5px' : '50%',
                       transform: focusedField === 'username' || watchUsername ? 'translateY(0)' : 'translateY(-50%)',
                       fontSize: focusedField === 'username' || watchUsername ? '11px' : '15px',
                       color: focusedField === 'username' ? '#F5A623' : '#8B8BA7',
-                      backgroundColor: focusedField === 'username' || watchUsername ? '#1A1A24' : 'rgba(0, 0, 0, 0)',
+                      backgroundColor: focusedField === 'username' || watchUsername ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
                     }}
                   >
                     Username
@@ -140,7 +138,7 @@ export default function LoginPage() {
                     onFocus={() => setFocusedField('username')}
                     onBlur={() => setFocusedField(null)}
                     className={cn(
-                      'w-full py-3 px-4 rounded-xl font-body text-base',
+                      'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
                       'text-text-primary',
                       'bg-dark-elevated transition-all duration-200 outline-none border',
                       focusedField === 'username'
@@ -171,13 +169,13 @@ export default function LoginPage() {
               <div className="relative">
                 <div className="relative">
                   <motion.label
-                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-1"
+                    className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
                     animate={{
-                      top: focusedField === 'password' || watchPassword ? '6px' : '50%',
+                      top: focusedField === 'password' || watchPassword ? '5px' : '50%',
                       transform: focusedField === 'password' || watchPassword ? 'translateY(0)' : 'translateY(-50%)',
                       fontSize: focusedField === 'password' || watchPassword ? '11px' : '15px',
                       color: focusedField === 'password' ? '#F5A623' : '#8B8BA7',
-                      backgroundColor: focusedField === 'password' || watchPassword ? '#1A1A24' : 'rgba(0, 0, 0, 0)',
+                      backgroundColor: focusedField === 'password' || watchPassword ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
                     }}
                   >
                     Password
@@ -189,7 +187,7 @@ export default function LoginPage() {
                     onFocus={() => setFocusedField('password')}
                     onBlur={() => setFocusedField(null)}
                     className={cn(
-                      'w-full py-3 px-4 pr-12 rounded-xl font-body text-base',
+                      'w-full py-3 px-4 pt-5 pr-12 rounded-xl font-body text-base',
                       'text-text-primary',
                       'bg-dark-elevated transition-all duration-200 outline-none border',
                       focusedField === 'password'
@@ -287,16 +285,19 @@ export default function LoginPage() {
             {/* Social buttons */}
             <div className="grid grid-cols-2 gap-3">
               {['Google', 'Apple'].map((provider) => (
-                <motion.button
-                  key={provider}
-                  type="button"
-                  disabled
-                  className="h-10 rounded-xl border border-dark-border bg-dark-elevated text-text-disabled text-xs font-body cursor-not-allowed opacity-50 flex items-center justify-center gap-2"
-                  whileHover={{ opacity: 0.6 }}
-                >
-                  <span>{provider === 'Google' ? '🌐' : '🍎'}</span>
-                  <span>{provider}</span>
-                </motion.button>
+                <div key={provider} className="relative">
+                  <motion.button
+                    type="button"
+                    disabled
+                    className="w-full h-10 rounded-xl border border-dark-border bg-dark-elevated text-text-muted text-xs font-body cursor-not-allowed opacity-60 flex items-center justify-center gap-2"
+                  >
+                    <span>{provider === 'Google' ? '🌐' : '🍎'}</span>
+                    <span>{provider}</span>
+                  </motion.button>
+                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-kili-gold/20 border border-kili-gold/30 text-[9px] font-semibold text-kili-gold">
+                    Soon
+                  </span>
+                </div>
               ))}
             </div>
 

@@ -16,7 +16,6 @@ import {
 } from '@/lib/validators';
 import { parseApiError } from '@/core/errors';
 import { cn } from '@/lib/utils';
-import { TravelVisualLayer } from '@/components/TravelVisualLayer';
 
 // ── OTP Input component ──────────────────────────────
 function OTPInput({
@@ -250,7 +249,6 @@ export default function ForgotPasswordPage() {
   return (
     <div className="relative min-h-dvh w-full overflow-hidden bg-dark-bg flex items-center justify-center">
       {/* Background Visual Layer */}
-      <TravelVisualLayer />
 
       <motion.div
         className="relative z-10 w-full max-w-md md:max-w-lg mx-4"
@@ -262,11 +260,11 @@ export default function ForgotPasswordPage() {
         <motion.div
           className="relative rounded-3xl overflow-hidden"
           style={{
-            background: 'rgba(19,19,26,0.88)',
+            background: 'rgba(19,19,26,0.85)',
             backdropFilter: 'blur(40px)',
             WebkitBackdropFilter: 'blur(40px)',
             border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}
         >
           {/* Top gradient line */}
@@ -291,7 +289,7 @@ export default function ForgotPasswordPage() {
                 href="/login"
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-dark-elevated transition-all duration-200 font-body text-sm"
                 style={{
-                  border: '1px solid rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.15)',
                 }}
               >
                 <ArrowLeft size={14} />
@@ -382,12 +380,13 @@ export default function ForgotPasswordPage() {
                   <div className="relative">
                     <div className="relative">
                       <motion.label
-                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out"
+                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
                         animate={{
-                          top: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '6px' : '50%',
+                          top: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '5px' : '50%',
                           transform: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? 'translateY(0)' : 'translateY(-50%)',
                           fontSize: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '11px' : '15px',
                           color: focused === 'email_or_phone' ? '#F5A623' : '#8B8BA7',
+                          backgroundColor: focused === 'email_or_phone' || emailForm.watch('email_or_phone') ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
                         }}
                       >
                         Barua pepe au namba ya simu
@@ -399,7 +398,7 @@ export default function ForgotPasswordPage() {
                         onFocus={() => setFocused('email_or_phone')}
                         onBlur={() => setFocused(null)}
                         className={cn(
-                          'w-full py-3 px-4 rounded-xl font-body text-base',
+                          'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
                           'text-text-primary',
                           'bg-dark-elevated transition-all duration-200 outline-none border',
                           focused === 'email_or_phone'
@@ -428,12 +427,13 @@ export default function ForgotPasswordPage() {
                   <div className="relative">
                     <div className="relative">
                       <motion.label
-                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out"
+                        className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
                         animate={{
-                          top: focused === 'username' || emailForm.watch('username') ? '6px' : '50%',
+                          top: focused === 'username' || emailForm.watch('username') ? '5px' : '50%',
                           transform: focused === 'username' || emailForm.watch('username') ? 'translateY(0)' : 'translateY(-50%)',
                           fontSize: focused === 'username' || emailForm.watch('username') ? '11px' : '15px',
                           color: focused === 'username' ? '#F5A623' : '#8B8BA7',
+                          backgroundColor: focused === 'username' || emailForm.watch('username') ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
                         }}
                       >
                         Username wako
@@ -445,7 +445,7 @@ export default function ForgotPasswordPage() {
                         onFocus={() => setFocused('username')}
                         onBlur={() => setFocused(null)}
                         className={cn(
-                          'w-full py-3 px-4 rounded-xl font-body text-base',
+                          'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
                           'text-text-primary',
                           'bg-dark-elevated transition-all duration-200 outline-none border',
                           focused === 'username'
@@ -638,12 +638,13 @@ export default function ForgotPasswordPage() {
                     <div className="relative">
                       <div className="relative">
                         <motion.label
-                          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out"
+                          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
                           animate={{
-                            top: focused === 'new_pwd' || watchPwd ? '6px' : '50%',
+                            top: focused === 'new_pwd' || watchPwd ? '5px' : '50%',
                             transform: focused === 'new_pwd' || watchPwd ? 'translateY(0)' : 'translateY(-50%)',
                             fontSize: focused === 'new_pwd' || watchPwd ? '11px' : '15px',
                             color: focused === 'new_pwd' ? '#F5A623' : '#8B8BA7',
+                            backgroundColor: focused === 'new_pwd' || watchPwd ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
                           }}
                         >
                           Password mpya
@@ -654,7 +655,7 @@ export default function ForgotPasswordPage() {
                           onFocus={() => setFocused('new_pwd')}
                           onBlur={() => setFocused(null)}
                           className={cn(
-                            'w-full py-3 px-4 pr-12 rounded-xl font-body text-base',
+                            'w-full py-3 px-4 pt-5 pr-12 rounded-xl font-body text-base',
                             'text-text-primary',
                             'bg-dark-elevated transition-all duration-200 outline-none border',
                             focused === 'new_pwd'

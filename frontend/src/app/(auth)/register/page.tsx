@@ -15,7 +15,6 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { registerSchema, RegisterInput } from '@/lib/validators';
 import { cn } from '@/lib/utils';
-import { TravelVisualLayer } from '@/components/TravelVisualLayer';
 
 // ── AI Onboarding Assistant ────────────────────────────
 function OnboardingAssistant({ step }: { step: number }) {
@@ -149,13 +148,13 @@ function FloatingInput({
     <div className="relative">
       <div className="relative">
         <motion.label
-          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-1"
+          className="absolute left-4 pointer-events-none font-body z-10 transition-all duration-200 ease-out px-2"
           animate={{
-            top: focused || hasValue ? '6px' : '50%',
+            top: focused || hasValue ? '5px' : '50%',
             transform: focused || hasValue ? 'translateY(0)' : 'translateY(-50%)',
             fontSize: focused || hasValue ? '11px' : '15px',
             color: focused ? '#F5A623' : '#8B8BA7',
-            backgroundColor: focused || hasValue ? '#1A1A24' : 'rgba(0, 0, 0, 0)',
+            backgroundColor: focused || hasValue ? '#1C1C27' : 'rgba(0, 0, 0, 0)',
           }}
         >
           {label}
@@ -174,7 +173,7 @@ function FloatingInput({
             onBlur?.(e);
           }}
           className={cn(
-            'w-full py-3 px-4 pt-6 rounded-xl font-body text-base',
+            'w-full py-3 px-4 pt-5 rounded-xl font-body text-base',
             'text-text-primary',
             'bg-dark-elevated transition-all duration-200 outline-none border',
             rightElement ? 'pr-12' : '',
@@ -378,23 +377,22 @@ function RoleCard({
       whileTap={{ scale: 0.98 }}
       animate={{ scale: selected ? 1.01 : 1 }}
     >
-      {/* Sparkle particles when selected */}
+      {/* Subtle ambient particles when selected - one-time burst */}
       <AnimatePresence>
         {selected && (
           <>
-            {[...Array(12)].map((_, i) => {
-              // Position particles around the card perimeter
-              const angle = (i / 12) * Math.PI * 2;
-              const radiusX = 50 + Math.cos(angle) * 60;
-              const radiusY = 50 + Math.sin(angle) * 60;
+            {[...Array(6)].map((_, i) => {
+              const angle = (i / 6) * Math.PI * 2;
+              const radiusX = 50 + Math.cos(angle) * 50;
+              const radiusY = 50 + Math.sin(angle) * 50;
               
               return (
                 <motion.div
                   key={i}
-                  className="absolute w-2.5 h-2.5 rounded-full pointer-events-none"
+                  className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
                   style={{
                     background: config.color,
-                    boxShadow: `0 0 12px ${config.color}, 0 0 24px ${config.color}`,
+                    boxShadow: `0 0 6px ${config.color}, 0 0 12px ${config.color}`,
                   }}
                   initial={{ 
                     opacity: 0, 
@@ -403,16 +401,14 @@ function RoleCard({
                     y: '50%'
                   }}
                   animate={{
-                    opacity: [0, 1, 0.8, 0],
-                    scale: [0, 1.2, 0.8, 0],
-                    x: [50, radiusX + (Math.random() - 0.5) * 20, radiusX],
-                    y: [50, radiusY + (Math.random() - 0.5) * 20, radiusY],
+                    opacity: [0, 0.6, 0.3, 0],
+                    scale: [0, 1, 0.8, 0],
+                    x: [50, radiusX + (Math.random() - 0.5) * 10, radiusX],
+                    y: [50, radiusY + (Math.random() - 0.5) * 10, radiusY],
                   }}
                   transition={{
-                    duration: 1.5,
-                    delay: i * 0.08,
-                    repeat: Infinity,
-                    repeatDelay: 1.5,
+                    duration: 2,
+                    delay: i * 0.1,
                     ease: 'easeOut'
                   }}
                 />
@@ -422,21 +418,20 @@ function RoleCard({
         )}
       </AnimatePresence>
 
-      {/* Intense pulsing glow when selected */}
+      {/* Soft ambient breathing glow when selected */}
       <AnimatePresence>
         {selected && (
           <motion.div
             className="absolute inset-0 rounded-2xl pointer-events-none"
             style={{
-              background: `radial-gradient(circle at center, ${config.color}30, transparent 70%)`,
+              background: `radial-gradient(circle at center, ${config.color}15, transparent 70%)`,
             }}
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0 }}
             animate={{ 
-              opacity: [0.4, 0.8, 0.4], 
-              scale: [1, 1.15, 1],
+              opacity: [0.2, 0.35, 0.2], 
             }}
             transition={{ 
-              duration: 1.5, 
+              duration: 3, 
               repeat: Infinity,
               ease: 'easeInOut'
             }}
@@ -444,31 +439,15 @@ function RoleCard({
         )}
       </AnimatePresence>
 
-      {/* Step success glow */}
-      <AnimatePresence>
-        {stepCompleted && selected && (
-          <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at center, ${config.color}20, transparent 70%)`,
-            }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.2, 1] }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, repeat: 2 }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Check icon */}
+      {/* Check icon - subtle fade-in */}
       <AnimatePresence>
         {selected && (
           <motion.div
             className="absolute top-3 right-3"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            exit={{ scale: 0 }}
-            transition={{ type: 'spring', stiffness: 300 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <CheckCircle2 size={20} style={{ color: config.color }} />
           </motion.div>
@@ -903,7 +882,6 @@ export default function RegisterPage() {
   return (
     <div className="relative min-h-dvh w-full overflow-hidden flex items-center justify-center">
       {/* Background Visual Layer */}
-      <TravelVisualLayer />
       
       <motion.div
         className="relative z-10 w-full max-w-md md:max-w-lg xl:max-w-2xl mx-4"
@@ -986,19 +964,11 @@ export default function RegisterPage() {
           className="absolute top-0 left-0 right-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent, rgba(0,229,160,0.6), rgba(245,166,35,0.4), transparent)',
-          }}
-        />
-        
-        {/* Noise texture overlay */}
-        <div 
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+              'linear-gradient(90deg, transparent, rgba(245,166,35,0.6), transparent)',
           }}
         />
 
-        <div className="p-8">
+        <div className="p-6">
           <AnimatePresence mode="wait">
 
             {/* ══ SUCCESS ══ */}
@@ -1352,7 +1322,7 @@ export default function RegisterPage() {
                     <p
                       className="text-sm font-semibold font-body"
                       style={{
-                        color: selectedRole === 'TOURIST' ? '#4A9EFF' : '#F5A623',
+                        color: '#F5A623',
                       }}
                     >
                       {selectedRole === 'TOURIST' ? 'Msafiri' : 'Kiongozi wa Ndani'}
