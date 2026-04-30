@@ -38,54 +38,64 @@ export default function LoginPage() {
       >
         {/* Logo section */}
         <motion.div
-          className="text-center mb-4"
+          className="text-center mb-6"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <motion.div
-            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-2 cursor-pointer"
-            style={{
-              background: 'linear-gradient(135deg, #F5A623, #D4891A)',
-              boxShadow: '0 0 40px rgba(245,166,35,0.4)',
-            }}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
+            className="inline-flex items-center justify-center mb-4"
+            initial={{ opacity: 0, y: -20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, type: 'spring', stiffness: 200 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <span className="text-2xl font-black text-dark-bg font-display">K</span>
+            <div
+              className="relative p-4 rounded-3xl"
+              style={{
+                background: 'linear-gradient(145deg, rgba(245,166,35,0.15), rgba(0,229,160,0.1))',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(245,166,35,0.3)',
+                boxShadow: '0 8px 32px rgba(245,166,35,0.2), 0 0 0 1px rgba(245,166,35,0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
+              }}
+            >
+              {/* Inner glow effect */}
+              <div
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background: 'radial-gradient(circle at 30% 30%, rgba(245,166,35,0.2), transparent 60%)',
+                }}
+              />
+              <img
+                src="/kilicare-logo.png"
+                alt="Kilicare Logo"
+                className="relative h-20 w-auto"
+                style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}
+              />
+            </div>
           </motion.div>
 
-          <h1 className="text-2xl font-black font-display text-text-primary tracking-tight">
+          <motion.h1
+            className="text-3xl font-black font-display text-text-primary tracking-tight mb-2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             Kilicare<span className="text-gradient-gold">+</span>
-          </h1>
-          <p className="text-text-muted text-xs mt-1 font-body">
-            Discover Tanzania, Reimagined
-          </p>
-
-          <motion.div
-            className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full"
-            style={{
-              background: 'rgba(245,166,35,0.08)',
-              border: '1px solid rgba(245,166,35,0.2)',
-            }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <MapPin size={11} className="text-kili-gold" />
-            <span className="text-kili-gold text-xs font-medium">Tanzania 🇹🇿</span>
-          </motion.div>
+          </motion.h1>
         </motion.div>
 
         {/* ── Glass card ── */}
         <motion.div
           className="relative rounded-3xl overflow-hidden"
           style={{
-            background: 'rgba(19, 19, 26, 0.85)',
+            background: 'linear-gradient(145deg, rgba(19,19,26,0.95), rgba(28,28,39,0.9))',
             backdropFilter: 'blur(40px)',
             WebkitBackdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
+            border: '1px solid rgba(245,166,35,0.15)',
+            boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
           }}
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -93,9 +103,9 @@ export default function LoginPage() {
         >
           {/* Top gradient line */}
           <div
-            className="absolute top-0 left-0 right-0 h-px"
+            className="absolute top-0 left-0 right-0 h-1"
             style={{
-              background: 'linear-gradient(90deg, transparent, rgba(245,166,35,0.6), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(245,166,35,0.8), rgba(0,229,160,0.6), transparent)',
             }}
           />
 
@@ -209,16 +219,29 @@ export default function LoginPage() {
             </div>
 
             {/* Register link with animated underline */}
-            <p className="text-center text-text-muted text-xs mt-4 font-body">
-              Huna akaunti?{' '}
-              <Link
-                href="/register"
-                className="group relative text-kili-gold font-semibold transition-colors"
-              >
-                Jisajili hapa
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-kili-gold transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            </p>
+            <motion.div
+              className="mt-6 pt-4 border-t border-dark-border text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <p className="text-text-muted text-sm font-body">
+                Huna akaunti?{' '}
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-1 text-kili-gold hover:text-kili-gold-light font-semibold transition-all duration-200 hover:underline hover:underline-offset-4"
+                >
+                  Jisajili hapa
+                  <motion.span
+                    initial={{ x: 0 }}
+                    whileHover={{ x: 3 }}
+                    transition={{ type: 'spring', stiffness: 400 }}
+                  >
+                    →
+                  </motion.span>
+                </Link>
+              </p>
+            </motion.div>
           </div>
         </motion.div>
 
