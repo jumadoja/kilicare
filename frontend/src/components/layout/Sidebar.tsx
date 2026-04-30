@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   { href: '/profile', icon: User, label: 'Wasifu', color: '#8B8BA7' },
 ];
 
-function Sidebar() {
+function SidebarInternal() {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar } = useAppStore();
   const { user } = useAuthStore();
@@ -300,4 +300,4 @@ function Sidebar() {
   );
 }
 
-export const Sidebar = memo(Sidebar);
+export const Sidebar = memo(SidebarInternal);
