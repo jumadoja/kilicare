@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +14,7 @@ import { KiliInput } from '@/components/ui/KiliInput';
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useAuth();
+  const hasUserInteractedRef = useRef(false);
 
   const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<LoginInput>({
     formKey: 'login',
@@ -21,8 +22,14 @@ export default function LoginPage() {
     storageType: 'sessionStorage',
     clearOnSuccess: true,
     onRestore: (data) => {
-      if (data.username) setValue('username', data.username);
-      if (data.password) setValue('password', data.password);
+      // Only restore if user hasn't started typing and field is empty
+      if (!hasUserInteractedRef.current) {
+        const currentUsername = (document.querySelector('input[name="username"]') as HTMLInputElement)?.value;
+        const currentPassword = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+        
+        if (data.username && !currentUsername) setValue('username', data.username);
+        if (data.password && !currentPassword) setValue('password', data.password);
+      }
     },
   });
 
@@ -167,7 +174,9 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
               {/* Username field */}
               <KiliInput
-                {...register('username')}
+                {...register('username', {
+                  onChange: () => { hasUserInteractedRef.current = true; }
+                })}
                 label="Username"
                 error={errors.username?.message}
                 type="text"
@@ -176,7 +185,9 @@ export default function LoginPage() {
 
               {/* Password field */}
               <KiliInput
-                {...register('password')}
+                {...register('password', {
+                  onChange: () => { hasUserInteractedRef.current = true; }
+                })}
                 label="Password"
                 error={errors.password?.message}
                 type="password"

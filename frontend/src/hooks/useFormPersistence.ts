@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface FormPersistenceOptions<T> {
   formKey: string;
@@ -18,6 +18,7 @@ export function useFormPersistence<T extends Record<string, any>>({
   onRestore,
 }: FormPersistenceOptions<T>) {
   const [isRestored, setIsRestored] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const getStorage = () => {
     if (typeof window === 'undefined') return null;
@@ -63,15 +64,23 @@ export function useFormPersistence<T extends Record<string, any>>({
   }, [formKey, onRestore]);
 
   const saveFormState = (data: T) => {
-    const storage = getStorage();
-    if (!storage) return;
-    
-    try {
-      const toSave = { ...data, _timestamp: Date.now() };
-      storage.setItem(`form_${formKey}`, JSON.stringify(toSave));
-    } catch (error) {
-      // Silent fail
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
+
+    // Set new timer with 600ms debounce
+    debounceTimerRef.current = setTimeout(() => {
+      const storage = getStorage();
+      if (!storage) return;
+
+      try {
+        const toSave = { ...data, _timestamp: Date.now() };
+        storage.setItem(`form_${formKey}`, JSON.stringify(toSave));
+      } catch (error) {
+        // Silent fail
+      }
+    }, 600);
   };
 
   const clearFormState = () => {
@@ -90,6 +99,15 @@ export function useFormPersistence<T extends Record<string, any>>({
       clearFormState();
     }
   };
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return {
     isRestored,

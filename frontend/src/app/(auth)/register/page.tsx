@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { KiliInput } from '@/components/ui/KiliInput';
 
 // ── AI Onboarding Assistant ────────────────────────────
-function OnboardingAssistant({ step }: { step: number }) {
+const OnboardingAssistant = memo(function OnboardingAssistant({ step }: { step: number }) {
   const messages = {
     1: 'Habari mimi ni AsKkiliCare,👋 Nitakusaidia kukupa maelezo mafupi kujaza taarifa zako',
     2: 'Chagua jukumu lako - utapata experiences zinakufaa',
@@ -48,10 +48,10 @@ function OnboardingAssistant({ step }: { step: number }) {
       </div>
     </motion.div>
   );
-}
+});
 
 // ── Progress Bar ─────────────────────────────────────
-function ProgressIntelligence({
+const ProgressIntelligence = memo(function ProgressIntelligence({
   current,
   total,
 }: {
@@ -124,7 +124,7 @@ function ProgressIntelligence({
       </motion.p>
     </div>
   );
-}
+});
 
 // ── Floating Input - DEPRECATED: Use KiliInput instead ──
 
@@ -206,7 +206,7 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 // ── Role Card ─────────────────────────────────────────
-function RoleCard({
+const RoleCard = memo(function RoleCard({
   role,
   selected,
   onSelect,
@@ -355,7 +355,7 @@ function RoleCard({
       </div>
     </motion.div>
   );
-}
+});
 
 // ── Success Screen ────────────────────────────────────
 function SuccessScreen({ onRedirect }: { onRedirect: () => void }) {
@@ -461,6 +461,7 @@ const slideVariants = {
 export default function RegisterPage() {
   const { registerAsync: registerUser, isRegistering } = useAuth();
   const router = useRouter();
+  const hasUserInteractedRef = useRef(false);
 
   const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<Partial<RegisterInput> & { _step?: number; _role?: 'TOURIST' | 'LOCAL_GUIDE' }>({
     formKey: 'register',
@@ -468,19 +469,25 @@ export default function RegisterPage() {
     storageType: 'sessionStorage',
     clearOnSuccess: true,
     onRestore: (data) => {
-      // Restore form fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (value && key !== '_step' && key !== '_role') {
-          setValue(key as keyof RegisterInput, value as string);
+      // Only restore if user hasn't started typing
+      if (!hasUserInteractedRef.current) {
+        // Restore form fields only if empty
+        Object.entries(data).forEach(([key, value]) => {
+          if (value && key !== '_step' && key !== '_role') {
+            const input = document.querySelector(`input[name="${key}"]`) as HTMLInputElement;
+            if (input && !input.value) {
+              setValue(key as keyof RegisterInput, value as string);
+            }
+          }
+        });
+        
+        // Restore step and role if valid
+        if (data._step && data._step >= 1 && data._step <= 3) {
+          setStep(data._step);
         }
-      });
-      
-      // Restore step and role if valid
-      if (data._step && data._step >= 1 && data._step <= 3) {
-        setStep(data._step);
-      }
-      if (data._role && (data._role === 'TOURIST' || data._role === 'LOCAL_GUIDE')) {
-        setSelectedRole(data._role);
+        if (data._role && (data._role === 'TOURIST' || data._role === 'LOCAL_GUIDE')) {
+          setSelectedRole(data._role);
+        }
       }
     },
   });
@@ -521,15 +528,6 @@ export default function RegisterPage() {
     }
   }, [errors, focusOnError]);
 
-  const watchPassword = watch('password', '');
-  const watchFirstName = watch('first_name', '');
-  const watchLastName = watch('last_name', '');
-  const watchUsername = watch('username', '');
-  const watchEmail = watch('email', '');
-  const watchConfirmPassword = watch('confirm_password', '');
-  const watchBio = watch('bio', '');
-  const watchLocation = watch('location', '');
-
   // Watch all form values for persistence
   const formValues = watch();
 
@@ -552,9 +550,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     const timeout = setTimeout(async () => {
-      if (watchUsername.length >= 3) {
+      if (formValues.username && formValues.username.length >= 3) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check-username/?username=${watchUsername}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check-username/?username=${formValues.username}`);
           const data = await response.json();
           if (data.exists) {
             setUsernameError('Username imeshatumika. Tumia nyingine.');
@@ -571,13 +569,13 @@ export default function RegisterPage() {
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [watchUsername]);
+  }, [formValues.username]);
 
   useEffect(() => {
     const timeout = setTimeout(async () => {
-      if (watchEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchEmail)) {
+      if (formValues.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check-email/?email=${watchEmail}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check-email/?email=${formValues.email}`);
           const data = await response.json();
           if (data.exists) {
             setEmailError('Email imeshatumika. Tumia nyingine.');
@@ -594,27 +592,28 @@ export default function RegisterPage() {
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [watchEmail]);
+  }, [formValues.email]);
 
   // ── Micro feedback ──────────────────────────────────
   useEffect(() => {
     const fb: Record<string, string> = {};
-    if (watchEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchEmail)) {
+    if (formValues.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
       fb.email = 'Email sahihi 📧';
     }
     if (
-      watchPassword.length >= 8 &&
-      /[A-Z]/.test(watchPassword) &&
-      /[0-9]/.test(watchPassword) &&
-      /[^A-Za-z0-9]/.test(watchPassword)
+      formValues.password &&
+      formValues.password.length >= 8 &&
+      /[A-Z]/.test(formValues.password) &&
+      /[0-9]/.test(formValues.password) &&
+      /[^A-Za-z0-9]/.test(formValues.password)
     ) {
       fb.password = 'Inaonekana unaweka nenosiri salama 🔐';
     }
-    if (watchConfirmPassword && watchConfirmPassword === watchPassword) {
+    if (formValues.confirm_password && formValues.confirm_password === formValues.password) {
       fb.confirm_password = 'Nenosiri zinalingana ✓';
     }
     setMicroFeedback(fb);
-  }, [watchEmail, watchPassword, watchConfirmPassword]);
+  }, [formValues.email, formValues.password, formValues.confirm_password]);
 
   // ── Navigation ──────────────────────────────────────
   const validateStep1 = async () => {
@@ -816,7 +815,9 @@ export default function RegisterPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
                     <KiliInput
-                      {...register('first_name')}
+                      {...register('first_name', {
+                        onChange: () => { hasUserInteractedRef.current = true; }
+                      })}
                       label="Jina la kwanza"
                       error={errors.first_name?.message}
                       hint={microFeedback.first_name}
@@ -825,7 +826,9 @@ export default function RegisterPage() {
                   </motion.div>
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     <KiliInput
-                      {...register('last_name')}
+                      {...register('last_name', {
+                        onChange: () => { hasUserInteractedRef.current = true; }
+                      })}
                       label="Jina la mwisho"
                       error={errors.last_name?.message}
                       hint={microFeedback.last_name}
@@ -836,7 +839,9 @@ export default function RegisterPage() {
 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
                   <KiliInput
-                    {...register('username')}
+                    {...register('username', {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Username"
                     error={errors.username?.message || usernameError}
                     hint={usernameError ? undefined : microFeedback.username}
@@ -846,7 +851,9 @@ export default function RegisterPage() {
 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <KiliInput
-                    {...register('email')}
+                    {...register('email', {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Barua pepe (Email)"
                     type="email"
                     error={errors.email?.message || emailError}
@@ -858,7 +865,9 @@ export default function RegisterPage() {
                 <div className="pt-1">
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
                   <KiliInput
-                    {...register('password')}
+                    {...register('password', {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Nenosiri"
                     type="password"
                     error={errors.password?.message}
@@ -867,9 +876,9 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                   />
                   <AnimatePresence>
-                    {watchPassword && (
+                    {formValues.password && (
                       <div className="mt-3">
-                        <PasswordStrength password={watchPassword} />
+                        <PasswordStrength password={formValues.password} />
                       </div>
                     )}
                   </AnimatePresence>
@@ -878,7 +887,9 @@ export default function RegisterPage() {
 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                   <KiliInput
-                    {...register('confirm_password')}
+                    {...register('confirm_password', {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Thibitisha Nenosiri"
                     type="password"
                     error={errors.confirm_password?.message}
@@ -1080,14 +1091,18 @@ export default function RegisterPage() {
                 {/* Bio & Location */}
                 <div className="space-y-4">
                   <KiliInput
-                    {...register('bio' as keyof RegisterInput)}
+                    {...register('bio' as keyof RegisterInput, {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Bio yako (si lazima)"
-                    value={watchBio}
+                    value={formValues.bio}
                   />
                   <KiliInput
-                    {...register('location' as keyof RegisterInput)}
+                    {...register('location' as keyof RegisterInput, {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Uko wapi? (Mji/Maeneo)"
-                    value={watchLocation}
+                    value={formValues.location}
                   />
                 </div>
 

@@ -25,7 +25,6 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
       type = 'text',
       className,
       value,
-      defaultValue,
       onChange,
       id,
       ...props
@@ -34,11 +33,10 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
   ) => {
     const [focused, setFocused] = useState(false);
     const [showPwd, setShowPwd] = useState(false);
-    const [internalValue, setInternalValue] = useState(defaultValue ?? '');
     const generatedId = useId();
 
-    const isControlled = value !== undefined;
-    const currentValue = isControlled ? String(value ?? '') : String(internalValue);
+    // Always use controlled mode - value prop is required
+    const currentValue = String(value ?? '');
     const hasValue = currentValue.length > 0;
     const inputType = showPasswordToggle
       ? showPwd ? 'text' : 'password'
@@ -50,7 +48,6 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
     const hintId = `${inputId}-hint`;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!isControlled) setInternalValue(e.target.value);
       onChange?.(e);
     };
 
@@ -92,7 +89,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
             ref={ref}
             id={inputId}
             type={inputType}
-            value={isControlled ? value : internalValue}
+            value={value}
             onChange={handleChange}
             onFocus={(e) => {
               setFocused(true);

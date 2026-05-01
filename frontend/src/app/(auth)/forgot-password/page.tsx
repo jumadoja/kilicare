@@ -164,6 +164,8 @@ function Countdown({
 type Step = 'email' | 'otp' | 'password' | 'success';
 
 export default function ForgotPasswordPage() {
+  const hasUserInteractedRef = useRef(false);
+
   const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<{
     emailOrPhone: string;
     username: string;
@@ -174,10 +176,16 @@ export default function ForgotPasswordPage() {
     storageType: 'sessionStorage',
     clearOnSuccess: true,
     onRestore: (data) => {
-      if (data.emailOrPhone) setEmailOrPhone(data.emailOrPhone);
-      if (data.username) setUsername(data.username);
-      if (data.step && ['email', 'otp', 'password', 'success'].includes(data.step)) {
-        setStep(data.step as Step);
+      // Only restore if user hasn't started typing
+      if (!hasUserInteractedRef.current) {
+        const currentEmail = (document.querySelector('input[name="email_or_phone"]') as HTMLInputElement)?.value;
+        const currentUsername = (document.querySelector('input[name="username"]') as HTMLInputElement)?.value;
+        
+        if (data.emailOrPhone && !currentEmail) setEmailOrPhone(data.emailOrPhone);
+        if (data.username && !currentUsername) setUsername(data.username);
+        if (data.step && ['email', 'otp', 'password', 'success'].includes(data.step)) {
+          setStep(data.step as Step);
+        }
       }
     },
   });
@@ -427,7 +435,9 @@ export default function ForgotPasswordPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <KiliInput
-                    {...emailForm.register('email_or_phone')}
+                    {...emailForm.register('email_or_phone', {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Barua pepe au namba ya simu"
                     error={emailForm.formState.errors.email_or_phone?.message}
                     type="text"
@@ -435,7 +445,9 @@ export default function ForgotPasswordPage() {
                   />
 
                   <KiliInput
-                    {...emailForm.register('username')}
+                    {...emailForm.register('username', {
+                      onChange: () => { hasUserInteractedRef.current = true; }
+                    })}
                     label="Username wako"
                     error={emailForm.formState.errors.username?.message}
                     type="text"
