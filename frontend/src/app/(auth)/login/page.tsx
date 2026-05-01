@@ -1,8 +1,7 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Loader2, MapPin } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,7 +13,6 @@ import { KiliInput } from '@/components/ui/KiliInput';
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useAuth();
-  const hasUserInteractedRef = useRef(false);
 
   const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<LoginInput>({
     formKey: 'login',
@@ -22,14 +20,12 @@ export default function LoginPage() {
     storageType: 'sessionStorage',
     clearOnSuccess: true,
     onRestore: (data) => {
-      // Only restore if user hasn't started typing and field is empty
-      if (!hasUserInteractedRef.current) {
-        const currentUsername = (document.querySelector('input[name="username"]') as HTMLInputElement)?.value;
-        const currentPassword = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
-        
-        if (data.username && !currentUsername) setValue('username', data.username);
-        if (data.password && !currentPassword) setValue('password', data.password);
-      }
+      // Restore form fields only if empty
+      const currentUsername = (document.querySelector('input[name="username"]') as HTMLInputElement)?.value;
+      const currentPassword = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+      
+      if (data.username && !currentUsername) setValue('username', data.username);
+      if (data.password && !currentPassword) setValue('password', data.password);
     },
   });
 
@@ -42,7 +38,6 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch,
     setValue,
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -55,19 +50,9 @@ export default function LoginPage() {
     }
   }, [errors, focusOnError]);
 
-
-  // Watch form values for persistence
-  const formValues = watch();
-
-
-  // Save form state on change
-  useEffect(() => {
-    if (isRestored && (formValues.username || formValues.password)) {
-      saveFormState(formValues);
-    }
-  }, [formValues, isRestored, saveFormState]);
-
   const onSubmit = (data: LoginInput) => {
+    // Save form state on submit
+    saveFormState(data);
     login(data);
     // Clear form state on successful submission (handled by useAuth onSuccess)
     // We'll clear it in a useEffect when we detect successful navigation
@@ -87,27 +72,11 @@ export default function LoginPage() {
       {/* Background Visual Layer */}
 
       {/* ── Main content wrapper ── */}
-      <motion.div
-        className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        style={{ willChange: 'transform, opacity' }}
-      >
+      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4">
         {/* Logo section */}
-        <motion.div
-          className="text-center mb-6"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          <motion.div
-            className="inline-flex items-center justify-center mb-4"
-            initial={{ opacity: 0, y: -20, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, type: 'spring', stiffness: 200 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="text-center mb-6">
+          <div
+            className="inline-flex items-center justify-center mb-4 transition-transform duration-150 ease hover:scale-[1.05] active:scale-[0.95]"
           >
             <div
               className="relative p-4 rounded-3xl glass"
@@ -131,27 +100,19 @@ export default function LoginPage() {
                 style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}
               />
             </div>
-          </motion.div>
+          </div>
 
-          <motion.h1
-            className="text-3xl font-black font-display text-text-primary tracking-tight mb-2"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
+          <h1 className="text-3xl font-black font-display text-text-primary tracking-tight mb-2">
             Kilicare<span className="text-gradient-gold">+</span>
-          </motion.h1>
-        </motion.div>
+          </h1>
+        </div>
 
         {/* ── Glass card ── */}
-        <motion.div
+        <div
           className="relative rounded-3xl overflow-hidden pb-safe glass-auth"
           style={{
             boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
           }}
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
         >
           {/* Top gradient line */}
           <div
@@ -174,9 +135,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
               {/* Username field */}
               <KiliInput
-                {...register('username', {
-                  onChange: () => { hasUserInteractedRef.current = true; }
-                })}
+                {...register('username')}
                 label="Username"
                 error={errors.username?.message}
                 type="text"
@@ -185,9 +144,7 @@ export default function LoginPage() {
 
               {/* Password field */}
               <KiliInput
-                {...register('password', {
-                  onChange: () => { hasUserInteractedRef.current = true; }
-                })}
+                {...register('password')}
                 label="Password"
                 error={errors.password?.message}
                 type="password"
@@ -207,45 +164,29 @@ export default function LoginPage() {
               </div>
 
               {/* Submit button */}
-              <motion.button
+              <button
                 type="submit"
                 disabled={isLoggingIn}
                 className={cn(
                   'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                   'relative overflow-hidden transition-all duration-200',
                   isLoggingIn ? 'opacity-80 cursor-not-allowed' : 'hover:brightness-110',
+                  'transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]',
                 )}
                 style={{
                   background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                   boxShadow: isLoggingIn ? 'none' : '0 4px 20px rgba(245,166,35,0.35)',
                 }}
-                whileHover={!isLoggingIn ? { scale: 1.01 } : {}}
-                whileTap={!isLoggingIn ? { scale: 0.98 } : {}}
               >
-                <AnimatePresence mode="wait">
-                  {isLoggingIn ? (
-                    <motion.div
-                      key="loading"
-                      className="flex items-center justify-center gap-2"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <Loader2 size={18} className="animate-spin" />
-                      <span>Inaingia...</span>
-                    </motion.div>
-                  ) : (
-                    <motion.span
-                      key="text"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      Ingia
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+                {isLoggingIn ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Inaingia...</span>
+                  </div>
+                ) : (
+                  <span>Ingia</span>
+                )}
+              </button>
             </form>
 
             {/* Divider */}
@@ -258,15 +199,15 @@ export default function LoginPage() {
             {/* Social buttons */}
             <div className="grid grid-cols-2 gap-3">
               {['Google', 'Apple'].map((provider) => (
-                <div key={provider} className="relative">
-                  <motion.button
+                <div key={provider}>
+                  <button
                     type="button"
                     disabled
                     className="w-full h-10 rounded-xl border border-dark-border bg-dark-elevated text-text-muted text-xs font-body cursor-not-allowed opacity-60 flex items-center justify-center gap-2"
                   >
                     <span>{provider === 'Google' ? '🌐' : '🍎'}</span>
                     <span>{provider}</span>
-                  </motion.button>
+                  </button>
                   <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-kili-gold/20 border border-kili-gold/30 text-[9px] font-semibold text-kili-gold">
                     Soon
                   </span>
@@ -274,13 +215,8 @@ export default function LoginPage() {
               ))}
             </div>
 
-            {/* Register link with animated underline */}
-            <motion.div
-              className="mt-6 pt-4 border-t border-dark-border text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
+            {/* Register link */}
+            <div className="mt-6 pt-4 border-t border-dark-border text-center">
               <p className="text-text-muted text-sm font-body">
                 Huna akaunti?{' '}
                 <Link
@@ -288,32 +224,21 @@ export default function LoginPage() {
                   className="inline-flex items-center gap-1 text-kili-gold hover:text-kili-gold-light font-semibold transition-all duration-200 hover:underline hover:underline-offset-4"
                 >
                   Jisajili hapa
-                  <motion.span
-                    initial={{ x: 0 }}
-                    whileHover={{ x: 3 }}
-                    transition={{ type: 'spring', stiffness: 400 }}
-                  >
-                    →
-                  </motion.span>
+                  <span>→</span>
                 </Link>
               </p>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Bottom text */}
-        <motion.p
-          className="text-center text-text-disabled text-[10px] mt-4 font-body"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
+        <p className="text-center text-text-disabled text-[10px] mt-4 font-body">
           Kwa kuingia, unakubali{' '}
           <span className="text-kili-gold/70 cursor-pointer hover:text-kili-gold">Masharti ya Matumizi</span>
           {' '}na{' '}
           <span className="text-kili-gold/70 cursor-pointer hover:text-kili-gold">Sera ya Faragha</span>
-        </motion.p>
-      </motion.div>
+        </p>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -28,16 +27,12 @@ const OnboardingAssistant = memo(function OnboardingAssistant({ step }: { step: 
   };
 
   return (
-    <motion.div
+    <div
       className="mb-4 p-3 rounded-xl flex items-start gap-3"
       style={{
         background: 'rgba(245,166,35,0.08)',
         border: '1px solid rgba(245,166,35,0.2)',
       }}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
     >
       <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
         style={{ background: 'rgba(245,166,35,0.2)' }}>
@@ -46,7 +41,7 @@ const OnboardingAssistant = memo(function OnboardingAssistant({ step }: { step: 
       <div>
         <p className="text-sm font-body text-text-primary">{messages[step as keyof typeof messages]}</p>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -68,60 +63,36 @@ const ProgressIntelligence = memo(function ProgressIntelligence({
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3">
-        <motion.div
-          key={current}
-          className="flex items-center gap-2"
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
+        <div className="flex items-center gap-2">
           <span className="text-sm font-body font-semibold text-kili-gold">
             Hatua ya {current} kati ya {total}
           </span>
-          <motion.span
-            key={`achievement-${current}`}
-            className="text-lg"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
+          <span className="text-lg">
             {achievements[current as keyof typeof achievements].icon}
-          </motion.span>
-        </motion.div>
-        <motion.span
-          key={`pct-${current}`}
-          className="text-xs font-body text-text-muted"
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
+          </span>
+        </div>
+        <span className="text-xs font-body text-text-muted">
           {Math.round(progress)}%
-        </motion.span>
+        </span>
       </div>
 
       <div
         className="relative h-2 rounded-full overflow-hidden"
         style={{ background: 'rgba(42,42,58,1)' }}
       >
-        <motion.div
-          className="absolute inset-y-0 left-0 rounded-full"
+        <div
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-300 ease"
           style={{
+            width: `${progress}%`,
             background: 'linear-gradient(90deg, #F5A623, #00E5A0)',
             boxShadow: '0 0 20px rgba(245,166,35,0.4)',
           }}
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
         />
       </div>
 
-      <motion.p
-        key={`motivation-${current}`}
-        className="text-xs text-kili-green mt-2 font-body text-center"
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
+      <p className="text-xs text-kili-green mt-2 font-body text-center">
         {achievements[current as keyof typeof achievements].text}
-      </motion.p>
+      </p>
     </div>
   );
 });
@@ -140,34 +111,22 @@ function PasswordStrength({ password }: { password: string }) {
   const colors = ['#E84545', '#FF7700', '#F5A623', '#00E5A0'];
   const labels = ['Dhaifu', 'Wastani', 'Nzuri', 'Bora 🔥'];
   const isMax = score === 4;
-  const [showSparkles, setShowSparkles] = useState(false);
-
-  // Trigger sparkle animation when password becomes strong
-  useEffect(() => {
-    if (isMax && !showSparkles) {
-      setShowSparkles(true);
-      setTimeout(() => setShowSparkles(false), 800);
-    }
-  }, [isMax, showSparkles]);
 
   if (!password) return null;
 
   return (
-    <motion.div
-      className="mt-2 space-y-4"
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-    >
+    <div className="mt-2 space-y-4">
       {/* Strength bars */}
       <div className="flex gap-1">
         {[1, 2, 3, 4].map((i) => (
-          <motion.div
+          <div
             key={i}
-            className="flex-1 h-1.5 rounded-full"
-            style={{ background: i <= score ? colors[score - 1] : '#2A2A3A' }}
-            animate={{ scaleX: i <= score ? 1 : 0.3, originX: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.05 }}
+            className="flex-1 h-1.5 rounded-full transition-all duration-300 ease"
+            style={{ 
+              background: i <= score ? colors[score - 1] : '#2A2A3A',
+              transform: i <= score ? 'scaleX(1)' : 'scaleX(0.3)',
+              transformOrigin: 'left',
+            }}
           />
         ))}
       </div>
@@ -189,19 +148,16 @@ function PasswordStrength({ password }: { password: string }) {
         </div>
 
         {score > 0 && (
-          <motion.span
+          <span
             className="text-xs font-semibold font-body flex items-center gap-1"
             style={{ color: colors[score - 1] }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 400 }}
           >
             {isMax && <Sparkles size={12} className="animate-pulse" />}
             {labels[score - 1]}
-          </motion.span>
+          </span>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -260,38 +216,28 @@ const RoleCard = memo(function RoleCard({
       };
 
   return (
-    <motion.div
+    <div
       onClick={onSelect}
-      className="relative cursor-pointer rounded-xl p-4 md:p-5 w-full min-h-[120px] md:min-h-[140px]"
+      className="relative cursor-pointer rounded-xl p-4 md:p-5 w-full min-h-[120px] md:min-h-[140px] transition-all duration-200 ease"
       style={{
         background: selected ? config.gradient : 'rgba(28,28,39,0.5)',
         border: `1px solid ${selected ? config.border : 'rgba(42,42,58,0.8)'}`,
         boxShadow: selected ? config.glow : 'none',
+        transform: selected ? 'scale(1.01)' : 'scale(1)',
       }}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
-      animate={{ scale: selected ? 1.01 : 1 }}
     >
-      {/* Check icon - subtle fade-in */}
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            className="absolute top-3 right-3"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          >
-            <CheckCircle2 size={20} style={{ color: config.color }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Check icon */}
+      {selected && (
+        <div className="absolute top-3 right-3">
+          <CheckCircle2 size={20} style={{ color: config.color }} />
+        </div>
+      )}
 
       {/* Content container with max-width to prevent text spreading */}
       <div className="w-full">
         {/* Icon box */}
-        <motion.div
-          className="w-12 h-12 rounded-xl flex items-center justify-center mb-3"
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-all duration-200 ease"
           style={{
             background: selected ? config.gradient : 'rgba(42,42,58,0.5)',
             border: `1px solid ${selected ? config.border : 'transparent'}`,
@@ -299,7 +245,7 @@ const RoleCard = memo(function RoleCard({
           }}
         >
           {config.icon}
-        </motion.div>
+        </div>
 
         <h3 className="font-bold font-display text-base text-text-primary mb-0.5">
           {config.title}
@@ -339,21 +285,14 @@ const RoleCard = memo(function RoleCard({
         </div>
 
         {/* Selection feedback */}
-        <AnimatePresence>
-          {selected && (
-            <motion.p
-              className="mt-3 text-xs text-kili-green font-body text-center flex items-center justify-center gap-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <Heart size={10} />
-              {config.feedback}
-            </motion.p>
-          )}
-        </AnimatePresence>
+        {selected && (
+          <p className="mt-3 text-xs text-kili-green font-body text-center flex items-center justify-center gap-1">
+            <Heart size={10} />
+            {config.feedback}
+          </p>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -368,127 +307,60 @@ function SuccessScreen({ onRedirect }: { onRedirect: () => void }) {
 
   return (
     <div className="relative">
-      <motion.div
-        className="text-center py-12 relative z-10"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="text-center py-12 relative z-10">
         {/* Icon */}
-        <motion.div
-          className="relative inline-flex items-center justify-center w-24 h-24 rounded-full mb-6"
+        <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-full mb-6"
           style={{
             background: 'linear-gradient(135deg, #00E5A0, #00C47A)',
             boxShadow: '0 0 40px rgba(0,229,160,0.4)',
           }}
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 15 }}
         >
           <CheckCircle2 size={48} className="text-dark-bg" />
+        </div>
 
-          {/* Glow ring */}
-          <motion.div
-            className="absolute inset-0 rounded-full pointer-events-none"
-            style={{
-              background: 'rgba(0,229,160,0.3)',
-              filter: 'blur(16px)',
-            }}
-            animate={{ scale: [1, 1.5, 2], opacity: [0.5, 0.3, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
-        </motion.div>
-
-        <motion.h2
-          className="text-2xl font-black font-display text-text-primary mb-3"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        <h2 className="text-2xl font-black font-display text-text-primary mb-3">
           Akaunti imeundwa 🎉
-        </motion.h2>
+        </h2>
 
-        <motion.p
-          className="text-lg font-body text-kili-green mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <p className="text-lg font-body text-kili-green mb-4">
           Karibu KilicareGO+
-        </motion.p>
+        </p>
 
-        <motion.p
-          className="text-sm text-text-muted font-body mb-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
+        <p className="text-sm text-text-muted font-body mb-8">
           Inakupeleka kwenye ukurasa wa kuingia...
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-        >
+        <div>
           <Loader2 size={24} className="text-kili-gold animate-spin mx-auto" />
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }
 
 // ── Slide variants ────────────────────────────────────
-const slideVariants = {
-  enter: (dir: number) => ({ 
-    x: dir > 0 ? 100 : -100, 
-    opacity: 0,
-    scale: 0.95,
-  }),
-  center: { 
-    x: 0, 
-    opacity: 1,
-    scale: 1,
-  },
-  exit: (dir: number) => ({ 
-    x: dir < 0 ? 100 : -100, 
-    opacity: 0,
-    scale: 0.95,
-  }),
-};
+// Removed - using simple CSS transitions instead
 
 // ── Main Page ─────────────────────────────────────────
 export default function RegisterPage() {
   const { registerAsync: registerUser, isRegistering } = useAuth();
   const router = useRouter();
-  const hasUserInteractedRef = useRef(false);
 
-  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<Partial<RegisterInput> & { _step?: number; _role?: 'TOURIST' | 'LOCAL_GUIDE' }>({
+  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<Partial<RegisterInput>>({
     formKey: 'register',
     initialValues: {},
     storageType: 'sessionStorage',
     clearOnSuccess: true,
     onRestore: (data) => {
-      // Only restore if user hasn't started typing
-      if (!hasUserInteractedRef.current) {
-        // Restore form fields only if empty
-        Object.entries(data).forEach(([key, value]) => {
-          if (value && key !== '_step' && key !== '_role') {
-            const input = document.querySelector(`input[name="${key}"]`) as HTMLInputElement;
-            if (input && !input.value) {
-              setValue(key as keyof RegisterInput, value as string);
-            }
+      // Restore form fields only if empty
+      Object.entries(data).forEach(([key, value]) => {
+        if (value) {
+          const input = document.querySelector(`input[name="${key}"]`) as HTMLInputElement;
+          if (input && !input.value) {
+            setValue(key as keyof RegisterInput, value as string);
           }
-        });
-        
-        // Restore step and role if valid
-        if (data._step && data._step >= 1 && data._step <= 3) {
-          setStep(data._step);
         }
-        if (data._role && (data._role === 'TOURIST' || data._role === 'LOCAL_GUIDE')) {
-          setSelectedRole(data._role);
-        }
-      }
+      });
     },
   });
 
@@ -506,14 +378,16 @@ export default function RegisterPage() {
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [microFeedback, setMicroFeedback] = useState<Record<string, string>>({});
+  const [passwordValue, setPasswordValue] = useState('');
+  const [bioValue, setBioValue] = useState('');
+  const [locationValue, setLocationValue] = useState('');
 
 
   const {
     register,
     handleSubmit,
     trigger,
-    watch,
+    getValues,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
@@ -528,100 +402,17 @@ export default function RegisterPage() {
     }
   }, [errors, focusOnError]);
 
-  // Watch all form values for persistence
-  const formValues = watch();
-
-
-  // Save form state on change
-  useEffect(() => {
-    if (isRestored) {
-      const toSave = {
-        ...formValues,
-        _step: step,
-        _role: selectedRole,
-      };
-      saveFormState(toSave);
-    }
-  }, [formValues, step, selectedRole, isRestored, saveFormState]);
-
-  // Real-time validation for username/email conflicts
-  const [usernameError, setUsernameError] = useState<string | undefined>(undefined);
-  const [emailError, setEmailError] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    const timeout = setTimeout(async () => {
-      if (formValues.username && formValues.username.length >= 3) {
-        try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check-username/?username=${formValues.username}`);
-          const data = await response.json();
-          if (data.exists) {
-            setUsernameError('Username imeshatumika. Tumia nyingine.');
-            toast.error('Username imeshatumika. Tumia nyingine.');
-          } else {
-            setUsernameError(undefined);
-          }
-        } catch (error) {
-          // Silent fail, let backend handle on submit
-        }
-      } else {
-        setUsernameError(undefined);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [formValues.username]);
-
-  useEffect(() => {
-    const timeout = setTimeout(async () => {
-      if (formValues.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
-        try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check-email/?email=${formValues.email}`);
-          const data = await response.json();
-          if (data.exists) {
-            setEmailError('Email imeshatumika. Tumia nyingine.');
-            toast.error('Email imeshatumika. Tumia nyingine.');
-          } else {
-            setEmailError(undefined);
-          }
-        } catch (error) {
-          // Silent fail, let backend handle on submit
-        }
-      } else {
-        setEmailError(undefined);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [formValues.email]);
-
-  // ── Micro feedback ──────────────────────────────────
-  useEffect(() => {
-    const fb: Record<string, string> = {};
-    if (formValues.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
-      fb.email = 'Email sahihi 📧';
-    }
-    if (
-      formValues.password &&
-      formValues.password.length >= 8 &&
-      /[A-Z]/.test(formValues.password) &&
-      /[0-9]/.test(formValues.password) &&
-      /[^A-Za-z0-9]/.test(formValues.password)
-    ) {
-      fb.password = 'Inaonekana unaweka nenosiri salama 🔐';
-    }
-    if (formValues.confirm_password && formValues.confirm_password === formValues.password) {
-      fb.confirm_password = 'Nenosiri zinalingana ✓';
-    }
-    setMicroFeedback(fb);
-  }, [formValues.email, formValues.password, formValues.confirm_password]);
-
   // ── Navigation ──────────────────────────────────────
   const validateStep1 = async () => {
     const ok = await trigger([
       'first_name', 'last_name', 'username',
       'email', 'password', 'confirm_password',
     ]);
-    if (ok) setStep(2);
+    if (ok) {
+      // Save form state only on step change
+      saveFormState(getValues());
+      setStep(2);
+    }
   };
 
   const goStep3 = () => {
@@ -630,6 +421,8 @@ export default function RegisterPage() {
       return;
     }
     setValue('role', selectedRole);
+    // Save form state only on step change
+    saveFormState(getValues());
     setStep(3);
   };
 
@@ -728,32 +521,15 @@ export default function RegisterPage() {
     <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
       {/* Background Visual Layer */}
       
-      <motion.div
-        className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4"
-        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, type: 'spring' }}
-        style={{ willChange: 'transform, opacity' }}
-      >
+      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4">
       {/* Header */}
       <div className="text-center mb-6">
-        <motion.h1
-          className="text-3xl font-black font-display text-text-primary tracking-tight mb-2"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+        <h1 className="text-3xl font-black font-display text-text-primary tracking-tight mb-2">
           Kilicare<span className="text-gradient-gold">+</span>
-        </motion.h1>
-        <motion.p
-          className="text-sm font-body"
-          style={{ color: '#F5A623' }}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        </h1>
+        <p className="text-sm font-body" style={{ color: '#F5A623' }}>
           Jiunge na Kilicare+ kugundua Tanzania
-        </motion.p>
+        </p>
       </div>
 
 
@@ -765,7 +541,7 @@ export default function RegisterPage() {
       )}
 
       {/* ── Card ── */}
-      <motion.div
+      <div
         className="relative rounded-3xl overflow-hidden pb-safe glass-auth"
         style={{
           boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
@@ -781,28 +557,17 @@ export default function RegisterPage() {
         />
 
         <div className="p-6">
-          <AnimatePresence mode="wait">
 
             {/* ══ SUCCESS ══ */}
             {showSuccess && (
-              <motion.div key="success">
+              <div>
                 <SuccessScreen onRedirect={() => router.push('/login')} />
-              </motion.div>
+              </div>
             )}
 
             {/* ══ STEP 1 ══ */}
             {!showSuccess && step === 1 && (
-              <motion.div
-                key="step1"
-                custom={1}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                className="space-y-4"
-                style={{ perspective: 1000 }}
-              >
+              <div className="space-y-4">
                 <OnboardingAssistant step={1} />
 
                 <div className="flex items-center gap-2 mb-4">
@@ -813,122 +578,95 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+                  <div>
                     <KiliInput
-                      {...register('first_name', {
-                        onChange: () => { hasUserInteractedRef.current = true; }
-                      })}
+                      {...register('first_name')}
                       label="Jina la kwanza"
                       error={errors.first_name?.message}
-                      hint={microFeedback.first_name}
                       autoComplete="given-name"
                     />
-                  </motion.div>
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                  </div>
+                  <div>
                     <KiliInput
-                      {...register('last_name', {
-                        onChange: () => { hasUserInteractedRef.current = true; }
-                      })}
+                      {...register('last_name')}
                       label="Jina la mwisho"
                       error={errors.last_name?.message}
-                      hint={microFeedback.last_name}
                       autoComplete="family-name"
                     />
-                  </motion.div>
+                  </div>
                 </div>
 
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+                <div>
                   <KiliInput
-                    {...register('username', {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
+                    {...register('username')}
                     label="Username"
-                    error={errors.username?.message || usernameError}
-                    hint={usernameError ? undefined : microFeedback.username}
+                    error={errors.username?.message}
                     autoComplete="username"
                   />
-                </motion.div>
-
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                  <KiliInput
-                    {...register('email', {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
-                    label="Barua pepe (Email)"
-                    type="email"
-                    error={errors.email?.message || emailError}
-                    hint={emailError ? undefined : microFeedback.email}
-                    autoComplete="email"
-                  />
-                </motion.div>
-
-                <div className="pt-1">
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                  <KiliInput
-                    {...register('password', {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
-                    label="Nenosiri"
-                    type="password"
-                    error={errors.password?.message}
-                    hint={microFeedback.password}
-                    showPasswordToggle
-                    autoComplete="new-password"
-                  />
-                  <AnimatePresence>
-                    {formValues.password && (
-                      <div className="mt-3">
-                        <PasswordStrength password={formValues.password} />
-                      </div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
                 </div>
 
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                <div>
                   <KiliInput
-                    {...register('confirm_password', {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
+                    {...register('email')}
+                    label="Barua pepe (Email)"
+                    type="email"
+                    error={errors.email?.message}
+                    autoComplete="email"
+                  />
+                </div>
+
+                <div className="pt-1">
+                  <div>
+                    <KiliInput
+                      {...register('password')}
+                      label="Nenosiri"
+                      type="password"
+                      error={errors.password?.message}
+                      showPasswordToggle
+                      autoComplete="new-password"
+                      value={passwordValue}
+                      onChange={(e) => {
+                        setPasswordValue(e.target.value);
+                      }}
+                    />
+                    {passwordValue && (
+                      <div className="mt-3">
+                        <PasswordStrength password={passwordValue} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <KiliInput
+                    {...register('confirm_password')}
                     label="Thibitisha Nenosiri"
                     type="password"
                     error={errors.confirm_password?.message}
-                    hint={microFeedback.confirm_password}
                     showPasswordToggle
                     autoComplete="new-password"
                   />
-                </motion.div>
+                </div>
 
                 <div className="pt-2">
-                  <motion.button
+                  <button
                     type="button"
                     onClick={validateStep1}
-                    className="w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2"
+                    className="w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2 transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                     style={{
                       background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                       boxShadow: '0 4px 20px rgba(245,166,35,0.35)',
                     }}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
                   >
                     Endelea <ArrowRight size={18} />
-                  </motion.button>
+                  </button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* ══ STEP 2 ══ */}
             {!showSuccess && step === 2 && (
-              <motion.div
-                key="step2"
-                custom={2}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                style={{ perspective: 1000 }}
-              >
+              <div>
                 <OnboardingAssistant step={2} />
 
                 <div className="flex items-center gap-2 mb-5">
@@ -954,46 +692,33 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <motion.button
+                  <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="min-w-[100px] h-12 px-6 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="min-w-[100px] h-12 px-6 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200 transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                   >
                     <ArrowLeft size={16} />
                     Rudi
-                  </motion.button>
+                  </button>
 
-                  <motion.button
+                  <button
                     type="button"
                     onClick={goStep3}
-                    className="flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2"
+                    className="flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2 transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                     style={{
                       background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                       boxShadow: '0 4px 20px rgba(245,166,35,0.35)',
                     }}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
                   >
                     Endelea <ArrowRight size={18} />
-                  </motion.button>
+                  </button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* ══ STEP 3 ══ */}
             {!showSuccess && step === 3 && (
-              <motion.div
-                key="step3"
-                custom={3}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                style={{ perspective: 1000 }}
-              >
+              <div>
                 <OnboardingAssistant step={3} />
 
                 <div className="flex items-center gap-2 mb-5">
@@ -1014,8 +739,8 @@ export default function RegisterPage() {
                       onChange={handleAvatar}
                       disabled={avatarUploading}
                     />
-                    <motion.div
-                      className="relative w-24 h-24 rounded-full overflow-hidden"
+                    <div
+                      className="relative w-24 h-24 rounded-full overflow-hidden transition-transform duration-150 ease"
                       style={{
                         background: avatarPreview
                           ? 'transparent'
@@ -1023,8 +748,6 @@ export default function RegisterPage() {
                         border: '2px solid rgba(245,166,35,0.4)',
                         boxShadow: '0 0 20px rgba(245,166,35,0.2)',
                       }}
-                      whileHover={{ scale: !avatarUploading ? 1.01 : 1 }}
-                      whileTap={{ scale: !avatarUploading ? 0.98 : 1 }}
                     >
                       {avatarUploading ? (
                         <div className="relative w-full h-full flex flex-col items-center justify-center gap-1">
@@ -1034,13 +757,10 @@ export default function RegisterPage() {
                         </div>
                       ) : avatarPreview ? (
                         <>
-                          <motion.img
+                          <img
                             src={avatarPreview}
                             alt="avatar"
                             className="w-full h-full object-cover"
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.3 }}
                           />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                             <CheckCircle2 size={24} className="text-kili-green" />
@@ -1058,56 +778,40 @@ export default function RegisterPage() {
                           <Camera size={20} className="text-white" />
                         </div>
                       )}
-                    </motion.div>
+                    </div>
                   </label>
 
-                  <AnimatePresence>
-                    {avatarError && (
-                      <motion.p
-                        key="avatarErr"
-                        className="text-kili-sunset text-xs mt-2 font-body text-center"
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        {avatarError}
-                      </motion.p>
-                    )}
-                    {avatarPreview && !avatarError && (
-                      <motion.p
-                        key="avatarOk"
-                        className="text-kili-green text-xs mt-2 font-body text-center flex items-center gap-1"
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <CheckCircle2 size={10} />
-                        ✓ Tayari
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  {avatarError && (
+                    <p className="text-kili-sunset text-xs mt-2 font-body text-center">
+                      {avatarError}
+                    </p>
+                  )}
+                  {avatarPreview && !avatarError && (
+                    <p className="text-kili-green text-xs mt-2 font-body text-center flex items-center gap-1">
+                      <CheckCircle2 size={10} />
+                      ✓ Tayari
+                    </p>
+                  )}
                 </div>
 
                 {/* Bio & Location */}
                 <div className="space-y-4">
                   <KiliInput
-                    {...register('bio' as keyof RegisterInput, {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
+                    {...register('bio' as keyof RegisterInput)}
                     label="Bio yako (si lazima)"
-                    value={formValues.bio}
+                    value={bioValue}
+                    onChange={(e) => setBioValue(e.target.value)}
                   />
                   <KiliInput
-                    {...register('location' as keyof RegisterInput, {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
+                    {...register('location' as keyof RegisterInput)}
                     label="Uko wapi? (Mji/Maeneo)"
-                    value={formValues.location}
+                    value={locationValue}
+                    onChange={(e) => setLocationValue(e.target.value)}
                   />
                 </div>
 
                 {/* Role summary */}
-                <motion.div
+                <div
                   className="mt-4 p-3 rounded-xl flex items-center gap-3"
                   style={{
                     background:
@@ -1120,8 +824,6 @@ export default function RegisterPage() {
                         : 'rgba(245,166,35,0.2)'
                     }`,
                   }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
                 >
                   <span className="text-2xl">
                     {selectedRole === 'TOURIST' ? '🧳' : '⭐'}
@@ -1139,74 +841,50 @@ export default function RegisterPage() {
                       Unaweza kubadilisha baadaye kwenye mipangilio
                     </p>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Buttons */}
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
                   <div className="flex gap-3 mt-4">
-                    <motion.button
+                    <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="min-w-[90px] h-12 px-5 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200"
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
+                      className="min-w-[90px] h-12 px-5 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200 transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                     >
                       <ArrowLeft size={16} />
                       Rudi
-                    </motion.button>
+                    </button>
 
-                    <motion.button
+                    <button
                       type="submit"
                       disabled={isRegistering}
-                      className="flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm"
+                      className="flex-1 h-12 rounded-xl font-display font-bold text-dark-bg text-sm transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                       style={{
                         background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                         boxShadow: isRegistering
                           ? 'none'
                           : '0 4px 20px rgba(245,166,35,0.35)',
                       }}
-                      whileHover={!isRegistering ? { scale: 1.01 } : {}}
-                      whileTap={!isRegistering ? { scale: 0.98 } : {}}
                     >
-                      <AnimatePresence mode="wait">
-                        {isRegistering ? (
-                          <motion.div
-                            key="loading"
-                            className="flex items-center gap-2"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                          >
-                            <Loader2 size={18} className="animate-spin" />
-                            <span>Inaunda akaunti...</span>
-                          </motion.div>
-                        ) : (
-                          <motion.span
-                            key="text"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                          >
-                            🎉 Unda Akaunti
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </motion.button>
+                      {isRegistering ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 size={18} className="animate-spin" />
+                          <span>Inaunda akaunti...</span>
+                        </div>
+                      ) : (
+                        <span>🎉 Unda Akaunti</span>
+                      )}
+                    </button>
                   </div>
                 </form>
-              </motion.div>
+              </div>
             )}
 
-          </AnimatePresence>
+          </div>
 
           {/* Login link inside card */}
           {!showSuccess && (
-            <motion.div
-              className="mt-6 pt-4 border-t border-dark-border text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
+            <div className="mt-6 pt-4 border-t border-dark-border text-center">
               <p className="text-text-muted text-sm font-body">
                 Una akaunti tayari?{' '}
                 <Link
@@ -1214,20 +892,13 @@ export default function RegisterPage() {
                   className="inline-flex items-center gap-1 text-kili-gold hover:text-kili-gold-light font-semibold transition-all duration-200 hover:underline hover:underline-offset-4"
                 >
                   Ingia hapa
-                  <motion.span
-                    initial={{ x: 0 }}
-                    whileHover={{ x: 3 }}
-                    transition={{ type: 'spring', stiffness: 400 }}
-                  >
-                    →
-                  </motion.span>
+                  <span>→</span>
                 </Link>
               </p>
-            </motion.div>
+            </div>
           )}
         </div>
-      </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }

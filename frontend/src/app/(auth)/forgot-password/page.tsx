@@ -1,8 +1,7 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Mail, KeyRound, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
@@ -75,7 +74,7 @@ function OTPInput({
       className="flex gap-3 justify-center"
     >
       {digits.map((digit, i) => (
-        <motion.input
+        <input
           key={i}
           ref={(el) => { inputs.current[i] = el; }}
           id={`${otpId}-${i}`}
@@ -91,7 +90,7 @@ function OTPInput({
           autoComplete={i === 0 ? 'one-time-code' : 'off'}
           className={cn(
             'w-10 h-12 text-center text-lg font-bold font-mono rounded-xl',
-            'text-text-primary outline-none transition-all duration-200',
+            'text-text-primary outline-none transition-all duration-150 ease',
             'border bg-dark-elevated',
             'focus-visible:ring-2 focus-visible:ring-kili-gold focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
             digit
@@ -100,10 +99,6 @@ function OTPInput({
                 : 'border-kili-gold shadow-glow-gold text-kili-gold'
               : 'border-dark-border hover:border-dark-border-light focus:border-kili-gold focus:shadow-glow-gold',
           )}
-          animate={{
-            scale: digit ? [1, 1.1, 1] : 1,
-          }}
-          transition={{ duration: 0.2 }}
         />
       ))}
     </div>
@@ -164,29 +159,21 @@ function Countdown({
 type Step = 'email' | 'otp' | 'password' | 'success';
 
 export default function ForgotPasswordPage() {
-  const hasUserInteractedRef = useRef(false);
-
   const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<{
     emailOrPhone: string;
     username: string;
-    step: Step;
   }>({
     formKey: 'forgot-password',
-    initialValues: { emailOrPhone: '', username: '', step: 'email' },
+    initialValues: { emailOrPhone: '', username: '' },
     storageType: 'sessionStorage',
     clearOnSuccess: true,
     onRestore: (data) => {
-      // Only restore if user hasn't started typing
-      if (!hasUserInteractedRef.current) {
-        const currentEmail = (document.querySelector('input[name="email_or_phone"]') as HTMLInputElement)?.value;
-        const currentUsername = (document.querySelector('input[name="username"]') as HTMLInputElement)?.value;
-        
-        if (data.emailOrPhone && !currentEmail) setEmailOrPhone(data.emailOrPhone);
-        if (data.username && !currentUsername) setUsername(data.username);
-        if (data.step && ['email', 'otp', 'password', 'success'].includes(data.step)) {
-          setStep(data.step as Step);
-        }
-      }
+      // Restore form fields only if empty
+      const currentEmail = (document.querySelector('input[name="email_or_phone"]') as HTMLInputElement)?.value;
+      const currentUsername = (document.querySelector('input[name="username"]') as HTMLInputElement)?.value;
+      
+      if (data.emailOrPhone && !currentEmail) setEmailOrPhone(data.emailOrPhone);
+      if (data.username && !currentUsername) setUsername(data.username);
     },
   });
 
@@ -204,12 +191,11 @@ export default function ForgotPasswordPage() {
   const [showPwd, setShowPwd] = useState(false);
 
 
-  // Save form state on change
-  useEffect(() => {
-    if (isRestored) {
-      saveFormState({ emailOrPhone, username, step });
-    }
-  }, [emailOrPhone, username, step, isRestored, saveFormState]);
+  // Save form state only on step change
+  const handleStepChange = (newStep: Step) => {
+    saveFormState({ emailOrPhone, username });
+    setStep(newStep);
+  };
 
   // Email form
   const emailForm = useForm<ForgotPasswordInput>({
@@ -236,7 +222,7 @@ export default function ForgotPasswordPage() {
   const forgotMutation = useMutation({
     mutationFn: (data: ForgotPasswordInput) => authService.forgotPassword(data),
     onSuccess: () => {
-      setStep('otp');
+      handleStepChange('otp');
       setCanResend(false);
       toast.success('Namba ya uthibitisho imetumwa! 📧');
     },
@@ -247,14 +233,14 @@ export default function ForgotPasswordPage() {
     mutationFn: (data: { email_or_phone: string; otp: string; new_password: string }) =>
       authService.resetPassword(data),
     onSuccess: () => {
-      setStep('success');
+      handleStepChange('success');
       handleSuccess(); // Clear form state on success
       toast.success('Password imebadilishwa! 🎉');
     },
     onError: (e) => {
       toast.error(parseApiError(e));
       setOtpError(true);
-      setStep('otp');
+      handleStepChange('otp');
     },
   });
 
@@ -271,7 +257,7 @@ export default function ForgotPasswordPage() {
       return;
     }
     setOtpError(false);
-    setStep('password');
+    handleStepChange('password');
   };
 
   const onPasswordSubmit = (data: ResetPasswordInput) => {
@@ -309,15 +295,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
-      <motion.div
-        className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{ willChange: 'transform, opacity' }}
-      >
+      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4">
         {/* Card */}
-        <motion.div
+        <div
           className="relative rounded-3xl overflow-hidden pb-safe glass-strong"
           style={{
             boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
@@ -335,12 +315,7 @@ export default function ForgotPasswordPage() {
 
           <div className="p-6">
             {/* Back button inside card */}
-            <motion.div
-              className="mb-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-            >
+            <div className="mb-4">
               <Link
                 href="/login"
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-dark-elevated transition-all duration-200 font-body text-sm"
@@ -351,93 +326,70 @@ export default function ForgotPasswordPage() {
                 <ArrowLeft size={14} />
                 Rudi Login
               </Link>
-            </motion.div>
+            </div>
 
             {/* Header */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={step + '-header'}
-                className="mb-6"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.3 }}
+            <div className="mb-6">
+              {/* Icon */}
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                style={{
+                  background: step === 'success'
+                    ? 'rgba(0,229,160,0.12)'
+                    : 'rgba(245,166,35,0.1)',
+                  border: step === 'success'
+                    ? '1px solid rgba(0,229,160,0.3)'
+                    : '1px solid rgba(245,166,35,0.2)',
+                }}
               >
-                {/* Icon */}
-                <motion.div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{
-                    background: step === 'success'
-                      ? 'rgba(0,229,160,0.12)'
-                      : 'rgba(245,166,35,0.1)',
-                    border: step === 'success'
-                      ? '1px solid rgba(0,229,160,0.3)'
-                      : '1px solid rgba(245,166,35,0.2)',
-                  }}
-                  animate={step === 'success' ? {
-                    scale: [1, 1.05, 1],
-                  } : {}}
-                  transition={{ duration: 0.5 }}
-                >
-                  {currentConfig.icon}
-                </motion.div>
+                {currentConfig.icon}
+              </div>
 
-                <h2 className="text-lg font-black font-display text-text-primary tracking-tight">
-                  {currentConfig.title}
-                </h2>
-                <p className="text-text-muted text-xs mt-1 font-body">
-                  {currentConfig.subtitle}
-                </p>
+              <h2 className="text-lg font-black font-display text-text-primary tracking-tight">
+                {currentConfig.title}
+              </h2>
+              <p className="text-text-muted text-xs mt-1 font-body">
+                {currentConfig.subtitle}
+              </p>
 
-                {step !== 'success' && (
-                  <div className="flex gap-2 mt-4">
-                    {(['email', 'otp', 'password'] as Step[]).map((s) => {
-                      const allSteps = ['email', 'otp', 'password'];
-                      const isActive = s === step;
-                      const currentStepIndex = allSteps.indexOf(step as string);
-                      const isDone = currentStepIndex !== -1 && allSteps.indexOf(s) < currentStepIndex;
-                      return (
-                        <motion.div
-                          key={s}
-                          className="h-1 rounded-full"
-                          style={{
-                            background: isActive
-                              ? 'linear-gradient(90deg, #F5A623, #D4891A)'
-                              : isDone
-                                ? '#00E5A0'
-                                : '#2A2A3A',
-                          }}
-                          animate={{
-                            width: isActive ? 24 : 8,
-                          }}
-                          transition={{ duration: 0.3 }}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+              {step !== 'success' && (
+                <div className="flex gap-2 mt-4">
+                  {(['email', 'otp', 'password'] as Step[]).map((s) => {
+                    const allSteps = ['email', 'otp', 'password'];
+                    const isActive = s === step;
+                    const currentStepIndex = allSteps.indexOf(step as string);
+                    const isDone = currentStepIndex !== -1 && allSteps.indexOf(s) < currentStepIndex;
+                    return (
+                      <div
+                        key={s}
+                        className="h-1 rounded-full transition-all duration-300 ease"
+                        style={{
+                          background: isActive
+                            ? 'linear-gradient(90deg, #F5A623, #D4891A)'
+                            : isDone
+                              ? '#00E5A0'
+                              : '#2A2A3A',
+                          width: isActive ? 24 : 8,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Content */}
-            <AnimatePresence mode="wait">
 
               {/* ── Email step ── */}
               {step === 'email' && (
-                <motion.form
+                <form
                   key="email-form"
                   onSubmit={emailForm.handleSubmit(onEmailSubmit)}
                   className="space-y-4"
                   noValidate
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -30 }}
-                  transition={{ duration: 0.3 }}
                 >
                   <KiliInput
-                    {...emailForm.register('email_or_phone', {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
+                    {...emailForm.register('email_or_phone')}
                     label="Barua pepe au namba ya simu"
                     error={emailForm.formState.errors.email_or_phone?.message}
                     type="text"
@@ -445,9 +397,7 @@ export default function ForgotPasswordPage() {
                   />
 
                   <KiliInput
-                    {...emailForm.register('username', {
-                      onChange: () => { hasUserInteractedRef.current = true; }
-                    })}
+                    {...emailForm.register('username')}
                     label="Username wako"
                     error={emailForm.formState.errors.username?.message}
                     type="text"
@@ -468,64 +418,51 @@ export default function ForgotPasswordPage() {
                     </p>
                   </div>
 
-                  <motion.button
+                  <button
                     type="submit"
                     disabled={forgotMutation.isPending}
                     className={cn(
                       'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                       'flex items-center justify-center gap-2',
                       forgotMutation.isPending && 'opacity-80 cursor-not-allowed',
+                      'transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]',
                     )}
                     style={{
                       background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                       boxShadow: forgotMutation.isPending ? 'none' : '0 4px 20px rgba(245,166,35,0.35)',
                     }}
-                    whileHover={!forgotMutation.isPending ? { scale: 1.01 } : {}}
-                    whileTap={!forgotMutation.isPending ? { scale: 0.98 } : {}}
                   >
-                    <AnimatePresence mode="wait">
-                      {forgotMutation.isPending ? (
-                        <motion.div key="loading" className="flex items-center gap-2"
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                          <Loader2 size={18} className="animate-spin" />
-                          <span>Inatuma...</span>
-                        </motion.div>
-                      ) : (
-                        <motion.span key="text"
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                          Tuma Namba ya Uthibitisho
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                </motion.form>
+                    {forgotMutation.isPending ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Inatuma...</span>
+                      </div>
+                    ) : (
+                      <span>Tuma Namba ya Uthibitisho</span>
+                    )}
+                  </button>
+                </form>
               )}
 
               {/* ── OTP step ── */}
               {step === 'otp' && (
-                <motion.div
+                <div
                   key="otp-form"
                   className="space-y-4"
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -30 }}
-                  transition={{ duration: 0.3 }}
                 >
                   {/* Email sent confirmation */}
-                  <motion.div
+                  <div
                     className="flex items-center gap-2 p-2.5 rounded-xl"
                     style={{
                       background: 'rgba(0,229,160,0.06)',
                       border: '1px solid rgba(0,229,160,0.2)',
                     }}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
                   >
                     <CheckCircle2 size={14} className="text-kili-green flex-shrink-0" />
                     <p className="text-[11px] text-text-secondary font-body">
                       Namba imetumwa kwa <span className="text-kili-green font-semibold">{emailOrPhone}</span>
                     </p>
-                  </motion.div>
+                  </div>
 
                   {/* OTP inputs */}
                   <div>
@@ -537,39 +474,31 @@ export default function ForgotPasswordPage() {
                       onChange={(val) => { setOtp(val); setOtpError(false); }}
                       hasError={otpError}
                     />
-                    <AnimatePresence>
-                      {otpError && (
-                        <motion.p
-                          id="otp-error"
-                          role="alert"
-                          className="text-center text-kili-sunset text-xs mt-3 font-body"
-                          initial={{ opacity: 0, y: -4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          Namba si sahihi. Jaribu tena.
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
+                    {otpError && (
+                      <p
+                        id="otp-error"
+                        role="alert"
+                        className="text-center text-kili-sunset text-xs mt-3 font-body"
+                      >
+                        Namba si sahihi. Jaribu tena.
+                      </p>
+                    )}
                   </div>
 
                   {/* Resend */}
                   <div className="text-center">
                     {canResend ? (
-                      <motion.button
+                      <button
                         type="button"
                         onClick={() => {
                           forgotMutation.mutate({ email_or_phone: emailOrPhone, username });
                           setCanResend(false);
                         }}
-                        className="inline-flex items-center gap-2 text-kili-gold hover:text-kili-gold-light transition-colors text-sm font-semibold font-body"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        whileTap={{ scale: 0.97 }}
+                        className="inline-flex items-center gap-2 text-kili-gold hover:text-kili-gold-light transition-colors text-sm font-semibold font-body transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.97]"
                       >
                         <RefreshCw size={14} />
                         Tuma tena
-                      </motion.button>
+                      </button>
                     ) : (
                       <Countdown
                         seconds={60}
@@ -578,7 +507,7 @@ export default function ForgotPasswordPage() {
                     )}
                   </div>
 
-                  <motion.button
+                  <button
                     type="button"
                     onClick={verifyOtp}
                     disabled={otp.length < 6}
@@ -586,16 +515,16 @@ export default function ForgotPasswordPage() {
                       'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                       'flex items-center justify-center gap-2 transition-all',
                       otp.length < 6 && 'opacity-50 cursor-not-allowed',
+                      'transition-transform duration-150 ease',
+                      otp.length === 6 ? 'hover:scale-[1.01] active:scale-[0.98]' : '',
                     )}
                     style={{
                       background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                       boxShadow: otp.length === 6 ? '0 4px 20px rgba(245,166,35,0.35)' : 'none',
                     }}
-                    whileHover={otp.length === 6 ? { scale: 1.01 } : {}}
-                    whileTap={otp.length === 6 ? { scale: 0.98 } : {}}
                   >
                     Thibitisha Namba
-                  </motion.button>
+                  </button>
 
                   <button
                     type="button"
@@ -604,20 +533,16 @@ export default function ForgotPasswordPage() {
                   >
                     ← Badilisha email
                   </button>
-                </motion.div>
+                </div>
               )}
 
               {/* ── Password step ── */}
               {step === 'password' && (
-                <motion.form
+                <form
                   key="password-form"
                   onSubmit={pwdForm.handleSubmit(onPasswordSubmit)}
                   className="space-y-4"
                   noValidate
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -30 }}
-                  transition={{ duration: 0.3 }}
                 >
                   {/* New password */}
                   <div>
@@ -631,100 +556,75 @@ export default function ForgotPasswordPage() {
                     />
 
                     {/* Password strength */}
-                    <AnimatePresence>
-                      {watchPwd && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                        >
-                          {(() => {
-                            const checks = [
-                              { pass: watchPwd.length >= 8 },
-                              { pass: /[A-Z]/.test(watchPwd) },
-                              { pass: /[0-9]/.test(watchPwd) },
-                              { pass: /[^A-Za-z0-9]/.test(watchPwd) },
-                            ];
-                            const score = checks.filter((c) => c.pass).length;
-                            const colors = ['#E84545', '#FF7700', '#F5A623', '#00E5A0'];
-                            return (
-                              <div className="flex gap-1">
-                                {[1, 2, 3, 4].map((i) => (
-                                  <div
-                                    key={i}
-                                    className="flex-1 h-1 rounded-full transition-all duration-300"
-                                    style={{ background: i <= score ? colors[score - 1] : '#2A2A3A' }}
-                                  />
-                                ))}
-                              </div>
-                            );
-                          })()}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {watchPwd && (
+                      <div className="transition-all duration-300 ease">
+                        {(() => {
+                          const checks = [
+                            { pass: watchPwd.length >= 8 },
+                            { pass: /[A-Z]/.test(watchPwd) },
+                            { pass: /[0-9]/.test(watchPwd) },
+                            { pass: /[^A-Za-z0-9]/.test(watchPwd) },
+                          ];
+                          const score = checks.filter((c) => c.pass).length;
+                          const colors = ['#E84545', '#FF7700', '#F5A623', '#00E5A0'];
+                          return (
+                            <div className="flex gap-1">
+                              {[1, 2, 3, 4].map((i) => (
+                                <div
+                                  key={i}
+                                  className="flex-1 h-1 rounded-full transition-all duration-300"
+                                  style={{ background: i <= score ? colors[score - 1] : '#2A2A3A' }}
+                                />
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </div>
-                  <motion.button
+                  <button
                     type="submit"
                     disabled={resetMutation.isPending}
                     className={cn(
                       'w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm',
                       'flex items-center justify-center gap-2',
                       resetMutation.isPending && 'opacity-80 cursor-not-allowed',
+                      'transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]',
                     )}
                     style={{
                       background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                       boxShadow: resetMutation.isPending ? 'none' : '0 4px 20px rgba(245,166,35,0.35)',
                     }}
-                    whileHover={!resetMutation.isPending ? { scale: 1.01 } : {}}
-                    whileTap={!resetMutation.isPending ? { scale: 0.98 } : {}}
                   >
-                    <AnimatePresence mode="wait">
-                      {resetMutation.isPending ? (
-                        <motion.div key="loading" className="flex items-center gap-2"
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                          <Loader2 size={18} className="animate-spin" />
-                          <span>Inabadilisha...</span>
-                        </motion.div>
-                      ) : (
-                        <motion.span key="text"
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                          Badilisha Password
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                </motion.form>
+                    {resetMutation.isPending ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Inabadilisha...</span>
+                      </div>
+                    ) : (
+                      <span>Badilisha Password</span>
+                    )}
+                  </button>
+                </form>
               )}
 
               {/* ── Success step ── */}
               {step === 'success' && (
-                <motion.div
+                <div
                   key="success"
                   className="text-center py-4 space-y-4"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200 }}
                 >
                   {/* Big checkmark */}
-                  <motion.div
+                  <div
                     className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
                     style={{
                       background: 'rgba(0,229,160,0.12)',
                       border: '2px solid rgba(0,229,160,0.4)',
                       boxShadow: '0 0 40px rgba(0,229,160,0.2)',
                     }}
-                    animate={{
-                      scale: [1, 1.05, 1],
-                      boxShadow: [
-                        '0 0 40px rgba(0,229,160,0.2)',
-                        '0 0 60px rgba(0,229,160,0.4)',
-                        '0 0 40px rgba(0,229,160,0.2)',
-                      ],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
                   >
                     <CheckCircle2 size={36} className="text-kili-green" />
-                  </motion.div>
+                  </div>
 
                   <div>
                     <h3 className="text-xl font-bold font-display text-text-primary mb-2">
@@ -736,7 +636,7 @@ export default function ForgotPasswordPage() {
                     </p>
                   </div>
 
-                  <motion.div
+                  <div
                     className="p-4 rounded-xl"
                     style={{
                       background: 'rgba(0,229,160,0.06)',
@@ -746,28 +646,25 @@ export default function ForgotPasswordPage() {
                     <p className="text-xs text-text-muted font-body">
                       💡 Usisahau kuweka password yako mahali salama. Usishiriki na mtu yeyote.
                     </p>
-                  </motion.div>
+                  </div>
 
                   <Link href="/login" className="block">
-                    <motion.div
-                      className="w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2"
+                    <div
+                      className="w-full h-12 rounded-xl font-display font-bold text-dark-bg text-sm flex items-center justify-center gap-2 transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                       style={{
                         background: 'linear-gradient(135deg, #F5A623, #D4891A)',
                         boxShadow: '0 4px 20px rgba(245,166,35,0.35)',
                       }}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       Ingia Sasa →
-                    </motion.div>
+                    </div>
                   </Link>
-                </motion.div>
+                </div>
               )}
 
-            </AnimatePresence>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

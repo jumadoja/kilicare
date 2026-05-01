@@ -1,5 +1,4 @@
 'use client';
-import { motion, AnimatePresence } from 'framer-motion';
 import { forwardRef, useState, useId } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -31,11 +30,9 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
     },
     ref
   ) => {
-    const [focused, setFocused] = useState(false);
     const [showPwd, setShowPwd] = useState(false);
     const generatedId = useId();
 
-    // Always use controlled mode - value prop is required
     const currentValue = String(value ?? '');
     const hasValue = currentValue.length > 0;
     const inputType = showPasswordToggle
@@ -53,9 +50,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
 
     return (
       <div className="relative w-full">
-        <motion.div
-          className="relative"
-        >
+        <div className="relative">
           {/* Left icon */}
           {leftIcon && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-text-muted">
@@ -64,26 +59,19 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
           )}
 
           {/* Floating label */}
-          <motion.label
+          <label
             htmlFor={inputId}
-            className="absolute pointer-events-none font-body z-10"
-            animate={{
-              left: leftIcon ? '40px' : '16px',
-              top: '50%',
-              transform: focused || hasValue
-                ? 'translateY(-1.5rem) scale(0.85)'
-                : 'translateY(-50%)',
-              fontSize: focused || hasValue ? '10px' : '14px',
-              color: focused
-                ? '#F5A623'
-                : error
-                ? '#E84545'
-                : '#8B8BA7',
-            }}
-            transition={{ duration: 0.15 }}
+            className={cn(
+              "absolute pointer-events-none font-body z-10 transition-all duration-150 ease",
+              leftIcon ? "left-10" : "left-4",
+              "top-1/2 -translate-y-1/2",
+              hasValue && "-translate-y-6 scale-85 text-[10px]",
+              "text-[14px]",
+              error ? "text-kili-sunset" : "text-text-muted"
+            )}
           >
             {label}
-          </motion.label>
+          </label>
 
           <input
             ref={ref}
@@ -92,11 +80,9 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
             value={value}
             onChange={handleChange}
             onFocus={(e) => {
-              setFocused(true);
               props.onFocus?.(e);
             }}
             onBlur={(e) => {
-              setFocused(false);
               props.onBlur?.(e);
             }}
             aria-label={label}
@@ -108,19 +94,15 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
             aria-required={props.required || false}
             className={cn(
               'w-full rounded-xl font-body text-sm text-text-primary',
-              'bg-dark-elevated transition-all duration-200 outline-none',
+              'bg-dark-elevated transition-all duration-150 ease outline-none',
               'border',
               leftIcon ? 'pl-10' : 'pl-4',
               showPasswordToggle || rightElement ? 'pr-12' : 'pr-4',
               'pt-6 pb-2',
               'focus-visible:ring-2 focus-visible:ring-kili-gold focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
-              focused
-                ? 'border-kili-gold shadow-glow-gold'
-                : error
-                ? 'border-kili-sunset'
-                : hasValue
-                ? 'border-dark-border-light'
-                : 'border-dark-border hover:border-dark-border-light',
+              'border-dark-border hover:border-dark-border-light',
+              'focus:border-kili-gold focus:shadow-glow-gold',
+              error && 'border-kili-sunset',
               className,
             )}
             style={{ minHeight: 'clamp(48px, 6vh, 56px)' }}
@@ -145,23 +127,18 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
               )}
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Error message */}
-        <AnimatePresence>
-          {error && (
-            <motion.p
-              id={errorId}
-              role="alert"
-              className="text-kili-sunset text-xs mt-1 ml-1 font-body"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-            >
-              {error}
-            </motion.p>
-          )}
-        </AnimatePresence>
+        {error && (
+          <p
+            id={errorId}
+            role="alert"
+            className="text-kili-sunset text-xs mt-1 ml-1 font-body transition-opacity duration-150 ease"
+          >
+            {error}
+          </p>
+        )}
 
         {/* Hint */}
         {hint && !error && (

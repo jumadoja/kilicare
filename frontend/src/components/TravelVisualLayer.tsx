@@ -43,17 +43,8 @@ export function TravelVisualLayer() {
   }, []);
 
   useEffect(() => {
-    const particleCount = isMobile ? 6 : 12;
-    const newParticles = Array.from({ length: particleCount }, (_, i) => ({
-      id: i,
-      background: `rgba(245,166,35,${0.15 + Math.random() * 0.2})`,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      duration: isMobile ? 8 + Math.random() * 4 : 6 + Math.random() * 5,
-      delay: Math.random() * 2,
-      yMove: isMobile ? -15 - Math.random() * 20 : -25 - Math.random() * 35,
-      xMove: (Math.random() - 0.5) * (isMobile ? 15 : 30),
-    }));
+    // Disabled particles for performance - using empty array
+    const newParticles: Array<{id: number; background: string; left: string; top: string; duration: number; delay: number; yMove: number; xMove: number}> = [];
     setParticles(newParticles);
   }, [isMobile]);
 
