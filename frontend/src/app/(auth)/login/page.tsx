@@ -32,6 +32,7 @@ export default function LoginPage() {
   const { focusOnError } = useFocusManagement({
     autoFocusSelector: 'input[name="username"]',
     enableFocusOnError: true,
+    restoreOnMount: false,
   }) as { focusOnError: () => void };
 
   const {
@@ -196,24 +197,6 @@ export default function LoginPage() {
               <div className="flex-1 h-px bg-dark-border" />
             </div>
 
-            {/* Social buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              {['Google', 'Apple'].map((provider) => (
-                <div key={provider}>
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full h-10 rounded-xl border border-dark-border bg-dark-elevated text-text-muted text-xs font-body cursor-not-allowed opacity-60 flex items-center justify-center gap-2"
-                  >
-                    <span>{provider === 'Google' ? '🌐' : '🍎'}</span>
-                    <span>{provider}</span>
-                  </button>
-                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-kili-gold/20 border border-kili-gold/30 text-[9px] font-semibold text-kili-gold">
-                    Soon
-                  </span>
-                </div>
-              ))}
-            </div>
 
             {/* Register link */}
             <div className="mt-6 pt-4 border-t border-dark-border text-center">

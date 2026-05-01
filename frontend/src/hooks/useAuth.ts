@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { authEvents } from '@/core/auth/authEvents';
 
 export function useAuth() {
-  const { setAuth, logout: storeLogout, user } = useAuthStore();
+  const { setUser, user } = useAuthStore();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isHydrated, setIsHydrated] = useState(false);
@@ -40,8 +40,9 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authService.login,
     onSuccess: (data) => {
-      setAuth(data.user, data.access_token, data.refresh_token);
-      toast.success('Karibu! �');
+      tokenManager.setTokens(data.access_token, data.refresh_token);
+      setUser(data.user);
+      toast.success('Karibu! 🎉');
     },
     onError: (e) => {
       toast.error(parseApiError(e));
@@ -76,8 +77,9 @@ export function useAuth() {
     } catch { /* ignore */ }
     // wsManager.disconnectAll() is called via AUTH_LOGOUT event listener in websocket manager
     // Removing direct call here to prevent duplicate disconnection
+    tokenManager.clearTokens();
+    setUser(null);
     queryClient.clear();
-    storeLogout();
     router.push('/login');
   };
 

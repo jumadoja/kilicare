@@ -3,7 +3,6 @@ import { env } from '@/config/env';
 import { tokenManager } from '@/core/auth/tokenManager';
 import { authEvents } from '@/core/auth/authEvents';
 import { API } from '@/lib/constants';
-import Router from 'next/router';
 
 // Network resilience configuration
 const MAX_RETRIES = 3;
@@ -42,18 +41,9 @@ function getCsrfToken(): string | null {
   return getCookie('csrftoken') || getCookie('csrf_token');
 }
 
-// Online/offline detection
-let isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    isOnline = true;
-  });
-  
-  window.addEventListener('offline', () => {
-    isOnline = false;
-  });
-}
+// Online/offline detection - moved to init function for SSR safety
+let isOnline = true;
+let onlineListenersSetup = false;
 
 const api = axios.create({
   baseURL: env.API_BASE_URL,
@@ -92,7 +82,9 @@ const performRefresh = async (): Promise<string> => {
   const refresh = tokenManager.getRefresh();
   if (!refresh) {
     tokenManager.clearTokens();
-    Router.replace('/login');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
     throw new Error('No refresh token');
   }
 
@@ -103,7 +95,9 @@ const performRefresh = async (): Promise<string> => {
     return data.access;
   } catch (e) {
     tokenManager.clearTokens();
-    Router.replace('/login');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
     throw e;
   }
 };
@@ -168,36 +162,64 @@ api.interceptors.response.use(
   }
 );
 
-// Subscribe to token updates to update default Authorization header
-const unsubscribeTokenUpdated = authEvents.on('AUTH_TOKEN_UPDATED', () => {
-  const token = tokenManager.getAccess();
-  if (token) {
-    api.defaults.headers.common.Authorization = `Bearer ${token}`;
-  } else {
-    delete api.defaults.headers.common.Authorization;
+// Auth event subscriptions - moved to init function for SSR safety
+let unsubscribeTokenUpdated: (() => void) | null = null;
+let unsubscribeAuthRefresh: (() => void) | null = null;
+
+// Initialize axios auth listeners (call this in AuthProvider useEffect)
+export const initAxiosAuthListeners = () => {
+  if (typeof window === 'undefined') return;
+  if (unsubscribeTokenUpdated) return; // Already initialized
+
+  // Setup online/offline listeners
+  if (!onlineListenersSetup) {
+    isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    window.addEventListener('online', () => {
+      isOnline = true;
+    });
+    window.addEventListener('offline', () => {
+      isOnline = false;
+    });
+    onlineListenersSetup = true;
   }
-});
 
-// Handle proactive refresh events
-const unsubscribeAuthRefresh = authEvents.on('AUTH_REFRESH', async () => {
-  const refresh = tokenManager.getRefresh();
-  if (!refresh || refreshPromise) return;
+  // Subscribe to token updates
+  unsubscribeTokenUpdated = authEvents.on('AUTH_TOKEN_UPDATED', () => {
+    const token = tokenManager.getAccess();
+    if (token) {
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    } else {
+      delete api.defaults.headers.common.Authorization;
+    }
+  });
 
-  refreshPromise = performRefresh();
+  // Handle proactive refresh events
+  unsubscribeAuthRefresh = authEvents.on('AUTH_REFRESH', async () => {
+    const refresh = tokenManager.getRefresh();
+    if (!refresh || refreshPromise) return;
 
-  try {
-    await refreshPromise;
-  } catch (e) {
-    // Silent fail - token refresh will be handled by 401 interceptor
-  } finally {
-    refreshPromise = null;
-  }
-});
+    refreshPromise = performRefresh();
 
-// Export cleanup function for module unload (if needed)
+    try {
+      await refreshPromise;
+    } catch (e) {
+      // Silent fail - token refresh will be handled by 401 interceptor
+    } finally {
+      refreshPromise = null;
+    }
+  });
+};
+
+// Export cleanup function
 export const cleanupAxiosAuthListeners = () => {
-  unsubscribeTokenUpdated();
-  unsubscribeAuthRefresh();
+  if (unsubscribeTokenUpdated) {
+    unsubscribeTokenUpdated();
+    unsubscribeTokenUpdated = null;
+  }
+  if (unsubscribeAuthRefresh) {
+    unsubscribeAuthRefresh();
+    unsubscribeAuthRefresh = null;
+  }
 };
 
 export default api;

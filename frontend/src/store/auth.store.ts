@@ -1,32 +1,37 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/types';
-import { tokenManager } from '@/core/auth/tokenManager';
 
 interface AuthState {
   user: User | null;
   setUser: (user: User | null) => void;
-  setAuth: (user: User, access: string, refresh: string) => void;
-  logout: () => void;
 }
+
+const ssrSafeStorage = {
+  getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(name);
+  },
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
       setUser: (user) => set({ user }),
-      setAuth: (user, access, refresh) => {
-        tokenManager.setTokens(access, refresh);
-        set({ user });
-      },
-      logout: () => {
-        tokenManager.clearTokens();
-        set({ user: null });
-      },
     }),
     {
       name: 'kili-auth',
       partialize: (s) => ({ user: s.user }),
+      storage: createJSONStorage(() => ssrSafeStorage),
     }
   )
 );

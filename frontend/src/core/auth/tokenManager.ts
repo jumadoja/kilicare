@@ -64,8 +64,17 @@ const safeRemoveItem = (key: string): void => {
   }
 };
 
+// Timer state management
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 let isClearing = false; // Guard to prevent repeated clearing
+
+// Cleanup function to be called on app shutdown
+export const cleanupTokenManager = () => {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+};
 
 export const tokenManager = {
   setTokens(access: string, refresh: string) {
@@ -75,7 +84,6 @@ export const tokenManager = {
     isClearing = false; // Reset guard when new tokens are set
     authEvents.emit('AUTH_TOKEN_UPDATED');
     authEvents.emit('AUTH_LOGIN');
-    tokenManager.scheduleProactiveRefresh();
   },
 
   getAccess: (): string | null => {

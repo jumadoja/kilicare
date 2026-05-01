@@ -22,5 +22,17 @@ export function formatFileSize(bytes: number): string {
 export function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+export function timeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (seconds < 60) return 'sasa hivi';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}dakika iliyopita`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}saa iliyopita`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}siku iliyopita`;
+  return formatDate(dateStr);
 }

@@ -4,6 +4,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAppStore } from '@/store/app.store';
 import { wsManager, WS_URLS } from '@/core/websocket';
 import { tokenManager } from '@/core/auth/tokenManager';
+import { initAxiosAuthListeners, cleanupAxiosAuthListeners } from '@/core/api/axios';
+import { authEvents } from '@/core/auth/authEvents';
 
 const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password'];
 
@@ -16,6 +18,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // Initialize axios auth listeners and token refresh scheduling
+  useEffect(() => {
+    if (!isHydrated) return;
+    
+    // Initialize axios listeners
+    initAxiosAuthListeners();
+    
+    // Schedule proactive token refresh
+    tokenManager.scheduleProactiveRefresh();
+    
+    // Handle proactive refresh events
+    const unsubscribeRefresh = authEvents.on('AUTH_REFRESH', async () => {
+      // Refresh logic is handled by axios interceptor
+    });
+
+    return () => {
+      cleanupAxiosAuthListeners();
+      unsubscribeRefresh();
+    };
+  }, [isHydrated]);
 
   useEffect(() => {
     if (!isHydrated) return;

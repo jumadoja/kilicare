@@ -180,6 +180,7 @@ export default function ForgotPasswordPage() {
   const { focusOnError } = useFocusManagement({
     autoFocusSelector: 'input[name="email_or_phone"]',
     enableFocusOnError: true,
+    restoreOnMount: false,
   }) as { focusOnError: () => void };
 
   const [step, setStep] = useState<Step>('email');

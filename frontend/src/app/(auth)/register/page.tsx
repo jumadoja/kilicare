@@ -99,67 +99,7 @@ const ProgressIntelligence = memo(function ProgressIntelligence({
 
 // ── Floating Input - DEPRECATED: Use KiliInput instead ──
 
-// ── Password Strength ─────────────────────────────────
-function PasswordStrength({ password }: { password: string }) {
-  const checks = [
-    { label: 'Herufi 8+', pass: password.length >= 8 },
-    { label: 'Herufi kubwa', pass: /[A-Z]/.test(password) },
-    { label: 'Namba', pass: /[0-9]/.test(password) },
-    { label: 'Alama maalum', pass: /[^A-Za-z0-9]/.test(password) },
-  ];
-  const score = checks.filter((c) => c.pass).length;
-  const colors = ['#E84545', '#FF7700', '#F5A623', '#00E5A0'];
-  const labels = ['Dhaifu', 'Wastani', 'Nzuri', 'Bora 🔥'];
-  const isMax = score === 4;
-
-  if (!password) return null;
-
-  return (
-    <div className="mt-2 space-y-4">
-      {/* Strength bars */}
-      <div className="flex gap-1">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="flex-1 h-1.5 rounded-full transition-all duration-300 ease"
-            style={{ 
-              background: i <= score ? colors[score - 1] : '#2A2A3A',
-              transform: i <= score ? 'scaleX(1)' : 'scaleX(0.3)',
-              transformOrigin: 'left',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Checks row */}
-      <div className="flex justify-between items-center flex-wrap gap-1">
-        <div className="flex gap-3 flex-wrap">
-          {checks.map((c) => (
-            <span
-              key={c.label}
-              className={cn(
-                'text-xs font-body flex items-center gap-1',
-                c.pass ? 'text-kili-green' : 'text-text-muted',
-              )}
-            >
-              {c.pass ? '✓' : '○'} {c.label}
-            </span>
-          ))}
-        </div>
-
-        {score > 0 && (
-          <span
-            className="text-xs font-semibold font-body flex items-center gap-1"
-            style={{ color: colors[score - 1] }}
-          >
-            {isMax && <Sparkles size={12} className="animate-pulse" />}
-            {labels[score - 1]}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
+// Password strength removed for performance - validation happens on submit
 
 // ── Role Card ─────────────────────────────────────────
 const RoleCard = memo(function RoleCard({
@@ -367,6 +307,7 @@ export default function RegisterPage() {
   const { focusOnError } = useFocusManagement({
     autoFocusSelector: 'input[name="first_name"]',
     enableFocusOnError: true,
+    restoreOnMount: false,
   }) as { focusOnError: () => void };
 
   const [step, setStep] = useState(1);
@@ -378,9 +319,7 @@ export default function RegisterPage() {
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [passwordValue, setPasswordValue] = useState('');
-  const [bioValue, setBioValue] = useState('');
-  const [locationValue, setLocationValue] = useState('');
+  const redirectTimerRef = useRef<NodeJS.Timeout | null>(null);
 
 
   const {
@@ -401,6 +340,13 @@ export default function RegisterPage() {
       focusOnError();
     }
   }, [errors, focusOnError]);
+
+  // Cleanup redirect timer on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
+    };
+  }, []);
 
   // ── Navigation ──────────────────────────────────────
   const validateStep1 = async () => {
@@ -435,12 +381,12 @@ export default function RegisterPage() {
 
       // ✅ ONLY HERE show success after confirmed API success
       setShowSuccess(true);
-      
+
       // Clear form state on success
       handleSuccess();
 
       // delay AFTER confirmed success
-      setTimeout(() => {
+      redirectTimerRef.current = setTimeout(() => {
         router.push('/login');
       }, 2000);
     } catch (error) {
@@ -624,16 +570,7 @@ export default function RegisterPage() {
                       error={errors.password?.message}
                       showPasswordToggle
                       autoComplete="new-password"
-                      value={passwordValue}
-                      onChange={(e) => {
-                        setPasswordValue(e.target.value);
-                      }}
                     />
-                    {passwordValue && (
-                      <div className="mt-3">
-                        <PasswordStrength password={passwordValue} />
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -799,14 +736,10 @@ export default function RegisterPage() {
                   <KiliInput
                     {...register('bio' as keyof RegisterInput)}
                     label="Bio yako (si lazima)"
-                    value={bioValue}
-                    onChange={(e) => setBioValue(e.target.value)}
                   />
                   <KiliInput
                     {...register('location' as keyof RegisterInput)}
                     label="Uko wapi? (Mji/Maeneo)"
-                    value={locationValue}
-                    onChange={(e) => setLocationValue(e.target.value)}
                   />
                 </div>
 

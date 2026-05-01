@@ -44,6 +44,13 @@ export function extractHashtags(text: string): string[] {
   return (text.match(/#\w+/g) ?? []).slice(0, 5);
 }
 
+export function mediaUrl(path: string): string {
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${path}`;
+}
+
 export function getBlurDataUrl(color = '#13131A'): string {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='${color}'/></svg>`;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;

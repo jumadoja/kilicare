@@ -50,6 +50,17 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
 
     return (
       <div className="relative w-full">
+        {/* Label above input */}
+        <label
+          htmlFor={inputId}
+          className={cn(
+            "block font-body text-sm mb-1.5",
+            error ? "text-kili-sunset" : "text-text-primary"
+          )}
+        >
+          {label}
+        </label>
+
         <div className="relative">
           {/* Left icon */}
           {leftIcon && (
@@ -57,21 +68,6 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
               {leftIcon}
             </div>
           )}
-
-          {/* Floating label */}
-          <label
-            htmlFor={inputId}
-            className={cn(
-              "absolute pointer-events-none font-body z-10 transition-all duration-150 ease",
-              leftIcon ? "left-10" : "left-4",
-              "top-1/2 -translate-y-1/2",
-              hasValue && "-translate-y-6 scale-85 text-[10px]",
-              "text-[14px]",
-              error ? "text-kili-sunset" : "text-text-muted"
-            )}
-          >
-            {label}
-          </label>
 
           <input
             ref={ref}
@@ -85,6 +81,7 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
             onBlur={(e) => {
               props.onBlur?.(e);
             }}
+            placeholder={props.placeholder || label}
             aria-label={label}
             aria-describedby={cn(
               error && errorId,
@@ -98,14 +95,14 @@ export const KiliInput = forwardRef<HTMLInputElement, KiliInputProps>(
               'border',
               leftIcon ? 'pl-10' : 'pl-4',
               showPasswordToggle || rightElement ? 'pr-12' : 'pr-4',
-              'pt-6 pb-2',
+              'py-3',
               'focus-visible:ring-2 focus-visible:ring-kili-gold focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
               'border-dark-border hover:border-dark-border-light',
               'focus:border-kili-gold focus:shadow-glow-gold',
               error && 'border-kili-sunset',
+              'placeholder:text-text-muted/50',
               className,
             )}
-            style={{ minHeight: 'clamp(48px, 6vh, 56px)' }}
             {...props}
           />
 
