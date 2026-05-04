@@ -29,8 +29,15 @@ export const authService = {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       return data.data.user;
-    } catch (error) {
-      console.log("SERVICE ERROR:", error.response?.data);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log("SERVICE ERROR:", error.message);
+      } else if (typeof error === "object" && error !== null) {
+        const err = error as any;
+        console.log("SERVICE ERROR:", err?.response?.data);
+      } else {
+        console.log("SERVICE ERROR:", "Unknown error occurred");
+      }
       throw error;
     }
   },
