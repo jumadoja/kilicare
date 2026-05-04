@@ -169,6 +169,27 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
     'ALGORITHM': 'HS256',
     'AUTH_HEADER_TYPES': ('Bearer',),
+    'BLACKLIST_AFTER_ROTATION': True,  # Enable token rotation
+    'ROTATE_REFRESH_TOKENS': True,  # Enable refresh token rotation
+}
+
+
+# ======================
+# RATE LIMITING
+# ======================
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+        'register': '5/hour',  # Limit registration attempts
+        'login': '10/hour',  # Limit login attempts
+        'forgot_password': '3/hour',  # Limit password reset requests
+        'reset_password': '5/hour',  # Limit password reset attempts
+    }
 }
 
 
@@ -211,9 +232,10 @@ CORS_ALLOW_CREDENTIALS = True
 # ======================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {'NAME': 'apps.users.validators.ComplexityValidator'},
 ]
 
 

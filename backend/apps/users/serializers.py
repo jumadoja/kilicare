@@ -74,17 +74,32 @@ class UserSerializer(serializers.ModelSerializer):
 # JWT Token serializer
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        print("SERIALIZER STEP 1: validate method called")
+        print(f"SERIALIZER STEP 2: attrs = {attrs}")
         data = super().validate(attrs)
-        data["user"] = {
-            "id": self.user.id,
-            "username": self.user.username,
-            "email": self.user.email,
-            "role": self.user.role,
-            "is_verified": self.user.is_verified,
+        print("SERIALIZER STEP 3: super().validate() completed")
+        print(f"SERIALIZER STEP 4: data from super = {data}")
+        # Standard response format: all payload data inside data object
+        payload = {
+            "access_token": data.pop("access"),
+            "refresh_token": data.pop("refresh"),
+            "user": {
+                "id": self.user.id,
+                "username": self.user.username,
+                "email": self.user.email,
+                "role": self.user.role,
+                "is_verified": self.user.is_verified,
+            }
         }
-        data["access_token"] = data.pop("access")
-        data["refresh_token"] = data.pop("refresh")
-        return data
+        print("SERIALIZER STEP 5: payload created")
+        # Return standardized structure
+        result = {
+            "status": "success",
+            "message": "Umefanikiwa kuingia. Karibu KilicareGO+",
+            "data": payload
+        }
+        print("SERIALIZER STEP 6: returning result")
+        return result
 
 # Forgot Password serializer
 class ForgotPasswordSerializer(serializers.Serializer):
@@ -95,4 +110,4 @@ class ForgotPasswordSerializer(serializers.Serializer):
 class ResetPasswordSerializer(serializers.Serializer):
     email_or_phone = serializers.CharField(required=False, allow_blank=True)
     otp = serializers.CharField()
-    new_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, validators=[validate_password])

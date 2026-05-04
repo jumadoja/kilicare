@@ -12,13 +12,59 @@ class User(AbstractUser):
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='TOURIST')
     is_verified = models.BooleanField(default=False)  # Only for Local
     
+    # Account security fields
+    failed_login_attempts = models.IntegerField(default=0)
+    is_locked = models.BooleanField(default=False)
+    locked_until = models.DateTimeField(null=True, blank=True)
+    
     class Meta:
         indexes = [
             models.Index(fields=['role']),
             models.Index(fields=['is_verified']),
             models.Index(fields=['username']),
             models.Index(fields=['email']),
+            models.Index(fields=['is_locked']),
         ]
+    
+    def increment_failed_login(self):
+        """Increment failed login counter and lock if threshold reached."""
+        print("USER MODEL STEP 1: increment_failed_login called")
+        self.failed_login_attempts += 1
+        if self.failed_login_attempts >= 5:
+            self.is_locked = True
+            self.locked_until = timezone.now() + timezone.timedelta(minutes=30)
+        print("USER MODEL STEP 2: Before save in increment_failed_login")
+        self.save()
+        print("USER MODEL STEP 3: After save in increment_failed_login")
+    
+    def reset_failed_login(self):
+        """Reset failed login counter on successful login."""
+        print("USER MODEL STEP 4: reset_failed_login called")
+        self.failed_login_attempts = 0
+        self.is_locked = False
+        self.locked_until = None
+        print("USER MODEL STEP 5: Before save in reset_failed_login")
+        self.save()
+        print("USER MODEL STEP 6: After save in reset_failed_login")
+    
+    def is_account_locked(self):
+        """Check if account is currently locked."""
+        print("USER MODEL STEP 7: is_account_locked called")
+        if not self.is_locked:
+            print("USER MODEL STEP 8: Account not locked, returning False")
+            return False
+        if self.locked_until and timezone.now() < self.locked_until:
+            print("USER MODEL STEP 9: Account still locked, returning True")
+            return True
+        # Lock expired, auto-unlock
+        print("USER MODEL STEP 10: Lock expired, auto-unlocking")
+        self.is_locked = False
+        self.locked_until = None
+        self.failed_login_attempts = 0
+        print("USER MODEL STEP 11: Before save in is_account_locked")
+        self.save()
+        print("USER MODEL STEP 12: After save in is_account_locked")
+        return False
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')

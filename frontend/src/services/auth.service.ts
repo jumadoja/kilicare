@@ -6,26 +6,33 @@ import { tokenManager } from '@/core/auth/tokenManager';
 
 export const authService = {
   async login(payload: LoginPayload): Promise<AuthResponse> {
+    console.log("AUTH SERVICE STEP 1: Login called with payload:", payload);
     const { data } = await api.post<AuthResponse>(API.AUTH.LOGIN, payload);
+    console.log("AUTH SERVICE STEP 2: API response received:", data);
     return data;
   },
 
   async register(payload: RegisterPayload): Promise<User> {
-    const formData = new FormData();
-    formData.append('username', payload.username);
-    formData.append('email', payload.email);
-    formData.append('password', payload.password);
-    formData.append('first_name', payload.first_name);
-    formData.append('last_name', payload.last_name);
-    formData.append('role', payload.role);
-    if (payload.bio) formData.append('bio', payload.bio);
-    if (payload.location) formData.append('location', payload.location);
-    if (payload.avatar) formData.append('avatar', payload.avatar);
+    try {
+      const formData = new FormData();
+      formData.append('username', payload.username);
+      formData.append('email', payload.email);
+      formData.append('password', payload.password);
+      formData.append('first_name', payload.first_name);
+      formData.append('last_name', payload.last_name);
+      formData.append('role', payload.role);
+      if (payload.bio) formData.append('bio', payload.bio);
+      if (payload.location) formData.append('location', payload.location);
+      if (payload.avatar) formData.append('avatar', payload.avatar);
 
-    const { data } = await api.post<User>(API.AUTH.REGISTER, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return data;
+      const { data } = await api.post<AuthResponse>(API.AUTH.REGISTER, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return data.data.user;
+    } catch (error) {
+      console.log("SERVICE ERROR:", error.response?.data);
+      throw error;
+    }
   },
 
   async getMe(): Promise<User> {

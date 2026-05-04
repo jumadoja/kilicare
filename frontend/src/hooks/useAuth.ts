@@ -39,24 +39,39 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: authService.login,
-    onSuccess: (data) => {
+    onSuccess: (res) => {
+      console.log("FRONTEND STEP 1: Login success callback called");
+      console.log("FRONTEND STEP 2: Full response object:", res);
+      console.log("FRONTEND STEP 3: res.data:", res.data);
+      const data = res.data;
+      console.log("FRONTEND STEP 4: Extracted data:", data);
+      console.log("FRONTEND STEP 5: data.access_token:", data?.access_token);
+      console.log("FRONTEND STEP 6: data.refresh_token:", data?.refresh_token);
+      console.log("FRONTEND STEP 7: data.user:", data?.user);
       tokenManager.setTokens(data.access_token, data.refresh_token);
       setUser(data.user);
       toast.success('Karibu! 🎉');
     },
-    onError: (e) => {
-      toast.error(parseApiError(e));
+    onError: (e: any) => {
+      console.log("FRONTEND ERROR STEP 1: Login error callback called");
+      console.log("FRONTEND ERROR STEP 2: Full error object:", e);
+      console.log("FRONTEND ERROR STEP 3: e.response:", e.response);
+      console.log("FRONTEND ERROR STEP 4: e.response?.data:", e.response?.data);
+      if (e.response?.status === 423) {
+        toast.error("Akaunti imefungwa kwa muda. Jaribu tena baada ya muda.");
+      } else {
+        toast.error(parseApiError(e));
+      }
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
-    onSuccess: () => {
-      toast.success('Akaunti imewekwa! Tafadhali ingia.');
+    onError: (e: any) => {
+      console.log("HOOK ERROR:", e.response?.data);
     },
-    onError: (e) => {
-      toast.error(parseApiError(e));
-    },
+    // UI side effects (toasts, redirects) handled by pages
+    // Hook only returns state: isRegistering, error
   });
 
   // Token is now derived from tokenManager directly

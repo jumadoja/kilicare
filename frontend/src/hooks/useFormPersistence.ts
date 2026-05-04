@@ -17,6 +17,9 @@ export function useFormPersistence<T extends Record<string, any>>({
   clearOnSuccess = true,
   onRestore,
 }: FormPersistenceOptions<T>) {
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isFreshStart, setIsFreshStart] = useState(true);
   const [isRestored, setIsRestored] = useState(false);
   
   const getStorage = () => {
@@ -28,13 +31,18 @@ export function useFormPersistence<T extends Record<string, any>>({
     }
   };
 
-  useEffect(() => {
+  // NO AUTO-RESTORATION - Controlled restore only
+  // useEffect for auto-restore removed to prevent unwanted auto-fill
+
+  const restoreDraft = () => {
     const storage = getStorage();
     if (!storage) {
       setIsRestored(true);
-      return;
+      return false;
     }
 
+    setIsRestoring(true);
+    
     try {
       const saved = storage.getItem(`form_${formKey}`);
       if (saved) {
@@ -50,17 +58,29 @@ export function useFormPersistence<T extends Record<string, any>>({
             // Silent fail
           }
           setIsRestored(true);
-          return;
+          setIsRestoring(false);
+          return false;
         }
         
-        onRestore?.(formData);
+        // Only restore if not submitted and fresh start is allowed
+        if (!isSubmitted && onRestore) {
+          onRestore(formData);
+          setIsFreshStart(false);
+        }
+        
+        setIsRestored(true);
+        setIsRestoring(false);
+        return true;
       }
     } catch (error) {
       // Silent fail
     } finally {
       setIsRestored(true);
+      setIsRestoring(false);
     }
-  }, [formKey, onRestore]);
+    
+    return false;
+  };
 
   const saveFormState = (data: T) => {
     const storage = getStorage();
@@ -89,12 +109,26 @@ export function useFormPersistence<T extends Record<string, any>>({
     if (clearOnSuccess) {
       clearFormState();
     }
+    setIsSubmitted(true);
+    setIsFreshStart(true);
+  };
+
+  const startFreshSession = () => {
+    clearFormState();
+    setIsSubmitted(false);
+    setIsFreshStart(true);
+    setIsRestored(false);
   };
 
   return {
     isRestored,
+    isRestoring,
+    isSubmitted,
+    isFreshStart,
     saveFormState,
     clearFormState,
     handleSuccess,
+    restoreDraft,
+    startFreshSession,
   };
 }

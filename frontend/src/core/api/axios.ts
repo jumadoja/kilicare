@@ -105,6 +105,7 @@ const performRefresh = async (): Promise<string> => {
 api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
+    console.log("AXIOS ERROR RESPONSE:", error.response?.data);
     const orig = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
       _retryCount?: number;

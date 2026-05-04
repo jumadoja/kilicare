@@ -22,9 +22,13 @@ export interface User {
 }
 
 export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  user: User;
+  status: string;
+  message: string;
+  data: {
+    access_token: string;
+    refresh_token: string;
+    user: User;
+  };
 }
 
 export interface RegisterPayload {

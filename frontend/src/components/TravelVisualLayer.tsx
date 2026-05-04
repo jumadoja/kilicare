@@ -36,7 +36,7 @@ export function TravelVisualLayer() {
         {backgroundImages.map((img, index) => (
           <div
             key={img.src}
-            className="absolute inset-0 transition-opacity duration-[2000ms] ease-in-out"
+            className="absolute inset-0 transition-opacity duration-2000 ease-in-out"
             style={{
               opacity: currentIndex === index ? 1 : 0,
             }}

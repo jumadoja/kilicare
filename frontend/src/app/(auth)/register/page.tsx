@@ -12,11 +12,12 @@ import {
   Sparkles, Heart, Zap, Trophy, Lock, MapPin,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useFormPersistence } from '@/hooks/useFormPersistence';
+import { useFormEngine } from '@/hooks/useFormEngine';
 import { useFocusManagement } from '@/hooks/useFocusManagement';
 import { registerSchema, RegisterInput } from '@/lib/validators';
 import { cn } from '@/lib/utils';
 import { KiliInput } from '@/components/ui/KiliInput';
+import { parseApiError, parseFieldErrors } from '@/core/errors';
 
 // ── AI Onboarding Assistant ────────────────────────────
 const OnboardingAssistant = memo(function OnboardingAssistant({ step }: { step: number }) {
@@ -131,7 +132,7 @@ const RoleCard = memo(function RoleCard({
         color: '#F5A623',
         gradient: 'linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05))',
         border: 'rgba(245,166,35,0.3)',
-        glow: '0 0 30px rgba(245,166,35,0.2)',
+        glow: '0 0 30px rgba(211, 146, 40, 0.88)',
         badge: '🧳 Karibu Tanzania!',
         feedback: 'Vizuri! Hii itakusaidia kupata experiences sahihi',
       }
@@ -150,7 +151,7 @@ const RoleCard = memo(function RoleCard({
         color: '#F5A623',
         gradient: 'linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05))',
         border: 'rgba(245,166,35,0.3)',
-        glow: '0 0 30px rgba(245,166,35,0.25)',
+        glow: '0 0 30px rgb(179, 123, 34)',
         badge: '⭐ Mwenyeji wa Tanzania!',
         feedback: 'Vizuri! Utashiriki maarifa yako na watalii',
       };
@@ -286,21 +287,47 @@ export default function RegisterPage() {
   const { registerAsync: registerUser, isRegistering } = useAuth();
   const router = useRouter();
 
-  const { saveFormState, clearFormState, handleSuccess, isRestored } = useFormPersistence<Partial<RegisterInput>>({
+  const formEngine = useFormEngine<Partial<RegisterInput>>({
     formKey: 'register',
-    initialValues: {},
-    storageType: 'sessionStorage',
-    clearOnSuccess: true,
-    onRestore: (data) => {
-      // Restore form fields only if empty
+    initialValues: { role: 'TOURIST' },
+    onStateChange: (data) => {
+      // Sync engine state with react-hook-form
       Object.entries(data).forEach(([key, value]) => {
-        if (value) {
-          const input = document.querySelector(`input[name="${key}"]`) as HTMLInputElement;
-          if (input && !input.value) {
-            setValue(key as keyof RegisterInput, value as string);
-          }
+        if (value !== undefined) {
+          setValue(key as keyof RegisterInput, value as string);
         }
       });
+      
+      // Sync role state
+      if (data.role) {
+        setSelectedRole(data.role as 'TOURIST' | 'LOCAL_GUIDE');
+      }
+    },
+    onSubmit: async (data) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirm_password, ...payload } = data;
+      
+      // Ensure required fields are not undefined
+      const registerPayload = {
+        first_name: payload.first_name || '',
+        last_name: payload.last_name || '',
+        username: payload.username || '',
+        email: payload.email || '',
+        password: payload.password || '',
+        bio: payload.bio || '',
+        location: payload.location || '',
+        role: selectedRole,
+        avatar: avatarFile,
+      };
+      
+      await registerUser(registerPayload);
+      
+      setShowSuccess(true);
+      
+      // delay AFTER confirmed success
+      redirectTimerRef.current = setTimeout(() => {
+        router.push('/login');
+      }, 2000);
     },
   });
 
@@ -328,6 +355,8 @@ export default function RegisterPage() {
     trigger,
     getValues,
     setValue,
+    setError,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -348,15 +377,14 @@ export default function RegisterPage() {
     };
   }, []);
 
-  // ── Navigation ──────────────────────────────────────
+  // ── Stateless Navigation ──────────────────────────────
   const validateStep1 = async () => {
     const ok = await trigger([
       'first_name', 'last_name', 'username',
       'email', 'password', 'confirm_password',
     ]);
     if (ok) {
-      // Save form state only on step change
-      saveFormState(getValues());
+      // Navigation only - no persistence side effects
       setStep(2);
     }
   };
@@ -366,70 +394,54 @@ export default function RegisterPage() {
       toast.error('Chagua jukumu lako kwanza');
       return;
     }
-    setValue('role', selectedRole);
-    // Save form state only on step change
-    saveFormState(getValues());
+    // Navigation only - no persistence side effects
     setStep(3);
   };
 
-  // ── Submit ──────────────────────────────────────────
-  const onSubmit = async (data: RegisterInput) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { confirm_password, ...payload } = data;
+  // Stateless back navigation
+  const goBackToStep1 = () => setStep(1);
+  const goBackToStep2 = () => setStep(2);
+
+  // ── Form Engine Integration ────────────────────────────
+  // Sync react-hook-form with engine state
+  useEffect(() => {
+    const subscription = watch((value) => {
+      formEngine.updateFields(value as Partial<RegisterInput>);
+    });
+    return subscription.unsubscribe;
+  }, [watch, formEngine]);
+
+  // Handle form submission through engine
+  const handleFormSubmit = async () => {
     try {
-      await registerUser({ ...payload, role: selectedRole, avatar: avatarFile });
-
-      // ✅ ONLY HERE show success after confirmed API success
-      setShowSuccess(true);
-
-      // Clear form state on success
-      handleSuccess();
-
-      // delay AFTER confirmed success
-      redirectTimerRef.current = setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-    } catch (error) {
-      // ❌ DO NOT show success on error
-      // show error feedback instead
-
-      // User-friendly error message - parse backend response
-      let errorMessage = 'Imeshindikana kujisajili. Tafadhali jaribu tena.';
-
-      if (error instanceof Error) {
-        // Check for network/timeout errors
-        if (error.message.includes('timeout') || error.message.includes('network') || error.message.includes('ECONNREFUSED')) {
-          errorMessage = 'Tatizo la mtandao. Tafadhali angalia connection yako na ujaribu tena.';
-        }
-        // Check for backend validation errors
-        else if ('response' in error) {
-          const response = (error as any).response;
-          const responseData = response?.data;
-
-          // Check for specific field errors
-          if (responseData) {
-            if (typeof responseData === 'string') {
-              errorMessage = responseData;
-            } else if (responseData.detail) {
-              errorMessage = responseData.detail;
-            } else if (responseData.username) {
-              // Handle both string and array
-              errorMessage = Array.isArray(responseData.username) ? responseData.username[0] : responseData.username;
-            } else if (responseData.email) {
-              // Handle both string and array
-              errorMessage = Array.isArray(responseData.email) ? responseData.email[0] : responseData.email;
-            } else if (responseData.non_field_errors) {
-              errorMessage = Array.isArray(responseData.non_field_errors) ? responseData.non_field_errors[0] : responseData.non_field_errors;
-            }
-          }
-        }
-        // Check for 409/conflict errors
-        else if (error.message.includes('409') || error.message.includes('already exists')) {
-          errorMessage = 'Username au email imeshatumika. Tumia nyingine.';
-        }
+      console.log("REGISTER PAGE STEP 1: Starting form submission");
+      await formEngine.submit();
+      console.log("REGISTER PAGE STEP 2: Form submission successful");
+    } catch (error: unknown) {
+      console.log("REGISTER PAGE STEP 3: Form submission failed, error:", error);
+      console.log("FORM ERROR:", (error as any)?.response?.data);
+      
+      // Parse field-level errors
+      const fieldErrors = parseFieldErrors(error);
+      console.log("PARSED ERRORS:", fieldErrors);
+      
+      // Bind errors to form fields
+      let hasFieldErrors = false;
+      fieldErrors.forEach(({ field, message }) => {
+        setError(field as keyof RegisterInput, { message });
+        hasFieldErrors = true;
+      });
+      
+      console.log("FORM FIELD ERRORS SET:", getValues());
+      
+      // Show smart toast: summary for field errors, fallback for other errors
+      if (hasFieldErrors) {
+        toast.error("Kuna makosa kwenye fomu. Tafadhali angalia fields zilizo chini.");
+      } else {
+        const errorMessage = parseApiError(error);
+        console.log("REGISTER PAGE STEP 4: Parsed fallback error message:", errorMessage);
+        toast.error(errorMessage);
       }
-
-      toast.error(errorMessage);
     }
   };
 
@@ -631,7 +643,7 @@ export default function RegisterPage() {
                 <div className="flex gap-3">
                   <button
                     type="button"
-                    onClick={() => setStep(1)}
+                    onClick={goBackToStep1}
                     className="min-w-[100px] h-12 px-6 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200 transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                   >
                     <ArrowLeft size={16} />
@@ -777,11 +789,11 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Buttons */}
-                <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
                   <div className="flex gap-3 mt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
+                      onClick={goBackToStep2}
                       className="min-w-[90px] h-12 px-5 rounded-xl border border-dark-border text-text-secondary font-body font-medium flex items-center justify-center gap-2 hover:bg-dark-elevated hover:border-kili-gold/50 hover:text-text-primary transition-all duration-200 transition-transform duration-150 ease hover:scale-[1.01] active:scale-[0.98]"
                     >
                       <ArrowLeft size={16} />
