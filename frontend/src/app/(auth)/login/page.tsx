@@ -77,7 +77,7 @@ export default function LoginPage() {
         {/* Logo section */}
         <div className="text-center mb-6">
           <div
-            className="inline-flex items-center justify-center mb-4 transition-transform duration-150 ease hover:scale-[1.05] active:scale-[0.95]"
+            className="inline-flex items-center justify-center mb-4"
           >
             <div
               className="relative p-4 rounded-3xl glass"
@@ -87,13 +87,6 @@ export default function LoginPage() {
                 boxShadow: '0 8px 32px rgba(245,166,35,0.2), 0 0 0 1px rgba(245,166,35,0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
               }}
             >
-              {/* Inner glow effect */}
-              <div
-                className="absolute inset-0 rounded-3xl pointer-events-none"
-                style={{
-                  background: 'radial-gradient(circle at 30% 30%, rgba(245,166,35,0.2), transparent 60%)',
-                }}
-              />
               <img
                 src="/kilicare-logo.png"
                 alt="Kilicare Logo"
