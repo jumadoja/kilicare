@@ -1,5 +1,4 @@
-export const MEDIA_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+export const MEDIA_BASE = process.env.NEXT_PUBLIC_API_URL!;
 
 export const mediaUrl = (path: string | null | undefined): string => {
   if (!path) return '/images/placeholder.jpg';
@@ -25,9 +24,12 @@ export const API = {
     SAVED: '/api/moments/saved/',
     DETAIL: (id: number) => `/api/moments/${id}/`,
     LIKE: (id: number) => `/api/moments/${id}/like/`,
-    COMMENT: (id: number) => `/api/moments/${id}/comment/`,
+    COMMENT: (id: number) => `/api/moments/${id}/comments/`,
     SAVE: (id: number) => `/api/moments/${id}/save/`,
     SHARE: (id: number) => `/api/moments/${id}/share/`,
+    FOLLOW: '/api/moments/follow/follow/',
+    UNFOLLOW: '/api/moments/follow/unfollow/',
+    TRACK_VIEW: (id: number) => `/api/moments/${id}/track_view/`,
   },
   AI: {
     CHAT: '/api/ai/chat/',
@@ -46,7 +48,6 @@ export const API = {
   },
   TIPS: {
     LIST: '/api/tips/',
-    CREATE: '/api/tips/create/',
     NEARBY: '/api/tips/nearby/',
     TRENDING: '/api/tips/trending/',
     MY: '/api/tips/my-tips/',

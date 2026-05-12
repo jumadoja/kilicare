@@ -7,8 +7,6 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
-    first_name: z.string().min(2, 'Jina la kwanza linahitajika'),
-    last_name: z.string().min(2, 'Jina la mwisho linahitajika'),
     username: z
       .string()
       .min(3, 'Username lazima iwe na herufi 3+')

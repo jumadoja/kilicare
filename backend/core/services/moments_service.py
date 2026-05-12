@@ -4,35 +4,36 @@ from ..exceptions import ValidationError, NotFoundError
 
 class CreateMomentService(BaseService):
     """Service for creating Kilicare moments"""
-    
-    def execute(self, user, caption, media_type, media_file, visibility='PUBLIC', latitude=None, longitude=None):
+
+    def execute(self, user, caption, media_type, media_file, visibility='PUBLIC', latitude=None, longitude=None, background_music=None):
         """
         Create a Kilicare moment with point awarding
         """
         if not media_file:
             raise ValidationError("Media file is required")
-        
-        if media_type not in ['IMAGE', 'VIDEO']:
+
+        if media_type not in ['image', 'video', 'IMAGE', 'VIDEO']:
             raise ValidationError("Invalid media type")
-        
+
         if visibility not in ['PUBLIC', 'FOLLOWERS', 'PRIVATE']:
             raise ValidationError("Invalid visibility setting")
-        
+
         with transaction.atomic():
             from apps.kilicaremoments.models import KilicareMoment
             from apps.passport.models import PassportProfile
-            
+
             # Create moment
             moment = KilicareMoment.objects.create(
                 posted_by=user,
                 caption=caption,
-                media_type=media_type,
-                media_file=media_file,
+                media_type=media_type.lower() if isinstance(media_type, str) else media_type,
+                media=media_file,
                 visibility=visibility,
                 latitude=latitude,
-                longitude=longitude
+                longitude=longitude,
+                background_music=background_music
             )
-            
+
             # Award points for posting moment
             passport, _ = PassportProfile.objects.get_or_create(user=user)
             passport.add_points(
@@ -41,7 +42,7 @@ class CreateMomentService(BaseService):
                 description='Posted a Kilicare moment',
                 metadata={'moment_id': moment.id}
             )
-            
+
             return moment
 
 

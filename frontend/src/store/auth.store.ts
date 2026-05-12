@@ -1,37 +1,45 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/types';
+
+export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
 interface AuthState {
   user: User | null;
+  authStatus: AuthStatus;
+  isLoading: boolean;
   setUser: (user: User | null) => void;
+  setAuthStatus: (status: AuthStatus) => void;
+  setLoading: (loading: boolean) => void;
+  reset: () => void;
 }
 
-const ssrSafeStorage = {
-  getItem: (name: string) => {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem(name);
+export const useAuthStore = create<AuthState>()((set, get) => ({
+  user: null,
+  authStatus: 'loading', // Start as loading to prevent premature redirects
+  isLoading: true, // Start as loading during auth initialization
+  setUser: (user) => {
+    const currentStatus = get().authStatus;
+    set({ 
+      user, 
+      authStatus: user ? 'authenticated' : 'unauthenticated',
+      isLoading: false
+    });
   },
-  setItem: (name: string, value: string) => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(name, value);
-  },
-  removeItem: (name: string) => {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem(name);
-  },
-};
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      setUser: (user) => set({ user }),
-    }),
-    {
-      name: 'kili-auth',
-      partialize: (s) => ({ user: s.user }),
-      storage: createJSONStorage(() => ssrSafeStorage),
+  setAuthStatus: (status) => {
+    // Only allow status change if it's different
+    const currentStatus = get().authStatus;
+    if (currentStatus !== status) {
+      set({ authStatus: status, isLoading: false });
     }
-  )
-);
+  },
+  setLoading: (loading) => {
+    set({ isLoading: loading });
+  },
+  reset: () => {
+    set({ 
+      user: null, 
+      authStatus: 'unauthenticated',
+      isLoading: false
+    });
+  },
+}));

@@ -8,11 +8,11 @@ from .views import (
 )
 
 urlpatterns = [
-    # 1. Main AI Chat Engine (Text + Image + Streaming + Memory)
-    path("ask/", KilicareAIView.as_view(), name="ai-chat"),
+    # 1. Main AI Chat Engine (Text + Image + JSON Response + Memory)
+    path("chat/", KilicareAIView.as_view(), name="ai-chat"),
 
     # 2. Voice → Text (Whisper)
-    path("voice/", VoiceToTextView.as_view(), name="ai-voice"),
+    path("voice-to-text/", VoiceToTextView.as_view(), name="ai-voice"),
 
     # 3. User Preferences (Language, Voice, Interests)
     path("preferences/", UserPreferenceView.as_view(), name="ai-preferences"),
@@ -21,5 +21,5 @@ urlpatterns = [
     path("threads/", AIThreadListView.as_view(), name="ai-threads"),
 
     # 5. Proactive Alerts
-    path("alerts/", ProactiveAlertListView.as_view(), name="ai-alerts"),
+    path("proactive-alerts/", ProactiveAlertListView.as_view(), name="ai-alerts"),
 ]

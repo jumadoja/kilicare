@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   Home, Compass, Shield, MessageCircle, Award,
   Map, Lightbulb, User, Settings, LogOut,
-  ChevronLeft, ChevronRight, Briefcase,
+  ChevronLeft, ChevronRight, Briefcase, Brain,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/app.store';
@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
 import { useAuth } from '@/hooks/useAuth';
 import { getInitials } from '@/lib/utils';
+import { KiliAvatar } from '@/components/ui/KiliAvatar';
 import { useState, useEffect, memo } from 'react';
 
 const NAV_ITEMS = [
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: '/tips', icon: Lightbulb, label: 'Vidokezo', color: '#FFB84D' },
   { href: '/experiences', icon: Briefcase, label: 'Uzoefu', color: '#A855F7' },
   { href: '/chat', icon: MessageCircle, label: 'Ujumbe', color: '#4A9EFF' },
+  { href: '/ai', icon: Brain, label: 'AskKiliCare ', color: '#E84545' },
   { href: '/sos', icon: Shield, label: 'SOS Dharura', color: '#E84545' },
   { href: '/passport', icon: Award, label: 'Pasipoti', color: '#F5A623' },
   { href: '/profile', icon: User, label: 'Wasifu', color: '#8B8BA7' },
@@ -32,14 +34,14 @@ function SidebarInternal() {
   const { sidebarOpen, toggleSidebar } = useAppStore();
   const { user } = useAuthStore();
   const { unreadTotal } = useChatStore();
-  const { logout, token } = useAuth();
+  const { logout } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!user;
 
   if (!isHydrated) return null;
   if (!isAuthenticated) return null;
@@ -122,10 +124,10 @@ function SidebarInternal() {
                 style={{
                   background: isActive
                     ? `rgba(${isSOS ? '232,69,69' : '245,166,35'},0.1)`
-                    : 'transparent',
+                    : 'rgba(255,255,255,0)',
                   border: isActive
                     ? `1px solid rgba(${isSOS ? '232,69,69' : '245,166,35'},0.2)`
-                    : '1px solid transparent',
+                    : '1px solid rgba(255,255,255,0)',
                 }}
                 whileHover={{
                   background: isActive
@@ -253,26 +255,12 @@ function SidebarInternal() {
               whileTap={{ scale: 0.97 }}
             >
               {/* Avatar */}
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-dark-bg"
-                style={{
-                  background: user.profile?.avatar
-                    ? 'transparent'
-                    : 'linear-gradient(135deg, #F5A623, #D4891A)',
-                }}
-              >
-                {user.profile?.avatar ? (
-                  <img
-                    src={user.profile.avatar}
-                    alt={user.username}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="font-display">
-                    {getInitials(user.username)}
-                  </span>
-                )}
-              </div>
+              <KiliAvatar
+                src={user.profile?.avatar}
+                name={user.username}
+                size="xs"
+                className="flex-shrink-0"
+              />
 
               <AnimatePresence>
                 {sidebarOpen && (

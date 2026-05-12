@@ -2,15 +2,16 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Compass, Shield, MessageCircle, Award } from 'lucide-react';
+import { Home, Compass, Shield, MessageCircle, Award, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChatStore } from '@/store/chat.store';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import { useState, useEffect, memo } from 'react';
 
 const NAV_ITEMS = [
   { href: '/feed', icon: Home, label: 'Feed' },
   { href: '/discover', icon: Compass, label: 'Gundua' },
+  { href: '/ai', icon: Brain, label: 'AskKilicare AI ' },
   { href: '/sos', icon: Shield, label: 'SOS', isSOS: true },
   { href: '/chat', icon: MessageCircle, label: 'Ujumbe' },
   { href: '/passport', icon: Award, label: 'Pasipoti' },
@@ -19,14 +20,14 @@ const NAV_ITEMS = [
 function BottomNavInternal() {
   const pathname = usePathname();
   const { unreadTotal } = useChatStore();
-  const { token } = useAuth();
+  const { user } = useAuthStore();
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!user;
 
   if (!isHydrated) return null;
   if (!isAuthenticated) return null;

@@ -22,21 +22,15 @@ export interface User {
 }
 
 export interface AuthResponse {
-  status: string;
-  message: string;
-  data: {
-    access_token: string;
-    refresh_token: string;
-    user: User;
-  };
+  access: string;
+  refresh: string;
+  user: User;
 }
 
 export interface RegisterPayload {
   username: string;
   email: string;
   password: string;
-  first_name: string;
-  last_name: string;
   role: 'TOURIST' | 'LOCAL_GUIDE';
   bio?: string;
   location?: string;
@@ -49,7 +43,5 @@ export interface LoginPayload {
 }
 
 export interface UpdateProfilePayload {
-  first_name?: string;
-  last_name?: string;
   profile?: Partial<UserProfile>;
 }

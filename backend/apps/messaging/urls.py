@@ -19,11 +19,16 @@ urlpatterns = [
     # 5. Vyumba vya chati (Room management)
     path('rooms/', views.ChatRoomListCreateView.as_view(), name='chat-rooms'),
 
-    # --- MPYA: LOGIC YA KUFUTA CHATI ---
-    # Inapokea ID ya yule mtu unayetaka kuficha chati yake
-    path('delete-chat/<int:user_id>/', views.DeleteChatView.as_view(), name='delete-chat'),
+    # --- DELETE ENDPOINTS (Clean REST style to match frontend) ---
+    # Frontend expects: /api/messages/chat/{userId}/ (DELETE)
+    path('chat/<int:user_id>/', views.DeleteChatView.as_view(), name='delete-chat'),
     
-    path('delete/<int:message_id>/', views.DeleteSingleMessageView.as_view(), name='delete-single-message'),
+    # Frontend expects: /api/messages/{id}/ (DELETE)
+    path('<int:message_id>/', views.DeleteSingleMessageView.as_view(), name='delete-single-message'),
+    
+    # Legacy endpoints for backward compatibility
+    path('delete-chat/<int:user_id>/', views.DeleteChatView.as_view(), name='delete-chat-legacy'),
+    path('delete/<int:message_id>/', views.DeleteSingleMessageView.as_view(), name='delete-single-message-legacy'),
 ]
 
 # WebSocket endpoints (Real-time signals)

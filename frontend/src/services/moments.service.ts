@@ -3,27 +3,34 @@ import { Moment, CreateMomentPayload, PaginatedMoments, MomentComment } from '@/
 
 export const momentsService = {
   async getFeed(page = 1): Promise<PaginatedMoments> {
-    const { data } = await api.get<PaginatedMoments>(
-      `/api/moments/feed/?page=${page}`,
-    );
-    return data;
+    const url = `/api/moments/feed/?page=${page}`;
+    console.log('🔥 FRONTEND FEED REQUEST:', url);
+    console.log('🌐 Base URL:', api.defaults.baseURL);
+    console.log('🎯 Full URL:', api.defaults.baseURL + url);
+    
+    const { data } = await api.get<any>(url);
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data || data;
   },
 
   async getTrending(): Promise<Moment[]> {
-    const { data } = await api.get<Moment[]>('/api/moments/trending/');
-    return data;
+    const { data } = await api.get<any>('/api/moments/trending/');
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data?.results || data.results || data;
   },
 
   async getMoment(id: number): Promise<Moment> {
-    const { data } = await api.get<Moment>(`/api/moments/${id}/`);
-    return data;
+    const { data } = await api.get<any>(`/api/moments/${id}/`);
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data || data;
   },
 
   async getComments(id: number): Promise<MomentComment[]> {
-    const { data } = await api.get<MomentComment[]>(
+    const { data } = await api.get<any>(
       `/api/moments/${id}/comments/`,
     );
-    return data;
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data?.results || data.results || data;
   },
 
   async createMoment(payload: CreateMomentPayload): Promise<Moment> {
@@ -37,51 +44,66 @@ export const momentsService = {
       form.append('latitude', String(payload.latitude));
     if (payload.longitude != null)
       form.append('longitude', String(payload.longitude));
-    const { data } = await api.post<Moment>('/api/moments/', form, {
+    if (payload.background_music != null)
+      form.append('background_music', String(payload.background_music));
+    const { data } = await api.post<any>('/api/moments/', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return data;
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data || data;
   },
 
   async likeMoment(
     id: number,
   ): Promise<{ is_liked: boolean; likes_count: number }> {
-    const { data } = await api.post(`/api/moments/${id}/like/`);
-    return data;
+    const { data } = await api.post<any>(`/api/moments/${id}/like/`);
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data || data;
   },
 
   async commentMoment(id: number, comment: string): Promise<MomentComment> {
-    const { data } = await api.post<MomentComment>(
-      `/api/moments/${id}/comment/`,
+    const { data } = await api.post<any>(
+      `/api/moments/${id}/comments/`,
       { comment },
     );
-    return data;
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data || data;
   },
 
   async saveMoment(id: number): Promise<{ is_saved: boolean }> {
-    const { data } = await api.post(`/api/moments/${id}/save/`);
-    return data;
+    const { data } = await api.post<any>(`/api/moments/${id}/save/`);
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data || data;
   },
 
   async shareMoment(id: number): Promise<void> {
     await api.post(`/api/moments/${id}/share/`);
   },
 
+  async followUser(userId: number): Promise<{ status: string }> {
+    const { data } = await api.post<any>(`/api/moments/follow/follow/`, { user_id: userId });
+    return data.data || data;
+  },
+
+  async unfollowUser(userId: number): Promise<{ status: string }> {
+    const { data } = await api.post<any>(`/api/moments/follow/unfollow/`, { user_id: userId });
+    return data.data || data;
+  },
+
+  async trackView(momentId: number): Promise<{ views: number }> {
+    const { data } = await api.post<any>(`/api/moments/${momentId}/track_view/`);
+    return data.data || data;
+  },
+
   async getMyMoments(): Promise<Moment[]> {
-    const { data } = await api.get<Moment[]>('/api/moments/my-moments/');
-    return data;
+    const { data } = await api.get<any>('/api/moments/my-moments/');
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data?.results || data.results || data;
   },
 
   async getSavedMoments(): Promise<Moment[]> {
-    const { data } = await api.get<Moment[]>('/api/moments/saved/');
-    return data;
-  },
-
-  async followUser(userId: number): Promise<void> {
-    await api.post('/api/follow/', { following_id: userId });
-  },
-
-  async unfollowUser(userId: number): Promise<void> {
-    await api.post('/api/follow/unfollow/', { following_id: userId });
+    const { data } = await api.get<any>('/api/moments/saved/');
+    // Handle standardized response format: {status, message, data: {...}}
+    return data.data?.results || data.results || data;
   },
 };

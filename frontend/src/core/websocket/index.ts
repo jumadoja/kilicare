@@ -1,6 +1,4 @@
 import { env } from '@/config/env';
-import { tokenManager } from '@/core/auth/tokenManager';
-import { authEvents } from '@/core/auth/authEvents';
 
 type Handler = (data: unknown) => void;
 
@@ -9,56 +7,101 @@ class WsManager {
   private handlers = new Map<string, Map<string, Handler[]>>();
   private timers = new Map<string, ReturnType<typeof setTimeout>>();
   private attempts = new Map<string, number>();
-  private pendingUrls = new Map<string, string>(); // Store URLs for reconnect after refresh
   private MAX_DELAY = 30_000;
-  private unsubscribeAuthLogout: (() => void) | null = null;
-  private unsubscribeAuthRefresh: (() => void) | null = null;
+  private MAX_RETRIES = 5;
 
   constructor() {
-    this.unsubscribeAuthLogout = authEvents.on('AUTH_LOGOUT', () => {
-      this.disconnectAll();
-    });
-
-    this.unsubscribeAuthRefresh = authEvents.on('AUTH_REFRESH', () => {
-      this.reconnectAllWithNewToken();
-    });
+    // Clean initialization - no auth event listeners
   }
 
   destroy() {
     this.disconnectAll();
-    this.unsubscribeAuthLogout?.();
-    this.unsubscribeAuthRefresh?.();
   }
 
+  // Auth-safe connection method
   connect(key: string, url: string) {
-    if (this.sockets.get(key)?.readyState === WebSocket.OPEN) return;
-    const token = tokenManager.getAccess();
-    if (!token || !tokenManager.isAuthenticated()) return;
+    // Prevent duplicate connections
+    if (this.sockets.get(key)?.readyState === WebSocket.OPEN) {
+      return;
+    }
+    
+    // SSR-safe token access
+    const token = this.getAuthToken();
+    if (!token) {
+      console.warn(`WebSocket: No auth token available for ${key}`);
+      return;
+    }
 
-    // Store URL for potential reconnect after refresh
-    this.pendingUrls.set(key, url);
-
-    const ws = new WebSocket(`${url}?token=${token}`);
-    ws.onopen = () => { this.attempts.set(key, 0); };
+    const wsUrl = `${url}?token=${encodeURIComponent(token)}`;
+    const ws = new WebSocket(wsUrl);
+    
+    ws.onopen = () => {
+      this.attempts.set(key, 0);
+      console.log(`WebSocket: Connected to ${key}`);
+    };
+    
     ws.onmessage = ({ data }) => {
       try {
         const parsed = JSON.parse(data as string);
         const action = parsed.action ?? 'message';
-        const m = this.handlers.get(key);
-        if (!m) return;
-        [...(m.get(action) ?? []), ...(m.get('*') ?? [])].forEach((h) => h(parsed));
-      } catch { /* ignore */ }
-    };
-    ws.onclose = () => {
-      const token = tokenManager.getAccess();
-      if (token && tokenManager.isAuthenticated()) {
-        this.reconnect(key, url);
-      } else {
-        this.pendingUrls.delete(key);
+        const handlers = this.handlers.get(key);
+        if (!handlers) return;
+        
+        const actionHandlers = handlers.get(action) ?? [];
+        const wildcardHandlers = handlers.get('*') ?? [];
+        
+        [...actionHandlers, ...wildcardHandlers].forEach((h) => h(parsed));
+      } catch (error) {
+        console.error(`WebSocket: Failed to parse message from ${key}:`, error);
       }
     };
-    ws.onerror = (e) => {/* Silent error logging */};
+    
+    ws.onclose = (event) => {
+      console.log(`WebSocket: Disconnected from ${key}, code: ${event.code}`);
+      
+      // Only reconnect if it wasn't an intentional disconnect
+      if (event.code !== 1000) {
+        this.reconnect(key, url);
+      }
+    };
+    
+    ws.onerror = (error) => {
+      console.error(`WebSocket: Error on ${key}:`, error);
+    };
+    
     this.sockets.set(key, ws);
+  }
+
+  // Cookie-based authentication - no token retrieval needed
+  // WebSocket uses cookies automatically via withCredentials
+  private getAuthToken(): string | null {
+    return null; // Cookies handle authentication automatically
+  }
+
+  // Auth-safe disconnection
+  disconnect(key: string) {
+    const ws = this.sockets.get(key);
+    if (ws) {
+      ws.close(1000, 'Intentional disconnect');
+      this.sockets.delete(key);
+    }
+    
+    // Clear any pending reconnect timer
+    const timer = this.timers.get(key);
+    if (timer) {
+      clearTimeout(timer);
+      this.timers.delete(key);
+    }
+    
+    // Reset attempts
+    this.attempts.delete(key);
+  }
+
+  // Disconnect all connections
+  disconnectAll() {
+    for (const key of this.sockets.keys()) {
+      this.disconnect(key);
+    }
   }
 
   private reconnect(key: string, url: string) {
@@ -67,18 +110,6 @@ class WsManager {
     const delay = Math.min(1000 * 2 ** n, this.MAX_DELAY);
     this.attempts.set(key, n + 1);
     this.timers.set(key, setTimeout(() => this.connect(key, url), delay));
-  }
-
-  private reconnectAllWithNewToken() {
-    const token = tokenManager.getAccess();
-    if (!token) return;
-
-    this.pendingUrls.forEach((url, key) => {
-      // Clear existing connection and reconnect with new token
-      this.disconnect(key);
-      this.attempts.set(key, 0); // Reset attempts for fresh start
-      this.connect(key, url);
-    });
   }
 
   send(key: string, data: unknown) {
@@ -94,19 +125,7 @@ class WsManager {
     return () => m.set(action, (m.get(action) ?? []).filter((h) => h !== handler));
   }
 
-  disconnect(key: string) {
-    clearTimeout(this.timers.get(key));
-    this.sockets.get(key)?.close();
-    this.sockets.delete(key);
-    this.handlers.delete(key);
-    this.attempts.delete(key);
-    this.pendingUrls.delete(key);
   }
-
-  disconnectAll() {
-    [...this.sockets.keys()].forEach((k) => this.disconnect(k));
-  }
-}
 
 export const wsManager = new WsManager();
 

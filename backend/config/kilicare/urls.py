@@ -1,27 +1,23 @@
 from django.contrib import admin
 from django.urls import path, include
-from graphene_django.views import GraphQLView
-from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from core.middleware.graphql_view import graphql_view
 
 urlpatterns = [
     # Django Admin (DON'T TOUCH)
     path('admin/', admin.site.urls),
 
-    # GraphQL + GraphiQL
-    path(
-        'graphql/',
-        csrf_exempt(GraphQLView.as_view(graphiql=True))
-    ),
+    # GraphQL with CSRF protection and security middleware
+    path('graphql/', graphql_view()),
 
-    # JWT Authentication
-    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_standard'),
+    # OpenAPI/Swagger Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
-    # Users
+    # Users (includes JWT endpoints)
     path('auth/', include('apps.users.urls')),
 
     # --- API APPS (FIXED TO BE CONSISTENT) ---

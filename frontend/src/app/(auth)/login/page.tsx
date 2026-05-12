@@ -69,11 +69,11 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
+    <div className="relative min-h-screen w-full flex items-center justify-center py-8 px-4 safe-container">
       {/* Background Visual Layer */}
 
       {/* ── Main content wrapper ── */}
-      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4">
+      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-auto">
         {/* Logo section */}
         <div className="text-center mb-6">
           <div
@@ -103,7 +103,7 @@ export default function LoginPage() {
 
         {/* ── Glass card ── */}
         <div
-          className="relative rounded-3xl overflow-hidden pb-safe glass-auth"
+          className="relative rounded-3xl overflow-hidden glass-auth"
           style={{
             boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
           }}
@@ -112,14 +112,14 @@ export default function LoginPage() {
           <div
             className="absolute top-0 left-0 right-0 h-1"
             style={{
-              background: 'linear-gradient(90deg, transparent, rgba(245,166,35,0.8), rgba(0,229,160,0.6), transparent)',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(245,166,35,0.8), rgba(0,229,160,0.6), rgba(255,255,255,0))',
             }}
           />
 
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             <div className="mb-4">
               <h2 className="text-lg font-bold font-display text-text-primary">
-                Karibu tena 👋
+                Karibu tena 
               </h2>
               <p className="text-text-muted text-xs mt-1">
                 Ingia kwenye akaunti yako

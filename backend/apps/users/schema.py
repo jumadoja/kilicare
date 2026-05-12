@@ -3,11 +3,12 @@ import graphql_jwt
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 from .models import User, Profile
+from core.decorators.graphql_permissions import login_required_graphql
 
 class ProfileType(DjangoObjectType):
     class Meta:
         model = Profile
-        fields = "__all__"
+        fields = ("id", "phone_number", "bio", "avatar", "gender", "dob", "location")
 
 class UserType(DjangoObjectType):
     class Meta:
@@ -17,10 +18,9 @@ class UserType(DjangoObjectType):
 class Query(graphene.ObjectType):
     me = graphene.Field(UserType)
 
+    @login_required_graphql
     def resolve_me(self, info):
         user = info.context.user
-        if user.is_anonymous:
-            raise GraphQLError("Authentication required")
         return user
 
 class ObtainToken(graphene.Mutation):
@@ -33,7 +33,7 @@ class ObtainToken(graphene.Mutation):
         password = graphene.String(required=True)
 
     def mutate(self, info, username, password):
-        user = User.objects.filter(username=username).first()
+        user = User.objects.select_related('profile').filter(username=username).first()
         if not user or not user.check_password(password):
             raise GraphQLError("Invalid credentials")
 

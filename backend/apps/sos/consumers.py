@@ -1,34 +1,21 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from urllib.parse import parse_qs
-from rest_framework_simplejwt.tokens import UntypedToken
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from .models import SOSAlert, SOSResponse
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.conf import settings
+import jwt
 
 User = get_user_model()
 
 class SOSConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # 1. AUTHENTICATION
-        query_string = parse_qs(self.scope["query_string"].decode())
-        token = query_string.get("token", [None])[0]
-
-        try:
-            if token:
-                UntypedToken(token)
-                self.user = self.scope['user']
-                
-                if self.user.is_anonymous:
-                    await self.close(code=4001)
-                    return
-            else:
-                await self.close(code=4003)
-                return
-        except (InvalidToken, TokenError):
-            await self.close(code=4002)
+        # Authenticate using query parameter token
+        self.user = await self.get_user_from_token()
+        
+        if self.user.is_anonymous:
+            await self.close(code=4001)
             return
 
         # 2. SOS CHANNEL SETUP
@@ -62,6 +49,28 @@ class SOSConsumer(AsyncWebsocketConsumer):
                 'status': 'online'
             }
         )
+
+    @database_sync_to_async
+    def get_user_from_token(self):
+        """Authenticate user from query parameter token."""
+        try:
+            # Extract token from query parameters
+            query_string = self.scope.get('query_string', b'').decode()
+            query_params = dict(param.split('=') for param in query_string.split('&') if '=' in param)
+            token = query_params.get('token')
+            
+            if not token:
+                return User.objects.get_or_create(username='anonymous')[0]  # Return anonymous user
+            
+            # Decode JWT using SECRET_KEY
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            user_id = payload.get("user_id")
+            
+            if user_id:
+                return User.objects.get(id=user_id)
+            return User.objects.get_or_create(username='anonymous')[0]  # Return anonymous user
+        except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+            return User.objects.get_or_create(username='anonymous')[0]  # Return anonymous user
 
     async def disconnect(self, close_code):
         if hasattr(self, 'sos_group_name'):

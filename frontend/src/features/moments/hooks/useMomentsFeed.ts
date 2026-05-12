@@ -6,10 +6,14 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { momentsService } from '@/services/moments.service';
-import { Moment, PaginatedMoments } from '@/features/moments/types';
+import { Moment, PaginatedMoments, FeedItemDTO } from '@/features/moments/types';
+import { useAuthStore } from '@/store/auth.store';
 
 // ── Feed ─────────────────────────────────────────────
 export function useMomentsFeed() {
+  const authStatus = useAuthStore((state) => state.authStatus);
+  const user = useAuthStore((state) => state.user);
+  
   return useInfiniteQuery({
     queryKey: ['moments', 'feed'],
     queryFn: ({ pageParam = 1 }) =>
@@ -18,6 +22,12 @@ export function useMomentsFeed() {
       last.next ? extractPage(last.next) : undefined,
     initialPageParam: 1,
     staleTime: 1000 * 60 * 2,
+    
+    // CRITICAL FIX: Only enable query when auth is ready
+    enabled: authStatus === 'authenticated' && !!user,
+    
+    // Prevent refetching on window focus if auth isn't ready
+    refetchOnWindowFocus: authStatus === 'authenticated',
   });
 }
 
@@ -48,17 +58,23 @@ export function useLikeMoment() {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
-              results: page.results.map((m) =>
-                m.id === momentId
-                  ? {
-                      ...m,
-                      is_liked: !m.is_liked,
-                      likes_count: m.is_liked
-                        ? m.likes_count - 1
-                        : m.likes_count + 1,
+              results: page.results.map((feedItem) => {
+                // Handle FeedItemDTO structure
+                const moment = feedItem.moment;
+                if (moment.id === momentId) {
+                  return {
+                    ...feedItem,
+                    moment: {
+                      ...moment,
+                      is_liked: !moment.is_liked,
+                      likes_count: moment.is_liked
+                        ? moment.likes_count - 1
+                        : moment.likes_count + 1,
                     }
-                  : m,
-              ),
+                  };
+                }
+                return feedItem;
+              }),
             })),
           };
         },
@@ -94,9 +110,20 @@ export function useSaveMoment() {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
-              results: page.results.map((m) =>
-                m.id === momentId ? { ...m, is_saved: !m.is_saved } : m,
-              ),
+              results: page.results.map((feedItem) => {
+                // Handle FeedItemDTO structure
+                const moment = feedItem.moment;
+                if (moment.id === momentId) {
+                  return {
+                    ...feedItem,
+                    moment: {
+                      ...moment,
+                      is_saved: !moment.is_saved
+                    }
+                  };
+                }
+                return feedItem;
+              }),
             })),
           };
         },
@@ -127,11 +154,20 @@ export function useCommentMoment() {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
-              results: page.results.map((m) =>
-                m.id === id
-                  ? { ...m, comments_count: m.comments_count + 1 }
-                  : m,
-              ),
+              results: page.results.map((feedItem) => {
+                // Handle FeedItemDTO structure
+                const moment = feedItem.moment;
+                if (moment.id === id) {
+                  return {
+                    ...feedItem,
+                    moment: {
+                      ...moment,
+                      comments_count: moment.comments_count + 1
+                    }
+                  };
+                }
+                return feedItem;
+              }),
             })),
           };
         },
@@ -150,6 +186,31 @@ export function useCreateMoment() {
       qc.invalidateQueries({ queryKey: ['moments', 'feed'] });
       toast.success('Moment imeshirikiwa! 🎉');
     },
-    onError: () => toast.error('Imeshindwa kushiriki. Jaribu tena.'),
+    onError: () => toast.error('Imeshindika kushiriki. Jaribu tena.'),
+  });
+}
+
+// ── Follow ────────────────────────────────────────────
+export function useFollowUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: number) => momentsService.followUser(userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['moments', 'feed'] });
+      toast.success('Umefuata mtumiaji!');
+    },
+    onError: () => toast.error('Imeshindika kufuata. Jaribu tena.'),
+  });
+}
+
+export function useUnfollowUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: number) => momentsService.unfollowUser(userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['moments', 'feed'] });
+      toast.success('Umefuta ufuataji.');
+    },
+    onError: () => toast.error('Imeshindika kufuta ufuataji. Jaribu tena.'),
   });
 }

@@ -91,7 +91,7 @@ export function KiliBottomSheet({
               className="absolute top-0 left-0 right-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent, rgba(245,166,35,0.4), rgba(232,69,69,0.3), transparent)',
+                  'linear-gradient(90deg, rgba(255,255,255,0), rgba(245,166,35,0.4), rgba(232,69,69,0.3), rgba(255,255,255,0))',
               }}
             />
 

@@ -6,6 +6,7 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from apps.users.views import CookieJWTAuthentication
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -18,9 +19,10 @@ logger = logging.getLogger(__name__)
 class KilicareAIView(APIView):
     """
     Main View ya Kilicare AI. 
-    Inasapoti Streaming, Image Vision, na Memory Compression.
+    Inasapoti JSON Response, Image Vision, na Memory Compression.
     """
     permission_classes = [IsAuthenticated]
+    authentication_classes = [CookieJWTAuthentication]
 
     def post(self, request):
         user = request.user
@@ -39,13 +41,14 @@ class KilicareAIView(APIView):
             thread_id=thread_id
         )
         
-        # Get streaming response from service
-        response = service.execute()
-        return response
+        # Get JSON response from service
+        response_data = service.execute()
+        return Response(response_data)
 
 
 class VoiceToTextView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [CookieJWTAuthentication]
 
     def post(self, request):
         audio_file = request.FILES.get("audio")
@@ -82,6 +85,7 @@ class VoiceToTextView(APIView):
 class UserPreferenceView(generics.RetrieveUpdateAPIView):
     serializer_class = UserAIPreferenceSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [CookieJWTAuthentication]
 
     def get_object(self):
         obj, _ = UserAIPreference.objects.get_or_create(user=self.request.user)
@@ -91,6 +95,7 @@ class UserPreferenceView(generics.RetrieveUpdateAPIView):
 class AIThreadListView(generics.ListAPIView):
     serializer_class = AIThreadSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [CookieJWTAuthentication]
 
     def get_queryset(self):
         return AIThread.objects.filter(user=self.request.user).order_by('-updated_at')
@@ -98,6 +103,7 @@ class AIThreadListView(generics.ListAPIView):
 
 class ProactiveAlertListView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [CookieJWTAuthentication]
 
     def get(self, request):
         alerts = ProactiveAlert.objects.filter(user=request.user).order_by('-created_at')[:5]

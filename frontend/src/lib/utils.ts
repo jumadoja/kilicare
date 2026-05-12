@@ -48,7 +48,7 @@ export function mediaUrl(path: string): string {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  return `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${path}`;
+  return `${process.env.NEXT_PUBLIC_API_URL!}${path}`;
 }
 
 export function getBlurDataUrl(color = '#13131A'): string {

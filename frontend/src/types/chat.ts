@@ -4,7 +4,7 @@ export interface ChatUser {
   id: number;
   username: string;
   avatar: string | null;
-  is_online?: boolean;
+  is_online: boolean;
 }
 
 export interface Message {

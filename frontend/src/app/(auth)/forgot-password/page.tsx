@@ -295,11 +295,11 @@ export default function ForgotPasswordPage() {
   const currentConfig = stepConfig[step];
 
   return (
-    <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
-      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4">
+    <div className="relative min-h-screen w-full flex items-center justify-center py-8 px-4 safe-container">
+      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-auto">
         {/* Card */}
         <div
-          className="relative rounded-3xl overflow-hidden pb-safe glass-strong"
+          className="relative rounded-3xl overflow-hidden glass-strong"
           style={{
             boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}
@@ -309,12 +309,12 @@ export default function ForgotPasswordPage() {
             className="absolute top-0 left-0 right-0 h-px"
             style={{
               background: step === 'success'
-                ? 'linear-gradient(90deg, transparent, rgba(0,229,160,0.6), transparent)'
-                : 'linear-gradient(90deg, transparent, rgba(245,166,35,0.6), transparent)',
+                ? 'linear-gradient(90deg, rgba(255,255,255,0), rgba(0,229,160,0.6), rgba(255,255,255,0))'
+                : 'linear-gradient(90deg, rgba(255,255,255,0), rgba(245,166,35,0.6), rgba(255,255,255,0))',
             }}
           />
 
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             {/* Back button inside card */}
             <div className="mb-4">
               <Link

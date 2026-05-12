@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils';
+import { getAvatarUrl } from '@/utils/media';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
@@ -53,6 +54,9 @@ export function KiliAvatar({
   const s = sizeMap[size];
   const id = `avatar-${useId()}`;
   const [imageError, setImageError] = useState(false);
+  
+  // Handle avatar URL fallback
+  const avatarSrc = getAvatarUrl(src);
 
   const content = (
     <div
@@ -127,14 +131,14 @@ export function KiliAvatar({
         style={{
           width: trustScore !== undefined ? s.image : s.container,
           height: trustScore !== undefined ? s.image : s.container,
-          background: src
+          background: avatarSrc
             ? 'transparent'
             : 'linear-gradient(135deg, #F5A623, #D4891A)',
         }}
       >
-        {src && !imageError ? (
+        {avatarSrc && !imageError ? (
           <Image
-            src={src}
+            src={avatarSrc}
             alt={name}
             width={s.image}
             height={s.image}

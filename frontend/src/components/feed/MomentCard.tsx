@@ -20,12 +20,16 @@ import {
   Eye,
   Plus,
   MoreVertical,
+  Music,
+  Music2,
 } from 'lucide-react';
 import { Moment } from '@/features/moments/types';
 import { KiliAvatar } from '@/components/ui/KiliAvatar';
 import { KiliBadge } from '@/components/ui/KiliBadge';
-import { useLikeMoment, useSaveMoment } from '@/features/moments/hooks/useMomentsFeed';
-import { mediaUrl, formatCount, extractHashtags, timeAgo } from '@/lib/utils';
+import { useLikeMoment, useSaveMoment, useFollowUser, useUnfollowUser } from '@/features/moments/hooks/useMomentsFeed';
+import { momentsService } from '@/services/moments.service';
+import { formatCount, extractHashtags, timeAgo } from '@/lib/utils';
+import { getMomentMediaUrl } from '@/utils/media';
 import { useAuthStore } from '@/store/auth.store';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -135,18 +139,23 @@ export const MomentCard = memo(function MomentCard({
   onCommentOpen,
 }: MomentCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isMuted, setIsMuted] = useState(true);
-  const [isLiked, setIsLiked] = useState(moment.is_liked);
-  const [likesCount, setLikesCount] = useState(moment.likes_count);
-  const [isSaved, setIsSaved] = useState(moment.is_saved);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
+  const [isLiked, setIsLiked] = useState(moment?.is_liked || false);
+  const [likesCount, setLikesCount] = useState(moment?.likes_count || 0);
+  const [isSaved, setIsSaved] = useState(moment?.is_saved || false);
+  const [isFollowing, setIsFollowing] = useState(moment?.is_following || false);
   const [heartBursts, setHeartBursts] = useState<
     { id: number; x: number; y: number }[]
   >([]);
+  const [viewTracked, setViewTracked] = useState(false);
   const { user } = useAuthStore();
   const likeMutation = useLikeMoment();
   const saveMutation = useSaveMoment();
+  const followMutation = useFollowUser();
+  const unfollowMutation = useUnfollowUser();
 
   // ── Video control ──────────────────────────────────
   useEffect(() => {
@@ -160,9 +169,49 @@ export const MomentCard = memo(function MomentCard({
     }
   }, [isActive]);
 
+  // ── Background music control ────────────────────────
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !moment?.background_music?.file) return;
+
+    if (isActive) {
+      // Load audio before playing
+      audio.load();
+      // Wait for audio to be ready before playing
+      const handleCanPlay = () => {
+        audio.play().catch(() => {});
+      };
+      audio.addEventListener('canplay', handleCanPlay);
+      // Fallback: try to play immediately if already loaded
+      if (audio.readyState >= 2) {
+        audio.play().catch(() => {});
+      }
+      return () => {
+        audio.removeEventListener('canplay', handleCanPlay);
+      };
+    } else {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }, [isActive, moment?.background_music?.file]);
+
+  // ── View tracking ─────────────────────────────────
+  useEffect(() => {
+    if (isActive && !viewTracked && moment?.id) {
+      momentsService.trackView(moment.id).catch(() => {
+        // Silently fail on view tracking
+      });
+      setViewTracked(true);
+    }
+  }, [isActive, moment?.id, viewTracked]);
+
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = isMuted;
   }, [isMuted]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = isMusicMuted;
+  }, [isMusicMuted]);
 
   // ── Like ──────────────────────────────────────────
   const triggerLike = useCallback(
@@ -174,10 +223,10 @@ export const MomentCard = memo(function MomentCard({
       if (!isLiked) {
         setIsLiked(true);
         setLikesCount((n: number) => n + 1);
-        likeMutation.mutate(moment.id);
+        likeMutation.mutate(moment?.id);
       }
     },
-    [isLiked, moment.id, likeMutation],
+    [isLiked, moment?.id, likeMutation],
   );
 
   const handleLikeTap = useCallback(() => {
@@ -186,8 +235,8 @@ export const MomentCard = memo(function MomentCard({
       setLikesCount((n: number) => (next ? n + 1 : n - 1));
       return next;
     });
-    likeMutation.mutate(moment.id);
-  }, [moment.id, likeMutation]);
+    likeMutation.mutate(moment?.id);
+  }, [moment?.id, likeMutation]);
 
   // ── Double tap detection ──────────────────────────
   const handleCardTap = useCallback(
@@ -215,18 +264,18 @@ export const MomentCard = memo(function MomentCard({
   // ── Save ──────────────────────────────────────────
   const handleSave = useCallback(() => {
     setIsSaved((prev) => !prev);
-    saveMutation.mutate(moment.id);
+    saveMutation.mutate(moment?.id);
   }, [moment.id, saveMutation]);
 
   // ── Share ─────────────────────────────────────────
   const handleShare = useCallback(async () => {
     if (typeof window === 'undefined') return;
-    const url = `${window.location.origin}/moment/${moment.id}`;
+    const url = `${window.location.origin}/moment/${moment?.id}`;
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `KilicareGO+ | ${moment.posted_by.username}`,
-          text: moment.caption ?? '',
+          title: `KilicareGO+ | ${moment?.posted_by?.username || 'User'}`,
+          text: moment?.caption ?? '',
           url,
         });
       } else {
@@ -239,8 +288,8 @@ export const MomentCard = memo(function MomentCard({
     }
   }, [moment]);
 
-  const hashtags = extractHashtags(moment.caption ?? '');
-  const isOwnMoment = user?.id === moment.posted_by.id;
+  const hashtags = extractHashtags(moment?.caption ?? '');
+  const isOwnMoment = user?.id === moment?.posted_by?.id;
 
   return (
     <div
@@ -261,10 +310,10 @@ export const MomentCard = memo(function MomentCard({
 
       {/* ── Media layer ── */}
       <div className="absolute inset-0" onClick={handleCardTap}>
-        {moment.media_type === 'video' ? (
+        {moment?.media_type === 'video' ? (
           <video
             ref={videoRef}
-            src={mediaUrl(moment.media)}
+            src={getMomentMediaUrl(moment?.media) || '/placeholder.jpg'}
             className="w-full h-full object-cover"
             loop
             muted={isMuted}
@@ -274,8 +323,8 @@ export const MomentCard = memo(function MomentCard({
           />
         ) : (
           <Image
-            src={mediaUrl(moment.media)}
-            alt={moment.caption ?? 'Moment'}
+            src={getMomentMediaUrl(moment?.media) || '/placeholder.jpg'}
+            alt={moment?.caption ?? 'Moment'}
             fill
             className="object-cover"
             priority={isActive}
@@ -290,7 +339,7 @@ export const MomentCard = memo(function MomentCard({
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 28%, transparent 52%, rgba(0,0,0,0.9) 100%)',
+              'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 52%, rgba(0,0,0,0.9) 100%)',
           }}
         />
       </div>
@@ -300,10 +349,10 @@ export const MomentCard = memo(function MomentCard({
         {/* User info */}
         <div className="flex items-center gap-2.5">
           <KiliAvatar
-            src={moment.posted_by.profile?.avatar}
-            name={moment.posted_by.username}
+            src={moment?.posted_by?.profile?.avatar}
+            name={moment?.posted_by?.username || 'User'}
             size="sm"
-            trustScore={moment.posted_by.passport_trust_score}
+            trustScore={moment?.posted_by?.passport_trust_score || 0}
             onClick={() => {}}
           />
           <div>
@@ -312,16 +361,16 @@ export const MomentCard = memo(function MomentCard({
                 className="text-white font-bold text-sm font-body"
                 style={{ textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}
               >
-                {moment.posted_by.username}
+                {moment?.posted_by?.username || 'User'}
               </span>
-              {moment.is_verified && (
+              {moment?.is_verified && (
                 <BadgeCheck size={13} className="text-kili-blue" />
               )}
             </div>
             <div className="flex items-center gap-1.5">
               <KiliBadge
                 variant={
-                  moment.posted_by.role as
+                  moment?.posted_by?.role as
                     | 'TOURIST'
                     | 'LOCAL_GUIDE'
                     | 'ADMIN'
@@ -329,7 +378,7 @@ export const MomentCard = memo(function MomentCard({
                 size="xs"
               />
               <span className="text-white/50 text-[10px] font-body">
-                {timeAgo(moment.created_at)}
+                {timeAgo(moment?.created_at || '')}
               </span>
             </div>
           </div>
@@ -349,14 +398,20 @@ export const MomentCard = memo(function MomentCard({
                   : 'rgba(245,166,35,0.2)',
                 backdropFilter: 'blur(10px)',
               }}
-              onClick={() => setIsFollowing((f) => !f)}
+              onClick={() => {
+                if (isFollowing) {
+                  unfollowMutation.mutate(moment?.posted_by?.id);
+                } else {
+                  followMutation.mutate(moment?.posted_by?.id);
+                }
+              }}
               whileTap={{ scale: 0.93 }}
             >
               {isFollowing ? 'Unafuata' : '+ Fuata'}
             </motion.button>
           )}
 
-          {moment.media_type === 'video' && (
+          {moment?.media_type === 'video' && (
             <motion.button
               className="w-8 h-8 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' }}
@@ -369,6 +424,25 @@ export const MomentCard = memo(function MomentCard({
               }
             </motion.button>
           )}
+
+          {/* Background music toggle */}
+          {moment?.background_music?.file && (
+            <motion.button
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ 
+                background: 'rgba(245,166,35,0.2)', 
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(245,166,35,0.4)'
+              }}
+              onClick={() => setIsMusicMuted((m) => !m)}
+              whileTap={{ scale: 0.9 }}
+            >
+              {isMusicMuted
+                ? <Music2 size={14} className="text-kili-gold" />
+                : <Music size={14} className="text-kili-gold" />
+              }
+            </motion.button>
+          )}
         </div>
       </div>
 
@@ -378,17 +452,17 @@ export const MomentCard = memo(function MomentCard({
         style={{ bottom: '72px' }}
       >
         {/* Caption */}
-        {moment.caption && <Caption text={moment.caption} />}
+        {moment?.caption && <Caption text={moment.caption} />}
 
         {/* Location */}
-        {moment.location && (
+        {moment?.location && (
           <div className="flex items-center gap-1.5 mt-2">
             <MapPin size={12} className="text-kili-gold flex-shrink-0" />
             <span
               className="text-white/70 text-xs font-body"
               style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
             >
-              {moment.location}
+              {moment?.location || ''}
             </span>
           </div>
         )}
@@ -412,7 +486,7 @@ export const MomentCard = memo(function MomentCard({
         <div className="flex items-center gap-1 mt-2">
           <Eye size={11} className="text-white/40" />
           <span className="text-white/40 text-[10px] font-mono">
-            {formatCount(moment.views)}
+            {formatCount(moment?.views || 0)}
           </span>
         </div>
       </div>
@@ -452,7 +526,7 @@ export const MomentCard = memo(function MomentCard({
           icon={
             <MessageCircle size={26} className="text-white" style={{ strokeWidth: 1.5 }} />
           }
-          label={formatCount(moment.comments_count)}
+          label={formatCount(moment?.comments_count || 0)}
           onClick={() => onCommentOpen(moment)}
         />
 
@@ -479,7 +553,7 @@ export const MomentCard = memo(function MomentCard({
         {/* Share */}
         <ActionBtn
           icon={<Share2 size={24} className="text-white" style={{ strokeWidth: 1.5 }} />}
-          label={formatCount(moment.shares)}
+          label={formatCount(moment?.shares || 0)}
           onClick={handleShare}
         />
 
@@ -496,8 +570,8 @@ export const MomentCard = memo(function MomentCard({
             }}
           >
             <KiliAvatar
-              src={moment.posted_by.profile?.avatar}
-              name={moment.posted_by.username}
+              src={moment?.posted_by?.profile?.avatar}
+              name={moment?.posted_by?.username || 'User'}
               size="sm"
             />
           </div>
@@ -505,17 +579,29 @@ export const MomentCard = memo(function MomentCard({
       </div>
 
       {/* ── Featured badge ── */}
-      {moment.is_featured && (
+      {moment?.is_featured && (
         <div className="absolute top-24 left-4 z-10">
           <KiliBadge variant="featured" size="sm" />
         </div>
       )}
 
       {/* ── Trending badge ── */}
-      {moment.trending_score > 70 && !moment.is_featured && (
+      {moment?.trending_score > 70 && !moment?.is_featured && (
         <div className="absolute top-24 left-4 z-10">
           <KiliBadge variant="trending" size="sm" />
         </div>
+      )}
+
+      {/* ── Background music audio element ── */}
+      {moment?.background_music?.file && (
+        <audio
+          ref={audioRef}
+          src={moment.background_music.file}
+          loop
+          muted={isMusicMuted}
+          preload="auto"
+          className="hidden"
+        />
       )}
     </div>
   );

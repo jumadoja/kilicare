@@ -22,7 +22,7 @@ import { parseApiError, parseFieldErrors } from '@/core/errors';
 // ── AI Onboarding Assistant ────────────────────────────
 const OnboardingAssistant = memo(function OnboardingAssistant({ step }: { step: number }) {
   const messages = {
-    1: 'Habari mimi ni AsKkiliCare,👋 Nitakusaidia kukupa maelezo mafupi kujaza taarifa zako',
+    1: 'Habari mimi ni AsKkiliCare, Nitakusaidia kukupa maelezo mafupi kujaza taarifa zako',
     2: 'Chagua jukumu lako - utapata experiences zinakufaa',
     3: 'Weka picha yako ili watu wakutambue kwa urahisi',
   };
@@ -309,8 +309,6 @@ export default function RegisterPage() {
       
       // Ensure required fields are not undefined
       const registerPayload = {
-        first_name: payload.first_name || '',
-        last_name: payload.last_name || '',
         username: payload.username || '',
         email: payload.email || '',
         password: payload.password || '',
@@ -332,7 +330,7 @@ export default function RegisterPage() {
   });
 
   const { focusOnError } = useFocusManagement({
-    autoFocusSelector: 'input[name="first_name"]',
+    autoFocusSelector: 'input[name="username"]',
     enableFocusOnError: true,
     restoreOnMount: false,
   }) as { focusOnError: () => void };
@@ -380,7 +378,7 @@ export default function RegisterPage() {
   // ── Stateless Navigation ──────────────────────────────
   const validateStep1 = async () => {
     const ok = await trigger([
-      'first_name', 'last_name', 'username',
+      'username',
       'email', 'password', 'confirm_password',
     ]);
     if (ok) {
@@ -476,10 +474,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative min-h-[var(--app-height)] w-full overflow-hidden flex items-center justify-center safe-container">
+    <div className="relative min-h-screen w-full flex items-center justify-center py-8 px-4 safe-container">
       {/* Background Visual Layer */}
       
-      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4">
+      <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
         <h1 className="text-3xl font-black font-display text-text-primary tracking-tight mb-2">
@@ -500,7 +498,7 @@ export default function RegisterPage() {
 
       {/* ── Card ── */}
       <div
-        className="relative rounded-3xl overflow-hidden pb-safe glass-auth"
+        className="relative rounded-3xl overflow-hidden glass-auth"
         style={{
           boxShadow: '0 32px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.05)',
         }}
@@ -510,11 +508,11 @@ export default function RegisterPage() {
           className="absolute top-0 left-0 right-0 h-1"
           style={{
             background:
-              'linear-gradient(90deg, transparent, rgba(245,166,35,0.8), rgba(0,229,160,0.6), transparent)',
+              'linear-gradient(90deg, rgba(255,255,255,0), rgba(245,166,35,0.8), rgba(0,229,160,0.6), rgba(255,255,255,0))',
           }}
         />
 
-        <div className="p-6">
+        <div className="p-4 md:p-6">
 
             {/* ══ SUCCESS ══ */}
             {showSuccess && (
@@ -535,35 +533,14 @@ export default function RegisterPage() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <KiliInput
-                      {...register('first_name')}
-                      label="Jina la kwanza"
-                      error={errors.first_name?.message}
-                      autoComplete="given-name"
-                    />
-                  </div>
-                  <div>
-                    <KiliInput
-                      {...register('last_name')}
-                      label="Jina la mwisho"
-                      error={errors.last_name?.message}
-                      autoComplete="family-name"
-                    />
-                  </div>
-                </div>
-
-                <div>
+                <div className="space-y-4">
                   <KiliInput
                     {...register('username')}
                     label="Username"
                     error={errors.username?.message}
                     autoComplete="username"
                   />
-                </div>
 
-                <div>
                   <KiliInput
                     {...register('email')}
                     label="Barua pepe (Email)"
@@ -571,30 +548,30 @@ export default function RegisterPage() {
                     error={errors.email?.message}
                     autoComplete="email"
                   />
-                </div>
 
-                <div className="pt-1">
+                  <div className="pt-1">
+                    <div>
+                      <KiliInput
+                        {...register('password')}
+                        label="Nenosiri"
+                        type="password"
+                        error={errors.password?.message}
+                        showPasswordToggle
+                        autoComplete="new-password"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <KiliInput
-                      {...register('password')}
-                      label="Nenosiri"
+                      {...register('confirm_password')}
+                      label="Thibitisha Nenosiri"
                       type="password"
-                      error={errors.password?.message}
+                      error={errors.confirm_password?.message}
                       showPasswordToggle
                       autoComplete="new-password"
                     />
                   </div>
-                </div>
-
-                <div>
-                  <KiliInput
-                    {...register('confirm_password')}
-                    label="Thibitisha Nenosiri"
-                    type="password"
-                    error={errors.confirm_password?.message}
-                    showPasswordToggle
-                    autoComplete="new-password"
-                  />
                 </div>
 
                 <div className="pt-2">

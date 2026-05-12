@@ -2,14 +2,15 @@ import api from '@/core/api/axios';
 import { AuthResponse, LoginPayload, RegisterPayload, UpdateProfilePayload, User } from '@/types';
 import { API } from '@/lib/constants';
 import { ForgotPasswordInput } from '@/lib/validators';
-import { tokenManager } from '@/core/auth/tokenManager';
 
 export const authService = {
   async login(payload: LoginPayload): Promise<AuthResponse> {
-    console.log("AUTH SERVICE STEP 1: Login called with payload:", payload);
-    const { data } = await api.post<AuthResponse>(API.AUTH.LOGIN, payload);
-    console.log("AUTH SERVICE STEP 2: API response received:", data);
-    return data;
+    const response = await api.post<AuthResponse>(API.AUTH.LOGIN, payload);
+    
+    // Tokens are set in httpOnly cookies by backend
+    // No localStorage storage needed
+    
+    return response.data;
   },
 
   async register(payload: RegisterPayload): Promise<User> {
@@ -18,38 +19,42 @@ export const authService = {
       formData.append('username', payload.username);
       formData.append('email', payload.email);
       formData.append('password', payload.password);
-      formData.append('first_name', payload.first_name);
-      formData.append('last_name', payload.last_name);
       formData.append('role', payload.role);
       if (payload.bio) formData.append('bio', payload.bio);
       if (payload.location) formData.append('location', payload.location);
       if (payload.avatar) formData.append('avatar', payload.avatar);
 
-      const { data } = await api.post<AuthResponse>(API.AUTH.REGISTER, formData, {
+      const { data } = await api.post<any>(API.AUTH.REGISTER, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      return data.data.user;
+      // Backend returns { status, message, data: user_data }
+      return data.data;
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.log("SERVICE ERROR:", error.message);
-      } else if (typeof error === "object" && error !== null) {
-        const err = error as any;
-        console.log("SERVICE ERROR:", err?.response?.data);
-      } else {
-        console.log("SERVICE ERROR:", "Unknown error occurred");
+      throw error;
+    }
+  },
+
+  async getMe(): Promise<User | null> {
+    try {
+      const { data } = await api.get<any>(API.AUTH.ME);
+      // Handle standardized response format: {status, message, data: user_data}
+      return data.data || data;
+    } catch (error: any) {
+      // Redirect to login on 401 - no silent failures
+      if (error.response?.status === 401) {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        throw error; // CRITICAL: Throw error instead of returning null
       }
       throw error;
     }
   },
 
-  async getMe(): Promise<User> {
-    const { data } = await api.get<User>(API.AUTH.ME);
-    return data;
-  },
-
   async updateProfile(payload: UpdateProfilePayload): Promise<User> {
-    const { data } = await api.put<User>(API.AUTH.ME, payload);
-    return data;
+    const { data } = await api.put<any>(API.AUTH.ME, payload);
+    // Handle standardized response format: {status, message, data: user_data}
+    return data.data || data;
   },
 
   async forgotPassword(payload: ForgotPasswordInput): Promise<void> {
@@ -64,7 +69,10 @@ export const authService = {
     await api.post(API.AUTH.RESET, payload);
   },
 
-  async logout(refreshToken: string): Promise<void> {
-    await api.post(API.AUTH.LOGOUT, { refresh_token: refreshToken });
+  async logout(): Promise<void> {
+    await api.post(API.AUTH.LOGOUT);
+    
+    // Cookies are cleared by backend
+    // No localStorage cleanup needed
   },
 };

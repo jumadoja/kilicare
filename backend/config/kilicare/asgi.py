@@ -11,7 +11,6 @@ django.setup()
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
-from apps.messaging.middleware import JWTAuthMiddleware  # Middleware yetu ya usalama
 import apps.messaging.routing
 import apps.sos.routing
 
@@ -21,10 +20,8 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     
     # Kwa ajili ya Real-time features (WebSockets)
-    "websocket": JWTAuthMiddleware(
-        URLRouter(
-            apps.messaging.routing.websocket_urlpatterns +
-            apps.sos.routing.websocket_urlpatterns
-        )
+    "websocket": URLRouter(
+        apps.messaging.routing.websocket_urlpatterns +
+        apps.sos.routing.websocket_urlpatterns
     ),
 })

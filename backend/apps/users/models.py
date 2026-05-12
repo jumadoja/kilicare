@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 import random
+import uuid
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -11,6 +12,7 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='TOURIST')
     is_verified = models.BooleanField(default=False)  # Only for Local
+    is_online = models.BooleanField(default=False)  # Track online status
     
     # Account security fields
     failed_login_attempts = models.IntegerField(default=0)
@@ -28,42 +30,30 @@ class User(AbstractUser):
     
     def increment_failed_login(self):
         """Increment failed login counter and lock if threshold reached."""
-        print("USER MODEL STEP 1: increment_failed_login called")
         self.failed_login_attempts += 1
         if self.failed_login_attempts >= 5:
             self.is_locked = True
             self.locked_until = timezone.now() + timezone.timedelta(minutes=30)
-        print("USER MODEL STEP 2: Before save in increment_failed_login")
         self.save()
-        print("USER MODEL STEP 3: After save in increment_failed_login")
     
     def reset_failed_login(self):
         """Reset failed login counter on successful login."""
-        print("USER MODEL STEP 4: reset_failed_login called")
         self.failed_login_attempts = 0
         self.is_locked = False
         self.locked_until = None
-        print("USER MODEL STEP 5: Before save in reset_failed_login")
         self.save()
-        print("USER MODEL STEP 6: After save in reset_failed_login")
     
     def is_account_locked(self):
         """Check if account is currently locked."""
-        print("USER MODEL STEP 7: is_account_locked called")
         if not self.is_locked:
-            print("USER MODEL STEP 8: Account not locked, returning False")
             return False
         if self.locked_until and timezone.now() < self.locked_until:
-            print("USER MODEL STEP 9: Account still locked, returning True")
             return True
         # Lock expired, auto-unlock
-        print("USER MODEL STEP 10: Lock expired, auto-unlocking")
         self.is_locked = False
         self.locked_until = None
         self.failed_login_attempts = 0
-        print("USER MODEL STEP 11: Before save in is_account_locked")
         self.save()
-        print("USER MODEL STEP 12: After save in is_account_locked")
         return False
 
 class Profile(models.Model):
@@ -87,6 +77,45 @@ class UserActivity(models.Model):
     action_type = models.CharField(max_length=50, choices=ACTION_CHOICES)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+class UserSession(models.Model):
+    """Track active user sessions for security and session management."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
+    session_id = models.CharField(max_length=255, unique=True, db_index=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    device_type = models.CharField(max_length=50, blank=True)
+    device_name = models.CharField(max_length=100, blank=True)
+    location = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_activity = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField()
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['session_id']),
+            models.Index(fields=['created_at']),
+            models.Index(fields=['expires_at']),
+        ]
+        ordering = ['-created_at']
+    
+    def is_valid(self):
+        """Check if session is still valid and not expired."""
+        if not self.is_active:
+            return False
+        if timezone.now() > self.expires_at:
+            self.is_active = False
+            self.save()
+            return False
+        return True
+    
+    def refresh_activity(self):
+        """Update last activity timestamp."""
+        self.last_activity = timezone.now()
+        self.save()
 
 # OTP Model
 class PasswordResetOTP(models.Model):

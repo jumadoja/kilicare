@@ -33,7 +33,7 @@ class MessageSerializer(serializers.ModelSerializer):
         # Inatafuta kama user ana profile na picha, isipopata inatoa default path
         profile = getattr(obj.sender, 'profile', None)
         if profile and getattr(profile, 'image', None):
-            return self.context['request'].build_absolute_uri(profile.image.url) if 'request' in self.context else profile.image.url
+            return profile.image.url
         return "/media/default-avatar.png"
 
     def get_receiver_profile(self, obj):
@@ -41,7 +41,7 @@ class MessageSerializer(serializers.ModelSerializer):
         if obj.receiver:
             profile = getattr(obj.receiver, 'profile', None)
             if profile and getattr(profile, 'image', None):
-                return self.context['request'].build_absolute_uri(profile.image.url) if 'request' in self.context else profile.image.url
+                return profile.image.url
         return "/media/default-avatar.png"
 
 

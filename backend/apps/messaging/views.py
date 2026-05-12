@@ -84,10 +84,7 @@ class ChatContactsView(generics.ListAPIView):
             profile = getattr(contact, 'profile', None)
             
             if profile and hasattr(profile, 'avatar') and profile.avatar:
-                try:
-                    profile_url = request.build_absolute_uri(profile.avatar.url)
-                except (ValueError, AttributeError):
-                    profile_url = "/media/default-avatar.png"
+                profile_url = profile.avatar.url
 
             contacts_data.append({
                 "id": contact.id,
