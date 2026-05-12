@@ -30,9 +30,9 @@ services:
       
       # CORS Configuration (EXACT VERCEL DOMAIN)
       - key: CORS_ALLOWED_ORIGINS
-        value: https://kilicare-gyri.vercel.app
+        value: https://kilicare-hub.vercel.app
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://kilicare-gyri.vercel.app
+        value: https://kilicare-hub.vercel.app
       
       # Database (Render PostgreSQL - AUTOMATICALLY PROVIDED)
       - key: DATABASE_URL
