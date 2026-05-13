@@ -145,37 +145,55 @@ LOGGING = {
             "format": "{asctime} [{levelname}] {name}: {message}",
             "style": "{",
         },
+        "detailed": {
+            "format": "{asctime} [{levelname}] {name}:{lineno} - {message} - {exc_info}",
+            "style": "{",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
+        "detailed_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "detailed",
+        },
     },
     "loggers": {
         "django.request": {
-            "handlers": ["console"],
+            "handlers": ["console", "detailed_console"],
             "level": "DEBUG",
             "propagate": False,
         },
         "django.csrf": {
-            "handlers": ["console"],
+            "handlers": ["console", "detailed_console"],
             "level": "DEBUG",
             "propagate": False,
         },
         "django.contrib.auth": {
-            "handlers": ["console"],
+            "handlers": ["console", "detailed_console"],
             "level": "DEBUG",
             "propagate": False,
         },
         "django.security": {
-            "handlers": ["console"],
+            "handlers": ["console", "detailed_console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["console", "detailed_console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "apps.users": {
+            "handlers": ["console", "detailed_console"],
             "level": "DEBUG",
             "propagate": False,
         },
     },
     "root": {
-        "handlers": ["console"],
-        "level": "INFO",
+        "handlers": ["console", "detailed_console"],
+        "level": "DEBUG",
     },
 }
