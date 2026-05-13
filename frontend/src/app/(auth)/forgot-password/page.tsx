@@ -346,7 +346,7 @@ export default function ForgotPasswordPage() {
                 {currentConfig.icon}
               </div>
 
-              <h2 className="text-lg font-black font-display text-text-primary tracking-tight">
+              <h2 className="text-lg font-extrabold font-display text-text-primary tracking-tight">
                 {currentConfig.title}
               </h2>
               <p className="text-text-muted text-xs mt-1 font-body">

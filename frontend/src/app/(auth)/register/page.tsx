@@ -259,7 +259,7 @@ function SuccessScreen({ onRedirect }: { onRedirect: () => void }) {
           <CheckCircle2 size={48} className="text-dark-bg" />
         </div>
 
-        <h2 className="text-2xl font-black font-display text-text-primary mb-3">
+        <h2 className="text-2xl font-extrabold font-display text-text-primary mb-3">
           Akaunti imeundwa 🎉
         </h2>
 
@@ -480,7 +480,7 @@ export default function RegisterPage() {
       <div className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-black font-display text-text-primary tracking-tight mb-2">
+        <h1 className="text-3xl font-extrabold font-display text-text-primary tracking-tight mb-2">
           Kilicare<span className="text-gradient-gold">+</span>
         </h1>
         <p className="text-sm font-body" style={{ color: '#F5A623' }}>

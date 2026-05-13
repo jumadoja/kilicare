@@ -45,7 +45,7 @@ export function TravelVisualLayer() {
               src={img.src}
               alt={img.alt}
               fill
-              className="object-cover"
+              className="object-cover object-center"
               priority={index === 0}
               loading={index === 0 ? "eager" : "lazy"}
               sizes="100vw"

@@ -96,7 +96,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <h1 className="text-3xl font-black font-display text-text-primary tracking-tight mb-2">
+          <h1 className="text-3xl font-extrabold font-display text-text-primary tracking-tight mb-2">
             Kilicare<span className="text-gradient-gold">+</span>
           </h1>
         </div>

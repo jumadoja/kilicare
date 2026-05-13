@@ -31,8 +31,17 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Handle 401 unauthorized - attempt refresh ONCE
-    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshing) {
+    const url = originalRequest.url ?? '';
+    const isRefreshCall =
+      url.includes('token/refresh') || url.includes('/auth/token/refresh');
+
+    // Handle 401 unauthorized - attempt refresh ONCE (never recurse from refresh endpoint)
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isRefreshing &&
+      !isRefreshCall
+    ) {
       originalRequest._retry = true;
       isRefreshing = true;
 
@@ -59,10 +68,17 @@ api.interceptors.response.use(
           // New access token is set in httpOnly cookie by backend
           // No frontend storage needed
         } catch (refreshError) {
-          // Refresh failed - redirect to login
-          // Backend will clear cookies on failed refresh
+          // Refresh failed — only redirect away from public auth pages (avoid loops / noise on /login).
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            const path = window.location.pathname;
+            const onPublicAuth =
+              path.startsWith('/login') ||
+              path.startsWith('/register') ||
+              path.startsWith('/forgot-password') ||
+              path.startsWith('/reset-password');
+            if (!onPublicAuth) {
+              window.location.href = '/login';
+            }
           }
           throw refreshError;
         } finally {

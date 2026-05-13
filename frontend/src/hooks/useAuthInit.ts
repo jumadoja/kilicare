@@ -27,8 +27,8 @@ export function useAuthInit() {
           setAuthStatus('unauthenticated');
         }
       } catch (error) {
-        // Session invalid/expired - set as unauthenticated
-        console.warn('Auth initialization failed - session invalid:', error);
+        // Network/server errors only — 401 is handled inside getMe() as null (no throw).
+        console.warn('Auth initialization failed:', error);
         setUser(null);
         setAuthStatus('unauthenticated');
       } finally {

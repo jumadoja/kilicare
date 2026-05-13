@@ -39,13 +39,11 @@ export const authService = {
       const { data } = await api.get<any>(API.AUTH.ME);
       // Handle standardized response format: {status, message, data: user_data}
       return data.data || data;
-    } catch (error: any) {
-      // Redirect to login on 401 - no silent failures
-      if (error.response?.status === 401) {
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-        throw error; // CRITICAL: Throw error instead of returning null
+    } catch (error: unknown) {
+      // 401 = not logged in — normal on /login and during cold loads (no cookies yet).
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 401) {
+        return null;
       }
       throw error;
     }

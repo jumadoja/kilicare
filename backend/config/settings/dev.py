@@ -16,9 +16,9 @@ if not SECRET_KEY:
 if not JWT_SECRET_KEY:
     JWT_SECRET_KEY = "dev-jwt-secret-key-change-in-production"
 
-# DEVELOPMENT-ONLY: Provide PostgreSQL fallback for local development
-# In production, these MUST be set via environment variables
-if not os.getenv("DB_NAME"):
+# DEVELOPMENT-ONLY: PostgreSQL defaults when neither DATABASE_URL nor DB_NAME is set.
+# If DATABASE_URL is set, base.py already configured DATABASES — do not override.
+if not os.getenv("DATABASE_URL") and not os.getenv("DB_NAME"):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -30,7 +30,7 @@ if not os.getenv("DB_NAME"):
             'CONN_MAX_AGE': 600,
             'OPTIONS': {
                 'connect_timeout': 10,
-                'sslmode': 'disable',  # Disable SSL for local development
+                'sslmode': 'disable',
             },
         }
     }

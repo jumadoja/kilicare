@@ -346,7 +346,7 @@ export default function AIPage() {
 
           {/* AI brand */}
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black text-dark-bg font-display flex-shrink-0"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-dark-bg font-display flex-shrink-0"
             style={{ background: 'linear-gradient(135deg, #F5A623, #E84545)' }}
           >
             K
@@ -408,7 +408,7 @@ export default function AIPage() {
             /* ── Welcome / Empty state ── */
             <div className="flex flex-col items-center justify-center h-full px-6 text-center">
               <motion.div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black text-dark-bg font-display mb-6"
+                className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-extrabold text-dark-bg font-display mb-6"
                 style={{
                   background: 'linear-gradient(135deg, #F5A623, #E84545)',
                   boxShadow: '0 0 50px rgba(245,166,35,0.35)',

@@ -1,4 +1,7 @@
-export const MEDIA_BASE = process.env.NEXT_PUBLIC_API_URL!;
+import { env } from '@/config/env';
+
+/** Backend origin (same as axios base); paths like /media/... are appended in callers */
+export const MEDIA_BASE = env.API_BASE_URL;
 
 export const mediaUrl = (path: string | null | undefined): string => {
   if (!path) return '/images/placeholder.jpg';

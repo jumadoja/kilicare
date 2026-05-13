@@ -209,11 +209,13 @@ def validate_production_config():
         # Validate actual SECRET_KEY value (after dev.py/prod.py overrides)
         validate_secret_key(
             settings.SECRET_KEY,
-            "SECRET_KEY"
+            "SECRET_KEY",
+            env,
         )
         validate_secret_key(
             settings.JWT_SECRET_KEY,
-            "JWT_SECRET_KEY"
+            "JWT_SECRET_KEY",
+            env,
         )
         validate_required_env_var("GROQ_API_KEY", "Groq AI API key")
         validate_database_config()

@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { env } from '@/config/env';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -48,7 +49,7 @@ export function mediaUrl(path: string): string {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  return `${process.env.NEXT_PUBLIC_API_URL!}${path}`;
+  return `${env.API_BASE_URL}${path}`;
 }
 
 export function getBlurDataUrl(color = '#13131A'): string {

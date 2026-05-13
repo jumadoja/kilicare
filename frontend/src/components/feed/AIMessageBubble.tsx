@@ -119,7 +119,7 @@ export function TypingIndicator() {
   return (
     <div className="flex items-end gap-2 px-4">
       <div
-        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black text-dark-bg"
+        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-extrabold font-display text-dark-bg"
         style={{ background: 'linear-gradient(135deg, #F5A623, #E84545)' }}
       >
         K
@@ -175,7 +175,7 @@ export function AIMessageBubble({ message, streamedText, isStreaming }: AIBubble
       >
         {/* AI Avatar */}
         <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black text-dark-bg font-display"
+          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-extrabold font-display text-dark-bg"
           style={{
             background: 'linear-gradient(135deg, #F5A623, #E84545)',
             flexShrink: 0,

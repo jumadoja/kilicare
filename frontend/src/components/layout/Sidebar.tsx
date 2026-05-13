@@ -84,7 +84,7 @@ function SidebarInternal() {
           }}
           whileHover={{ scale: 1.05 }}
         >
-          <span className="text-base font-black text-dark-bg font-display">K</span>
+          <span className="text-base font-extrabold text-dark-bg font-display">K</span>
         </motion.div>
 
         <AnimatePresence>
@@ -95,7 +95,7 @@ function SidebarInternal() {
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="font-black text-sm font-display text-text-primary leading-none">
+              <p className="font-extrabold text-sm font-display text-text-primary leading-none">
                 Kilicare<span className="text-gradient-gold">GO+</span>
               </p>
               <p className="text-[10px] text-text-muted font-body mt-0.5">

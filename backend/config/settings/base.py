@@ -131,19 +131,33 @@ ASGI_APPLICATION = 'config.kilicare.asgi.application'
 # ======================
 # DATABASE (POSTGRESQL ONLY - NO SQLITE FALLBACK)
 # ======================
-# CRITICAL: PostgreSQL is required for production. Uses DATABASE_URL from Render.
+# Use DATABASE_URL when set (e.g. Render). Otherwise use discrete DB_* variables so
+# config.settings.dev can supply defaults without importing base failing first.
 import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
-}
-
-# Validate DATABASE_URL configuration at startup
-if not os.getenv("DATABASE_URL"):
-    raise ImproperlyConfigured(
-        "CRITICAL: DATABASE_URL is required. Please set DATABASE_URL environment variable. "
-        "SQLite is not supported."
-    )
+_database_url = os.getenv("DATABASE_URL")
+if _database_url:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=_database_url,
+            conn_max_age=int(os.getenv("DB_CONN_MAX_AGE", "600")),
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", ""),
+            "USER": os.getenv("DB_USER", ""),
+            "PASSWORD": os.getenv("DB_PASSWORD", ""),
+            "HOST": os.getenv("DB_HOST", "localhost"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "600")),
+            "OPTIONS": {
+                "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "10")),
+            },
+        }
+    }
 
 
 # ======================
@@ -344,25 +358,6 @@ def log_security_event(event_type: str, severity: str, details=None):
 
 
 # ======================
-# RATE LIMITING
-# ======================
-REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',
-        'user': '1000/hour',
-        'register': '5/hour',  # Limit registration attempts
-        'login': '10/hour',  # Limit login attempts
-        'forgot_password': '3/hour',  # Limit password reset requests
-        'reset_password': '5/hour',  # Limit password reset attempts
-    }
-}
-
-
-# ======================
 # CHANNELS (REALTIME)
 # ======================
 # Redis URL for channels (can be overridden)
@@ -545,14 +540,6 @@ SPECTACULAR_SETTINGS = {
 # ======================
 # STARTUP VALIDATION
 # ======================
-# Validate critical configuration at startup (after all settings are loaded)
-# This ensures production-safe defaults and fails fast on misconfiguration
 from .validation import validate_production_config
-validate_production_config()
-# ======================
-# STARTUP VALIDATION
-# ======================
-# Validate critical configuration at startup (after all settings are loaded)
-# This ensures production-safe defaults and fails fast on misconfiguration
-from .validation import validate_production_config
+
 validate_production_config()

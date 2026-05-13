@@ -93,7 +93,6 @@ export function TrustScoreRing({
           style={{
             fill: '#F8F8FF',
             fontSize: size * 0.22,
-            fontFamily: 'JetBrains Mono, monospace',
           }}
         >
           {current}
