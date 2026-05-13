@@ -50,7 +50,9 @@ CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 # PRODUCTION DATABASE
 # ======================
 # PostgreSQL with SSL enforced in production
-DATABASES['default']['OPTIONS']['sslmode'] = 'require'
+if 'default' in DATABASES:
+    DATABASES['default'].setdefault('OPTIONS', {})
+    DATABASES['default']['OPTIONS']['sslmode'] = 'require'
 
 # ======================
 # PRODUCTION CACHING
