@@ -7,7 +7,7 @@ services:
   - type: web
     name: kilicare-backend
     runtime: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python manage.py migrate --noinput
     startCommand: daphne config.kilicare.asgi:application -b 0.0.0.0 -p $PORT
     envVars:
       # Django Settings
@@ -73,7 +73,7 @@ services:
   - type: worker
     name: kilicare-celery-worker
     runtime: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python manage.py migrate --noinput
     startCommand: celery -A config worker -l info
     envVars:
       - key: DJANGO_SETTINGS_MODULE
@@ -112,7 +112,7 @@ services:
   - type: worker
     name: kilicare-celery-beat
     runtime: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python manage.py migrate --noinput
     startCommand: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     envVars:
       - key: DJANGO_SETTINGS_MODULE
