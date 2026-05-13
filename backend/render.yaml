@@ -7,7 +7,7 @@ services:
   - type: web
     name: kilicare-backend
     runtime: python
-    buildCommand: pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py ensure_admin --username=admin --email=admin@kilicare.com --password=admin123
+    buildCommand: pip install -r requirements.txt && python manage.py migrate --noinput
     startCommand: daphne config.kilicare.asgi:application -b 0.0.0.0 -p $PORT
     envVars:
       # Django Settings
