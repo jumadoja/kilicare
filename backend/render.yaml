@@ -34,13 +34,18 @@ services:
       - key: CSRF_TRUSTED_ORIGINS
         value: https://kilicare-hub.vercel.app,https://kilicare-1.onrender.com,https://*.onrender.com
       
-      # Database (Render PostgreSQL - SPECIFIC CONNECTION STRING)
+      # Database (Render PostgreSQL - USE RENDER'S INTERNAL REFERENCE)
       - key: DATABASE_URL
-        value: postgresql://kilicare_user:vymEFiJr7WCuZ6MsliKN3kB6gGDjVWUT@dpg-d81rnbf7f7vs73eed6sg-a/kilicare
+        fromDatabase:
+          name: kilicare-db
+          property: connectionString
       
-      # Redis (SPECIFIC CONNECTION STRING)
+      # Redis (USE RENDER'S INTERNAL REFERENCE)
       - key: REDIS_URL
-        value: redis://red-d81rru3tqb8s73d9sm6g:6379
+        fromService:
+          type: redis
+          name: kilicare-redis
+          property: connectionString
       
       # Celery
       - key: CELERY_BROKER_URL
@@ -76,13 +81,24 @@ services:
       - key: JWT_SECRET_KEY
         sync: false
       - key: DATABASE_URL
-        value: postgresql://kilicare_user:vymEFiJr7WCuZ6MsliKN3kB6gGDjVWUT@dpg-d81rnbf7f7vs73eed6sg-a/kilicare
+        fromDatabase:
+          name: kilicare-db
+          property: connectionString
       - key: REDIS_URL
-        value: redis://red-d81rru3tqb8s73d9sm6g:6379
+        fromService:
+          type: redis
+          name: kilicare-redis
+          property: connectionString
       - key: CELERY_BROKER_URL
-        value: redis://red-d81rru3tqb8s73d9sm6g:6379
+        fromService:
+          type: redis
+          name: kilicare-redis
+          property: connectionString
       - key: CELERY_RESULT_BACKEND
-        value: redis://red-d81rru3tqb8s73d9sm6g:6379
+        fromService:
+          type: redis
+          name: kilicare-redis
+          property: connectionString
       - key: GROQ_API_KEY
         sync: false
 
@@ -104,13 +120,24 @@ services:
       - key: JWT_SECRET_KEY
         sync: false
       - key: DATABASE_URL
-        value: postgresql://kilicare_user:vymEFiJr7WCuZ6MsliKN3kB6gGDjVWUT@dpg-d81rnbf7f7vs73eed6sg-a/kilicare
+        fromDatabase:
+          name: kilicare-db
+          property: connectionString
       - key: REDIS_URL
-        value: redis://red-d81rru3tqb8s73d9sm6g:6379
+        fromService:
+          type: redis
+          name: kilicare-redis
+          property: connectionString
       - key: CELERY_BROKER_URL
-        value: redis://red-d81rru3tqb8s73d9sm6g:6379
+        fromService:
+          type: redis
+          name: kilicare-redis
+          property: connectionString
       - key: CELERY_RESULT_BACKEND
-        value: redis://red-d81rru3tqb8s73d9sm6g:6379
+        fromService:
+          type: redis
+          name: kilicare-redis
+          property: connectionString
       - key: GROQ_API_KEY
         sync: false
 
