@@ -8,8 +8,22 @@ from .base import *
 ENV = "production"
 DEBUG = False
 
-# CRITICAL: ALLOWED_HOSTS must be set via environment variable
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+# CRITICAL: ALLOWED_HOSTS with secure defaults for Render deployment
+allowed_hosts_env = os.getenv("ALLOWED_HOSTS", "").strip()
+if allowed_hosts_env:
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(",") if host.strip()]
+else:
+    # Auto-detect Render domain and include localhost for development
+    render_url = os.getenv("RENDER_EXTERNAL_URL", "")
+    if render_url:
+        # Extract hostname from Render URL
+        from urllib.parse import urlparse
+        parsed = urlparse(render_url)
+        render_host = parsed.netloc.split(':')[0]  # Remove port if present
+        ALLOWED_HOSTS = [render_host, "localhost", "127.0.0.1"]
+    else:
+        # Fallback for local development
+        ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 # ======================
 # SECURITY HARDENING
