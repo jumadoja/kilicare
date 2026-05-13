@@ -131,27 +131,17 @@ ASGI_APPLICATION = 'config.kilicare.asgi.application'
 # ======================
 # DATABASE (POSTGRESQL ONLY - NO SQLITE FALLBACK)
 # ======================
-# CRITICAL: PostgreSQL is required for production. This fails fast if not configured.
+# CRITICAL: PostgreSQL is required for production. Uses DATABASE_URL from Render.
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv("DB_NAME"),
-        'USER': os.getenv("DB_USER"),
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': os.getenv("DB_HOST"),
-        'PORT': os.getenv("DB_PORT", "5432"),
-        'CONN_MAX_AGE': 600,
-        'OPTIONS': {
-            'connect_timeout': 10,
-            'sslmode': os.getenv("DB_SSLMODE", "prefer"),  # Changed from 'require' to 'prefer' for local dev
-        },
-    }
+    'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
 }
 
-# Validate PostgreSQL configuration at startup
-if not all([os.getenv("DB_NAME"), os.getenv("DB_USER"), os.getenv("DB_PASSWORD"), os.getenv("DB_HOST")]):
+# Validate DATABASE_URL configuration at startup
+if not os.getenv("DATABASE_URL"):
     raise ImproperlyConfigured(
-        "CRITICAL: PostgreSQL is required. Please set DB_NAME, DB_USER, DB_PASSWORD, and DB_HOST environment variables. "
+        "CRITICAL: DATABASE_URL is required. Please set DATABASE_URL environment variable. "
         "SQLite is not supported."
     )
 
