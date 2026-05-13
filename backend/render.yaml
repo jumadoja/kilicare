@@ -24,15 +24,15 @@ services:
       - key: JWT_SECRET_KEY
         sync: false
       
-      # Allowed Hosts (REPLACE WITH YOUR RENDER DOMAIN)
+      # Allowed Hosts (CORRECT RENDER DOMAIN)
       - key: ALLOWED_HOSTS
-        value: kilicare-backend.onrender.com
+        value: kilicare-1.onrender.com,.onrender.com
       
-      # CORS Configuration (EXACT VERCEL DOMAIN)
+      # CORS Configuration (INCLUDE RENDER DOMAIN)
       - key: CORS_ALLOWED_ORIGINS
-        value: https://kilicare-hub.vercel.app
+        value: https://kilicare-hub.vercel.app,https://kilicare-1.onrender.com,https://*.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://kilicare-hub.vercel.app
+        value: https://kilicare-hub.vercel.app,https://kilicare-1.onrender.com,https://*.onrender.com
       
       # Database (Render PostgreSQL - AUTOMATICALLY PROVIDED)
       - key: DATABASE_URL

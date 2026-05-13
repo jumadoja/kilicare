@@ -85,6 +85,15 @@ if not CSRF_TRUSTED_ORIGINS:
     ]
 
 # ======================
+# SESSION CONFIGURATION
+# ======================
+# Explicit session configuration for production
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 1209600  # 2 weeks
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_DOMAIN = None  # Allow cross-subdomain sessions
+
+# ======================
 # PRODUCTION DATABASE
 # ======================
 # PostgreSQL with SSL enforced in production
@@ -127,17 +136,46 @@ GRAPHQL_SECURITY = {
     "ENABLE_GRAPHIQL": False,  # Disabled in production
 }
 
-# Logging (basic)
+# Enhanced logging for debugging admin login issues
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} [{levelname}] {name}: {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "django.csrf": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "django.contrib.auth": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "django.security": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
         },
     },
     "root": {
         "handlers": ["console"],
-        "level": "WARNING",
+        "level": "INFO",
     },
 }
