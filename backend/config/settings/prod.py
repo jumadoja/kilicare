@@ -54,11 +54,35 @@ X_FRAME_OPTIONS = 'DENY'
 
 # CORS: Never allow all origins in production
 CORS_ALLOW_ALL_ORIGINS = False
-# CORS_ALLOWED_ORIGINS must be set via environment variable
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+# CORS_ALLOWED_ORIGINS with safe fallback
+cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() 
+    for origin in cors_origins_env.split(",") 
+    if origin.strip()
+]
 
-# CSRF trusted origins must match production domains
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+# SAFE FALLBACK for CORS
+if not CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [
+        "https://kilicare-hub.vercel.app",
+        "https://*.onrender.com"
+    ]
+
+# CRITICAL: CSRF trusted origins with safe fallback
+csrf_origins_env = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() 
+    for origin in csrf_origins_env.split(",") 
+    if origin.strip()
+]
+
+# SAFE FALLBACK for Render deployment
+if not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://kilicare-1.onrender.com",
+        "https://*.onrender.com"
+    ]
 
 # ======================
 # PRODUCTION DATABASE
